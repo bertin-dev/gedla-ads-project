@@ -12,6 +12,7 @@ use \App\Http\Controllers\Admin\ProjectsController;
 use \App\Http\Controllers\Admin\RolesController;
 use \App\Http\Controllers\Admin\FoldersController;
 use \App\Http\Controllers\Auth\ChangePasswordController;
+use \App\Http\Controllers\PostUploadOCRController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -22,9 +23,6 @@ use \App\Http\Controllers\Auth\ChangePasswordController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-//Route::get('lang/{lang}', ['as' => 'lang.switch', 'uses' => LanguageController::class]);
-Route::get('lang/{lang}', [LanguageController::class, 'switchLang'])->name('lang.switch');
 
 Route::redirect('/', '/projects');
 
@@ -80,4 +78,7 @@ Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 
         Route::post('password', [ChangePasswordController::class, 'update'])->name('password.update');
     }
 });
+
+
+Route::post('uploadOCR', [PostUploadOCRController::class, 'postUploadOCR'])->name('post-upload-ocr');
 
