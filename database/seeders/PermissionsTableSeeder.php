@@ -126,6 +126,34 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 27,
                 'title' => 'profile_password_edit',
             ],
+            [
+                'id'    => 28,
+                'title' => 'ocr_access',
+            ],
+            [
+                'id'    => 29,
+                'title' => 'page_access',
+            ],
+            [
+                'id'    => 30,
+                'title' => 'paraph_access',
+            ],
+            [
+                'id'    => 31,
+                'title' => 'safe_access',
+            ],
+            [
+                'id'    => 32,
+                'title' => 'lunch_access',
+            ],
+            [
+                'id'    => 33,
+                'title' => 'dispath_access',
+            ],
+            [
+                'id'    => 34,
+                'title' => 'design_access',
+            ],
         ];
 
         Permission::insert($permissions);
