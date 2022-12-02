@@ -119,3 +119,43 @@ table.dataTable thead .sorting_desc {
 .c-sidebar-brand .c-sidebar-brand-full:hover {
     color: inherit;
 }
+
+
+/* CUSTOMIZATION PERSONNALISE*/
+.blue{
+    color: #6cc3ca;
+}
+.green{
+    color: #52d8a6;
+}
+.violet{
+    color: #d783db;
+}
+
+.white{
+    color: white;
+}
+
+.bg-card-blue{
+    background-color: #6cc3ca !important;
+}
+.bg-card-green{
+    background-color: #52d8a6 !important;
+}
+.bg-card-violet{
+    background-color: #d783db !important;
+}
+.bg-card-white{
+    background-color: #ffffff !important;
+}
+
+.card {
+    /* Add shadows to create the "card" effect */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+}
+
+/* On mouse-over, add a deeper shadow */
+.card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}

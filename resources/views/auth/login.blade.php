@@ -4,9 +4,9 @@
     <div class="col-md-6">
         <div class="card mx-4">
             <div class="card-body p-4">
-                <h1>{{ trans('panel.site_title') }}</h1>
+                <center><img class="mb-4" src="{!! url('images/logo-official.jpg') !!}" alt="" width="72" height="57"></center>
 
-                <p class="text-muted">{{ trans('global.login') }}</p>
+                <h1 class="text-center mb-4"><span class="blue">GEDLA</span> <span class="green">-</span> <span class="violet">ADS</span></h1>
 
                 @if(session('message'))
                     <div class="alert alert-info" role="alert">
@@ -58,7 +58,7 @@
 
                     <div class="row">
                         <div class="col-6">
-                            <button type="submit" class="btn btn-primary px-4">
+                            <button type="submit" class="btn bg-card-violet px-4" style="color: white">
                                 {{ trans('global.login') }}
                             </button>
                         </div>
