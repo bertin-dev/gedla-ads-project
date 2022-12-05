@@ -70,6 +70,18 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('folders/media', [FoldersController::class, 'storeMedia'])->name('folders.storeMedia');
     Route::post('folders/ckmedia', [FoldersController::class, 'storeCKEditorImages'])->name('folders.storeCKEditorImages');
     Route::resource('folders', FoldersController::class);
+
+
+    // Audit Logs
+    Route::resource('audit-logs', 'AuditLogsController', ['except' => ['create', 'store', 'edit', 'update', 'destroy']]);
+
+    // User Alerts
+    Route::delete('user-alerts/destroy', 'UserAlertsController@massDestroy')->name('user-alerts.massDestroy');
+    Route::get('user-alerts/read', 'UserAlertsController@read');
+    Route::resource('user-alerts', 'UserAlertsController', ['except' => ['edit', 'update']]);
+
+    Route::get('global-search', 'GlobalSearchController@search')->name('globalSearch');
+
 });
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {
 // Change password

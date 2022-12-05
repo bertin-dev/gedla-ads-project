@@ -154,7 +154,32 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 34,
                 'title' => 'design_access',
             ],
+            [
+                'id'    => 35,
+                'title' => 'audit_log_show',
+            ],
+            [
+                'id'    => 36,
+                'title' => 'audit_log_access',
+            ],
+            [
+                'id'    => 37,
+                'title' => 'user_alert_create',
+            ],
+            [
+                'id'    => 38,
+                'title' => 'user_alert_show',
+            ],
+            [
+                'id'    => 39,
+                'title' => 'user_alert_delete',
+            ],
+            [
+                'id'    => 40,
+                'title' => 'user_alert_access',
+            ],
         ];
+
 
         Permission::insert($permissions);
     }

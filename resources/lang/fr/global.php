@@ -363,4 +363,9 @@ return [
     'leave'                          => 'Quitter',
     'calendar'                       => 'Calendrier',
     'messenger'                      => 'Messager',
+    'folder'                         => 'Dossier',
+    'file_details'                   => 'Détails du fichier',
+    'file_action'                    => 'Action sur le fichier',
+    'size'                         =>  'Taille',
+
 ];

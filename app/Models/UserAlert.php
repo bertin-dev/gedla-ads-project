@@ -3,29 +3,33 @@
 namespace App\Models;
 
 use App\Http\Controllers\Traits\Auditable;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use \DateTimeInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class Permission extends Model
+class UserAlert extends Model
 {
-    use SoftDeletes;
+    use HasFactory;
     use Auditable;
 
-    public $table = 'permissions';
+    public $table = 'user_alerts';
 
     protected $dates = [
         'created_at',
         'updated_at',
-        'deleted_at',
     ];
 
     protected $fillable = [
-        'title',
+        'alert_text',
+        'alert_link',
         'created_at',
         'updated_at',
-        'deleted_at',
     ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 
     protected function serializeDate(DateTimeInterface $date)
     {

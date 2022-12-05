@@ -159,3 +159,7 @@ table.dataTable thead .sorting_desc {
 .card:hover {
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 }
+
+ul {
+    list-style-type: none;
+}

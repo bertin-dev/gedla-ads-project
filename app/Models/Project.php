@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use \DateTimeInterface;
@@ -10,8 +11,13 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class Project extends Model
 {
     use SoftDeletes;
+    use Auditable;
 
     public $table = 'projects';
+
+    public static $searchable = [
+        'name',
+    ];
 
     protected $dates = [
         'created_at',

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
+    <link rel="icon" type="image/png" sizes="16x16" href="{!! url('images/logo-official.jpg') !!}">
     <title>{{ trans('panel.site_title') }}</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://unpkg.com/@coreui/coreui@3.2/dist/css/coreui.min.css" rel="stylesheet" />
@@ -21,10 +21,11 @@
     @yield('styles')
 </head>
 
-<body class="header-fixed sidebar-fixed aside-menu-fixed aside-menu-hidden login-page">
-    <div class="c-app flex-row align-items-center">
+<body class="header-fixed sidebar-fixed aside-menu-fixed aside-menu-hidden login-page bg-card-blue">
+    <div class="c-app flex-row align-items-center" style="background-color: initial;">
         <div class="container">
             @yield("content")
+            <center><small class="copyright white">© Designed &amp; Developed by <a href="https://adsyst-solution.com/" target="_blank"><span style="color: green;">ADS - SOLUTION</span></a> &copy; {{date('Y')}}</small></center>
         </div>
     </div>
     @yield('scripts')

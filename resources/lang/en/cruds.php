@@ -60,8 +60,8 @@ return [
     ],
 
     'project' => [
-        'title'          => 'Project',
-        'title_singular' => 'Project',
+        'title'          => 'Entity',
+        'title_singular' => 'Entity',
         'fields'  => [
             'id'                => 'ID',
             'id_helper'         => ' ',
@@ -75,6 +75,8 @@ return [
             'deleted_at_helper' => ' ',
             'thumbnail'         => 'Thumbnail',
             'thumbnail_helper'  => ' ',
+            'users'             => 'User(s)',
+            'users_helper'      => ' ',
         ]
     ],
 
@@ -94,8 +96,10 @@ return [
             'deleted_at_helper' => ' ',
             'parent'            => 'Parent',
             'parent_helper'     => ' ',
-            'project'           => 'Project',
+            'project'           => 'Entity',
             'project_helper'    => ' ',
+            'files'             => 'File(s)',
+            'files_helper'      => ' ',
         ]
     ],
 

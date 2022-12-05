@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>{{ trans('panel.site_title') }}</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="{!! url('images/logo-official.jpg') !!}">
+    <title>{{ trans('panel.admin_gedla') }}</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet" />
     <link href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" rel="stylesheet" />
@@ -26,6 +26,8 @@
 </head>
 
 <body class="c-app">
+
+
     @include('partials.menu')
     <div class="c-wrapper">
         <header class="c-header c-header-fixed px-3">
@@ -40,6 +42,39 @@
             </button>
 
             <ul class="c-header-nav ml-auto">
+                <li class="c-header-nav-item dropdown d-md-down-none notifications-menu">
+                    <a href="#" class="c-header-nav-link" data-toggle="dropdown" aria-expanded="false" role="button" aria-haspopup="true" >
+                        <i class="fa fa-bell-o"></i>
+                        @php($alertsCount = Auth::user()->userUserAlerts()->where('read', false)->count())
+                        @if($alertsCount > 0)
+                            <span class="label label-warning">{{ $alertsCount }}</span>
+                        @endif
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <li>
+                            <div class="slimScrollDiv" style="position: relative;">
+                                <ul class="menu">
+                                    @if(count($alerts = Auth::user()->userUserAlerts()->withPivot('read')->limit(10)->orderBy('created_at', 'ASC')->get()->reverse()) > 0)
+                                        @foreach($alerts as $alert)
+                                            <li>
+                                                <a href="{{ $alert->alert_link ? $alert->alert_link : "#" }}" target="_blank" rel="noopener noreferrer">
+                                                    @if($alert->pivot->read === 0) <strong> @endif
+                                                        {{ $alert->alert_text }}
+                                                        @if($alert->pivot->read === 0) </strong> @endif
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    @else
+                                        <li style="text-align:center;">
+                                            {{ trans('global.no_alerts') }}
+                                        </li>
+                                    @endif
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+
                 @if(count(config('panel.available_languages', [])) > 1)
                     <li class="c-header-nav-item dropdown d-md-down-none">
                         <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
@@ -52,9 +87,11 @@
                         </div>
                     </li>
                 @endif
-
-
             </ul>
+
+
+
+
         </header>
 
         <div class="c-body">
@@ -88,6 +125,14 @@
                 {{ csrf_field() }}
             </form>
         </div>
+
+        <!--**********************************
+        Footer start
+    ***********************************-->
+    @include('partials.copy')
+    <!--**********************************
+        Footer end
+    ***********************************-->
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
@@ -124,7 +169,7 @@
 
   let languages = {
     'en': 'https://cdn.datatables.net/plug-ins/1.10.19/i18n/English.json',
-    'fr': 'https://cdn.datatables.net/plug-ins/1.10.19/i18n/French.json'
+    'fr': 'https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json'
   };
 
   $.extend(true, $.fn.dataTable.Buttons.defaults.dom.button, { className: 'btn' })
@@ -226,6 +271,79 @@
 });
 
     </script>
+
+
+    <script>
+        $(document).ready(function() {
+            $('.searchable-field').select2({
+                minimumInputLength: 3,
+                ajax: {
+                    url: '{{ route("admin.globalSearch") }}',
+                    dataType: 'json',
+                    type: 'GET',
+                    delay: 200,
+                    data: function (term) {
+                        return {
+                            search: term
+                        };
+                    },
+                    results: function (data) {
+                        return {
+                            data
+                        };
+                    }
+                },
+                escapeMarkup: function (markup) { return markup; },
+                templateResult: formatItem,
+                templateSelection: formatItemSelection,
+                placeholder : '{{ trans('global.search') }}...',
+                language: {
+                    inputTooShort: function(args) {
+                        var remainingChars = args.minimum - args.input.length;
+                        var translation = '{{ trans('global.search_input_too_short') }}';
+
+                        return translation.replace(':count', remainingChars);
+                    },
+                    errorLoading: function() {
+                        return '{{ trans('global.results_could_not_be_loaded') }}';
+                    },
+                    searching: function() {
+                        return '{{ trans('global.searching') }}';
+                    },
+                    noResults: function() {
+                        return '{{ trans('global.no_results') }}';
+                    },
+                }
+
+            });
+            function formatItem (item) {
+                if (item.loading) {
+                    return '{{ trans('global.searching') }}...';
+                }
+                var markup = "<div class='searchable-link' href='" + item.url + "'>";
+                markup += "<div class='searchable-title'>" + item.model + "</div>";
+                $.each(item.fields, function(key, field) {
+                    markup += "<div class='searchable-fields'>" + item.fields_formated[field] + " : " + item[field] + "</div>";
+                });
+                markup += "</div>";
+
+                return markup;
+            }
+
+            function formatItemSelection (item) {
+                if (!item.model) {
+                    return '{{ trans('global.search') }}...';
+                }
+                return item.model;
+            }
+            $(document).delegate('.searchable-link', 'click', function() {
+                var url = $(this).attr('href');
+                window.location = url;
+            });
+        });
+
+    </script>
+
     @yield('scripts')
 </body>
 

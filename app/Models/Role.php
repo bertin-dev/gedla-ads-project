@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use \DateTimeInterface;
@@ -9,6 +10,7 @@ use \DateTimeInterface;
 class Role extends Model
 {
     use SoftDeletes;
+    use Auditable;
 
     public $table = 'roles';
 

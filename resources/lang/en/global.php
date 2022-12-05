@@ -363,4 +363,8 @@ return [
     'leave'                          => 'Leave',
     'calendar'                       => 'Calendar',
     'messenger'                      => 'Messenger',
+    'folder'                         => 'Folder',
+    'file_details'                   => 'File Details',
+    'file_action'                    =>  'File Action',
+    'size'                           =>  'Size',
 ];
