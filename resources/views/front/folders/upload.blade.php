@@ -16,7 +16,7 @@
 
                         <form method="POST" action="{{ route('folders.postUpload') }}">
                             @csrf
-                            <input type="hidden" name="folder_id" value="{{ request('folder_id') }}" />
+                            <input type="hidden" name="folder_id" value="{{ request('folder_id') ?? $folder_id }}" />
 
                             <div class="form-group">
                                 <label for="files">Files</label>

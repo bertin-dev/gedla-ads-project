@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use \DateTimeInterface;
@@ -11,7 +12,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Folder extends Model implements HasMedia
 {
-    use SoftDeletes, InteractsWithMedia;
+    use SoftDeletes, InteractsWithMedia, Auditable;
 
     public $table = 'folders';
 
@@ -73,4 +74,19 @@ class Folder extends Model implements HasMedia
     {
         return $this->hasMany(Folder::class, 'parent_id');
     }
+
+    /*-----------------------------------------------------*/
+
+
+    public function subChildren()
+    {
+        return $this->hasMany(Folder::class, 'parent_id')->with('children');
+    }
+
+
+    public function scopeFindByParentId($query, $parentId){
+        return $query->where('parent_id', $parentId);
+    }
+
+
 }

@@ -2,11 +2,12 @@
 
 return [
     'site_title' => 'GEDLA - ADS',
-    'primary_language' => 'primary language',
-    'available_languages' => 'available language',
+    'primary_language' => 'Langue primaire',
+    'available_languages' => 'Langues disponible',
     'admin_gedla' => 'ADMIN | GEDLA - ADS',
-    'home_gedla' => 'HOME | GEDLA - ADS',
-    'settings' => 'SETTINGS',
-    'work_space' => 'WORK SPACE',
-    'acquisition_document' => 'Acquisition of documents',
+    'home_gedla' => 'ACCUEIL | GEDLA - ADS',
+    'settings' => 'Configuration',
+    'work_space' => 'Espace de travail',
+    'acquisition_document' => 'Acquisition des documents',
+    'home' => 'Accueil',
 ];

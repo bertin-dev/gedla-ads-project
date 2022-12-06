@@ -9,4 +9,5 @@ return [
     'settings' => 'SETTINGS',
     'work_space' => 'WORK SPACE',
     'acquisition_document' => 'Acquisition of documents',
+    'home' => 'Home',
 ];

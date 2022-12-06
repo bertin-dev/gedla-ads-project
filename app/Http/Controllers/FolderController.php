@@ -3,13 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Folder;
+use App\Models\Project;
 use Illuminate\Http\Request;
 
 class FolderController extends Controller
 {
     public function create()
     {
-        return view('front.folders.create');
+        $children_level_n = Folder::with('project')
+            ->whereHas('project.users', function($query) {
+                $query->where('id', auth()->id());
+            })
+            ->whereNull('parent_id')
+            ->with('subChildren')
+            ->get();
+
+        return view('front.folders.create', compact('children_level_n'));
     }
 
     public function store(Request $request)
@@ -36,17 +45,39 @@ class FolderController extends Controller
 
     public function show($id)
     {
+
         $folder = Folder::with('project')
             ->whereHas('project.users', function($query) {
                 $query->where('id', auth()->id());
             })->findOrFail($id);
 
-        return view('front.folders.show', compact('folder'));
+        /*$projects = Project::whereHas('users', function($query) {
+            $query->where('id', auth()->id());
+        })->get();*/
+
+        $children_level_n = Folder::with('project')
+            ->whereHas('project.users', function($query) {
+                $query->where('id', auth()->id());
+            })
+            ->whereNull('parent_id')
+            ->with('subChildren')
+            ->get();
+
+        return view('front.folders.show_files', compact('folder', 'children_level_n'));
+        //return view('front.folders.show', compact('folder','projects'));
     }
 
     public function upload()
     {
-        return view('front.folders.upload');
+        $children_level_n = Folder::with('project')
+            ->whereHas('project.users', function($query) {
+                $query->where('id', auth()->id());
+            })
+            ->whereNull('parent_id')
+            ->with('subChildren')
+            ->get();
+
+        return view('front.folders.upload', compact('children_level_n'));
     }
 
     public function storeMedia(Request $request)

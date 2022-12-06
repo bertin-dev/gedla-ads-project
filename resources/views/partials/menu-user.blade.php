@@ -9,12 +9,12 @@
 
 
     <ul class="c-sidebar-nav">
-        {{--<li class="c-sidebar-nav-item">
-            <a class="c-sidebar-nav-link" href="#">
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ route("projects.index") }}">
                 <i class="c-sidebar-nav-icon fas fa-fw fa-home"></i>
-                {{ trans('panel.work_space') }}
+                {{ trans('panel.home') }}
             </a>
-        </li>--}}
+        </li>
         @foreach ($children_level_n as $child)
             <li class="c-sidebar-nav-dropdown">
 

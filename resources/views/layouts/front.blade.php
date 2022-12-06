@@ -86,7 +86,6 @@
 </div>--}}
 
 
-
 <div class="c-wrapper">
     <header class="c-header c-header-fixed px-3">
         <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar" data-class="c-sidebar-show">
@@ -333,15 +332,15 @@
             let size = $(e.relatedTarget).data('size');
             let itemType = $(e.relatedTarget).data('item_type');
             //let objects = $('#objectLink').data('name');
-            $('.img_detail').attr("src", itemType);
+            $('.img_detail').attr({
+                src: itemType,
+                alt: name,
+                title: name
+            });
             $('.folder_id').text('{{ trans('global.folder') }} : ' + id + '');
             $('.folder_size').text('{{ trans('global.size') }} : ' + size + ' KO');
             $('.myUrl').attr("href", url);
             console.log(id);
-            /*alert(id);
-            alert(name);
-            alert(size);
-            alert(itemType);*/
         });
 
     });
