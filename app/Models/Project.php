@@ -4,8 +4,13 @@ namespace App\Models;
 
 use App\Http\Controllers\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use \DateTimeInterface;
+use Illuminate\Testing\Fluent\Concerns\Has;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Project extends Model
@@ -28,27 +33,29 @@ class Project extends Model
     protected $fillable = [
         'name',
         'thumbnail_id',
+        'created_by',
+        'updated_by',
         'created_at',
         'updated_at',
         'deleted_at',
     ];
 
-    protected function serializeDate(DateTimeInterface $date)
+    protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format('Y-m-d H:i:s');
     }
 
-    public function users()
+    public function users() : BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
 
-    public function folders()
+    public function folders() : HasMany
     {
         return $this->hasMany(Folder::class);
     }
 
-    public function parentDirectory()
+    public function parentDirectory() : HasOne
     {
         return $this->hasOne(Folder::class)->whereNull('parent_id');
     }
@@ -71,7 +78,7 @@ class Project extends Model
         return collect();
     }
 
-    public function getThumbnailAttribute()
+    public function getThumbnailAttribute(): Media
     {
         if ($this->thumbnail_id) {
             $image = Media::firstWhere('id', $this->thumbnail_id);
@@ -81,5 +88,18 @@ class Project extends Model
         }
 
         return $image;
+    }
+
+
+    //CREATED BY
+    public function userCreatedProjectBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    //UPDATED_BY
+    public function userUpdatedProjectBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

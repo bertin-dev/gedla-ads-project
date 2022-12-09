@@ -12,6 +12,7 @@ class CreateUsersTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('email')->unique();
+            $table->enum('user_state', ['unlocked', 'locked'])->default('unlocked')->comment('unlocked=0, locked=1');
             $table->datetime('email_verified_at')->nullable();
             $table->string('password');
             $table->string('remember_token')->nullable();

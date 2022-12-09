@@ -144,6 +144,21 @@
     <div class="c-body">
         <main class="c-main">
 
+            {{--<div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="m-0">Dashboard</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                                <li class="breadcrumb-item active">Dashboard v1</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>--}}
 
             <div class="container-fluid">
                 @if(session('message'))
@@ -219,7 +234,7 @@
 
         let languages = {
             'en': 'https://cdn.datatables.net/plug-ins/1.10.19/i18n/English.json',
-            'fr': 'https://cdn.datatables.net/plug-ins/1.10.19/i18n/French.json'
+            'fr': 'https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json'
         };
 
         $.extend(true, $.fn.dataTable.Buttons.defaults.dom.button, { className: 'btn' })

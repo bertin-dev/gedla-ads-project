@@ -10,4 +10,7 @@ return [
     'work_space' => 'WORK SPACE',
     'acquisition_document' => 'Acquisition of documents',
     'home' => 'Home',
+    'open' => 'Open',
+    'ocr' => 'OCR',
+    'acquisition_by' => 'Acquisition by',
 ];

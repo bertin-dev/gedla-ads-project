@@ -26,6 +26,12 @@ return new class extends Migration
             $table->json('responsive_images');
             $table->unsignedInteger('order_column')->nullable()->index();
 
+            $table->unsignedInteger('media_version')->nullable()->index();
+            $table->enum('media_status', ['public', 'private', 'confidential'])->default('public');
+            $table->enum('media_state', ['unlocked', 'locked'])->default('unlocked')->comment('unlocked=0, locked=1');
+            $table->enum('media_signing', ['0', '1'])->default('0')->comment('0=non signe, 1=signé');
+            $table->enum('media_save', ['unarchived', 'archived'])->default('unarchived')->comment('0=non-archivé, 1=archivé');
+
             $table->nullableTimestamps();
         });
     }

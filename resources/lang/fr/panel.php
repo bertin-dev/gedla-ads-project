@@ -10,4 +10,7 @@ return [
     'work_space' => 'Espace de travail',
     'acquisition_document' => 'Acquisition des documents',
     'home' => 'Accueil',
+    'open' => 'Ouvrir',
+    'ocr' => 'OCR',
+    'acquisition_by' => 'Acquisition par',
 ];

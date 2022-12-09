@@ -8,8 +8,7 @@
         <div class="container-fluid">
 
             <div class="row">
-
-             {{--   <form action="{{route('post-upload-ocr')}}" method="post" enctype="multipart/form-data">
+                {{--   <form action="{{route('post-upload-ocr')}}" method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         @csrf
                         <label for="filechoose">Choose File</label>

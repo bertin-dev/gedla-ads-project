@@ -6,12 +6,15 @@ use App\Http\Controllers\Traits\Auditable;
 use Carbon\Carbon;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\HasApiTokens;
 use \DateTimeInterface;
+use \Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use \Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -39,6 +42,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'user_state',
+        'created_by',
         'email_verified_at',
         'password',
         'remember_token',
@@ -47,17 +52,17 @@ class User extends Authenticatable
         'deleted_at',
     ];
 
-    protected function serializeDate(DateTimeInterface $date)
+    protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format('Y-m-d H:i:s');
     }
 
-    public function getIsAdminAttribute()
+    public function getIsAdminAttribute(): bool
     {
         return $this->roles()->where('id', 1)->exists();
     }
 
-    public function getEmailVerifiedAtAttribute($value)
+    public function getEmailVerifiedAtAttribute($value): ?string
     {
         return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
     }
@@ -79,13 +84,64 @@ class User extends Authenticatable
         $this->notify(new ResetPassword($token));
     }
 
-    public function roles()
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);
     }
 
-    public function userUserAlerts()
+    public function userUserAlerts(): BelongsToMany
     {
         return $this->belongsToMany(UserAlert::class);
+    }
+
+
+
+    //PERMISSION
+    public function permissionsBy(): HasMany
+    {
+        return $this->hasMany(Permission::class);
+    }
+
+    //ROLE
+    public function rolesBy(): HasMany
+    {
+        return $this->hasMany(Role::class);
+    }
+
+    //USER-ALERT
+    public function userAlertsBy(): HasMany
+    {
+        return $this->hasMany(UserAlert::class);
+    }
+
+
+    //FOLDERS
+    public function userFoldersBy(): HasMany
+    {
+        return $this->hasMany(Folder::class);
+    }
+
+    //PROJECTS
+    public function userProjectsBy(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    //CUSTOMER MEDIA
+    public function userCustomerMediasBy(): HasMany
+    {
+        return $this->hasMany(CustomerMedia::class);
+    }
+
+    //PARENT USER
+    public function parentUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    //CHILDREN USERS CREATED BY PARENT
+    public function childrenUsers(): HasMany
+    {
+        return $this->hasMany(User::class, 'created_by');
     }
 }

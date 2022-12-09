@@ -4,10 +4,13 @@ namespace App\Models;
 
 use App\Http\Controllers\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use \DateTimeInterface;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Folder extends Model implements HasMedia
@@ -31,23 +34,25 @@ class Folder extends Model implements HasMedia
         'project_id',
         'parent_id',
         'thumbnail_id',
+        'created_by',
+        'updated_by',
         'created_at',
         'updated_at',
         'deleted_at',
     ];
 
-    protected function serializeDate(DateTimeInterface $date)
+    protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format('Y-m-d H:i:s');
     }
 
 
-    public function project()
+    public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id');
     }
 
-    public function getFilesAttribute()
+    public function getFilesAttribute(): MediaCollection
     {
         $files = $this->getMedia('files');
 
@@ -65,12 +70,12 @@ class Folder extends Model implements HasMedia
         });
     }
 
-    public function parent()
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(Folder::class, 'parent_id');
     }
 
-    public function children()
+    public function children() : HasMany
     {
         return $this->hasMany(Folder::class, 'parent_id');
     }
@@ -78,15 +83,27 @@ class Folder extends Model implements HasMedia
     /*-----------------------------------------------------*/
 
 
-    public function subChildren()
+    public function subChildren(): HasMany
     {
         return $this->hasMany(Folder::class, 'parent_id')->with('children');
     }
 
 
-    public function scopeFindByParentId($query, $parentId){
+    /*public function scopeFindByParentId($query, $parentId){
         return $query->where('parent_id', $parentId);
+    }*/
+
+
+    //CREATED BY
+    public function userCreatedFolderBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
+    //UPDATED_BY
+    public function userUpdatedFolderBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 
 }
