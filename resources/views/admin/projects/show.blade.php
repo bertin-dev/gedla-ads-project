@@ -41,6 +41,22 @@
                             @endforeach
                         </td>
                     </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.project.fields.created_by') }}
+                        </th>
+                        <td>
+                            {{ $project->userCreatedProjectBy->name }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.project.fields.updated_by') }}
+                        </th>
+                        <td>
+                            {{ $project->userUpdatedProjectBy->name }}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <div class="form-group">

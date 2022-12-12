@@ -32,6 +32,12 @@
                             {{ trans('cruds.project.fields.users') }}
                         </th>
                         <th>
+                            {{ trans('cruds.project.fields.created_by') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.project.fields.updated_by') }}
+                        </th>
+                        <th>
                             &nbsp;
                         </th>
                     </tr>
@@ -52,6 +58,12 @@
                                 @foreach($project->users as $key => $item)
                                     <span class="badge badge-info">{{ $item->name }}</span>
                                 @endforeach
+                            </td>
+                            <td>
+                                {{ $project->userCreatedProjectBy->name ?? '' }}
+                            </td>
+                            <td>
+                                {{ $project->userUpdatedProjectBy->name ?? '' }}
                             </td>
                             <td>
                                 @can('project_show')
@@ -132,7 +144,7 @@
       $($.fn.dataTable.tables(true)).DataTable()
           .columns.adjust();
   });
-  
+
 })
 
 </script>

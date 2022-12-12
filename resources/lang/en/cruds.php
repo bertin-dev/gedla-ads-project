@@ -82,6 +82,8 @@ return [
             'thumbnail_helper'  => ' ',
             'users'             => 'User(s)',
             'users_helper'      => ' ',
+            'created_by'        => 'Created by',
+            'updated_by'        => 'Updated by',
         ]
     ],
 

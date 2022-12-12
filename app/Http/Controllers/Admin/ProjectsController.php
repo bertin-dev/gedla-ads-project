@@ -18,7 +18,7 @@ class ProjectsController extends Controller
     {
         abort_if(Gate::denies('project_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $projects = Project::all();
+        $projects = Project::with('userCreatedProjectBy', 'userUpdatedProjectBy')->get();
 
         return view('admin.projects.index', compact('projects'));
     }
@@ -34,7 +34,11 @@ class ProjectsController extends Controller
 
     public function store(StoreProjectRequest $request)
     {
-        $project = Project::create($request->all());
+        $project = Project::create([
+            'name' => $request->name,
+            'users' => $request->users,
+            'created_by' => \Auth::user()->id,
+        ]);
         $project->folders()->create([
             'name' => 'Parent Directory'
         ]);
@@ -56,7 +60,11 @@ class ProjectsController extends Controller
 
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        $project->update($request->all());
+        $project->update([
+            'name' => $request->name,
+            'users' => $request->users,
+            'updated_by' => \Auth::user()->id,
+        ]);
         $project->users()->sync($request->input('users', []));
 
         return redirect()->route('admin.projects.index');
@@ -66,7 +74,7 @@ class ProjectsController extends Controller
     {
         abort_if(Gate::denies('project_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $project->load('users');
+        $project->load('users', 'userCreatedProjectBy', 'userUpdatedProjectBy');
 
         return view('admin.projects.show', compact('project'));
     }
