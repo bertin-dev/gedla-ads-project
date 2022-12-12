@@ -352,11 +352,19 @@
                 alt: name,
                 title: name
             });
+            $('.file-title').text('{{trans('global.file_details')}} : ' + name);
             $('.folder_id').text('{{ trans('global.folder') }} : ' + id + '');
             $('.folder_size').text('{{ trans('global.size') }} : ' + size + ' KO');
             $('.myUrl').attr("href", url);
+            $('#media_id').attr("value", id);
             console.log(id);
         });
+
+
+        $('.workflow_validate').click(function() {
+            $('.workflow_form').toggle('slow');
+        });
+
 
     });
 </script>

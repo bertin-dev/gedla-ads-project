@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\OcrController;
+use App\Http\Controllers\ValidationWorkflowController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\ProjectController;
@@ -12,7 +13,6 @@ use \App\Http\Controllers\Admin\ProjectsController;
 use \App\Http\Controllers\Admin\RolesController;
 use \App\Http\Controllers\Admin\FoldersController;
 use \App\Http\Controllers\Auth\ChangePasswordController;
-use \App\Http\Controllers\PostUploadOCRController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,8 +40,18 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::get('folders/upload', [FolderController::class, 'upload'])->name('folders.upload');
     Route::post('folders/media', [FolderController::class, 'storeMedia'])->name('folders.storeMedia');
     Route::post('folders/upload', [FolderController::class, 'postUpload'])->name('folders.postUpload');
-
     Route::resource('folders', FolderController::class)->except(['index', 'destroy']);
+
+    //OCR
+    Route::get('openOCR', [OcrController::class, 'openOCR'])->name('openOCR');
+    Route::post('storeOCR', [OcrController::class, 'storeImgOCR'])->name('storeImgOCR');
+    Route::post('uploadOCR', [OcrController::class, 'postUploadOCR'])->name('postUploadOCR');
+
+    //WORKFLOW VALIDATE
+    Route::post('workflow/store', [ValidationWorkflowController::class, 'store'])->name('workflow.store');
+    Route::get('workflow/index', [ValidationWorkflowController::class, 'index'])->name('workflow.index');
+
+
 });
 
 Auth::routes(['register' => false]);
@@ -80,6 +90,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('user-alerts/read', 'UserAlertsController@read');
     Route::resource('user-alerts', 'UserAlertsController', ['except' => ['edit', 'update']]);
 
+    // Global Search
     Route::get('global-search', 'GlobalSearchController@search')->name('globalSearch');
 
 });
@@ -94,5 +105,5 @@ Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 
 });
 
 
-Route::post('uploadOCR', [PostUploadOCRController::class, 'postUploadOCR'])->name('post-upload-ocr');
+//Route::post('uploadOCR', [PostUploadOCRController::class, 'postUploadOCR'])->name('post-upload-ocr');
 

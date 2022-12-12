@@ -68,7 +68,7 @@
                     @endphp
                     <div class="col-lg-4">
                         <div class="card" data-toggle="modal" data-target=".bd-example-modal-lg"
-                             data-id="{{$file->id}}" data-name="{{$file->name}}" data-size="{{$realSize}}"
+                             data-id="{{$file->id}}" data-name="{{ucfirst(strtolower(Str::substr($file->file_name, 14)))}}" data-size="{{$realSize}}"
                              data-item_type="{{$result}}" data-url="{{$file->getUrl()}}">
                             <div class="row no-gutters">
                                 <div class="col-sm-4">
@@ -80,7 +80,7 @@
                                         <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 42)) }}</h5>
                                         <div style="margin-top: 23px">
                                             <span>{{ date('d/m/Y' , strtotime($file->created_at)) }}</span>
-                                            <div class="text-right"> {{$realSize}}KO</div>
+                                            <div class="text-right"> {{$realSize}} KO</div>
                                             {{--<a href="{{ $file->getUrl() }}" target="_blank" class="btn-link">Acquisition</a>--}}
                                         </div>
                                     </div>
@@ -103,7 +103,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{trans('global.file_details')}}</h5>
+                    <h5 class="modal-title file-title">{{trans('global.file_details')}}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -115,12 +115,89 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <img class="img-thumbnail img_detail">
+                                <div class="text-left">
+                                    <a class="myUrl col-lg-4" target="_blank">Ouvrir </a>
+                                    <a href="#" class="col-lg-4"> Télécharger</a>
+                                    <a href="#" class="col-lg-4">Archiver le document </a>
+                                </div>
                             </div>
 
                             <div class="col-md-6 ml-auto">
-                                <span class="folder_id"></span>
-                                <br>
-                                <span class="folder_size"></span>
+                                <span class="folder_id col-lg-4"></span>
+                                <span class="folder_size col-lg-4"></span>
+                                <span class="version col-lg-4">Version: 0.1</span>
+                                <hr>
+
+                                <div class="card workflow_form" style="display: none">
+                                    <div class="card-header">Workflow de Validation</div>
+
+                                    <div class="card-body">
+                                        @if (session('status'))
+                                            <div class="alert alert-success" role="alert">
+                                                {{ session('status') }}
+                                            </div>
+                                        @endif
+
+                                        <form method="POST" action="{{ route('workflow.store') }}">
+                                            @csrf
+                                            <input id="media_id" type="hidden" name="media_id" />
+                                                <div class="form-group">
+                                                    <label for="deadline">Echéance</label>
+                                                    <input type="date" id="deadline" name="deadline" class="form-control">
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label for="priority">Priorité</label>
+                                                    <select name="priority" id="priority" class="form-control">
+                                                        <option value="low">Basse</option>
+                                                        <option value="medium">Moyenne</option>
+                                                        <option value="high">Important</option>
+                                                    </select>
+                                                </div>
+
+                                            <div class="form-group">
+                                                <label for="visibility">Visibilité</label>
+                                                <select name="visibility" id="visibility" class="form-control">
+                                                    <option value="public">Public</option>
+                                                    <option value="private">Privé</option>
+                                                    <option value="confidential">Confidentiel</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="user_assign">Assigné à</label>
+                                                <select name="user_assign" id="user_assign" class="form-control">
+                                                    @foreach(\App\Models\User::all() as $user)
+                                                         @if($user->id != Auth::user()->id)
+                                                            <option value="{{$user->id}}">{{$user->name}}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="message">Message</label>
+                                                <textarea name="message" id="message" class="form-control"></textarea>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="form-check checkbox">
+                                                    <input class="form-check-input" type="checkbox" name="flexCheckChecked" id="flexCheckChecked" style="vertical-align: middle;">
+                                                    <label class="form-check-label" for="flexCheckChecked" style="vertical-align: middle;">
+                                                        Envoyer des notifications par Email
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <button type="submit" class="btn bg-card-violet text-white">Envoyer</button>
+                                                <button type="reset" class="btn bg-card-green text-white">Annuler</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+
                             </div>
                         </div>
                     </div>
@@ -131,9 +208,9 @@
                     <h5 class="modal-title">{{ trans('global.file_action') }}</h5><br>
                     <ul>
                         <li><a href="#">Valider</a></li>
-                        <li><a href="#">Demander une validation</a></li>
-                        <li><a class="myUrl" target="_blank">Ouvrir</a></li>
-                        <li><a href="#">Télécharger</a></li>
+                        @can('validation_workflow_access')
+                            <li><a href="#" class="workflow_validate">Démarrer le workflow de validation</a></li>
+                        @endcan
                     </ul>
                 </div>
 

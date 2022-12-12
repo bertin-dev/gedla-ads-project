@@ -144,4 +144,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(User::class, 'created_by');
     }
+
+    //UN UTILISATEUR PEUT EFFECTUER PLUSIEURS WORKFLOW DE VALIDATION
+    public function sendValidateWorkflows(): HasMany
+    {
+        return $this->hasMany(ValidationWorkflow::class, 'workflow_sender');
+    }
+
+    //UN UTILISATEUR PEUT RECEPTION UN OU PLUSIEURS WORKFLOW A VALIDER
+    public function receiveValidateWorkflows(): HasMany
+    {
+        return $this->hasMany(ValidationWorkflow::class, 'workflow_receiver');
+    }
 }

@@ -178,6 +178,10 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 40,
                 'title' => 'user_alert_access',
             ],
+            [
+                'id'    => 41,
+                'title' => 'validation_workflow_access',
+            ],
         ];
 
 

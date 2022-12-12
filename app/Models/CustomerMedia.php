@@ -6,6 +6,7 @@ use App\Http\Controllers\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class CustomerMedia extends Media
@@ -40,5 +41,11 @@ class CustomerMedia extends Media
     public function userSignedCustomerMediaBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'signed_by');
+    }
+
+    //UN MEDIA PEUT AVOIR UN OU PLUSIEURS WORKFLOW DE VALIDATION
+    public function workflowValidates(): HasMany
+    {
+        return $this->hasMany(ValidationWorkflow::class);
     }
 }
