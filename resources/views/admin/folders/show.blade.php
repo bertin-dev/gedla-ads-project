@@ -59,6 +59,22 @@
                             {{ $folder->parent->name ?? '' }}
                         </td>
                     </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.folder.fields.created_by') }}
+                        </th>
+                        <td>
+                            {{ $folder->userCreatedFolderBy->name ?? '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.folder.fields.updated_by') }}
+                        </th>
+                        <td>
+                            {{ $folder->userUpdatedFolderBy->name ?? '' }}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <div class="form-group">

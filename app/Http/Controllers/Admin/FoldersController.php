@@ -11,7 +11,7 @@ use App\Http\Requests\UpdateFolderRequest;
 use App\Models\Project;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
-use Spatie\MediaLibrary\Models\Media;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\Response;
 
 class FoldersController extends Controller
@@ -22,7 +22,7 @@ class FoldersController extends Controller
     {
         abort_if(Gate::denies('folder_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $folders = Folder::all();
+        $folders = Folder::with(['userCreatedFolderBy', 'userUpdatedFolderBy'])->get();
 
         return view('admin.folders.index', compact('folders'));
     }
@@ -40,7 +40,10 @@ class FoldersController extends Controller
 
     public function store(StoreFolderRequest $request)
     {
-        $folder = Folder::create($request->all());
+        $folder = Folder::create([
+            'name' => $request->name,
+            'created_by' => \Auth::user()->id
+        ]);
 
         foreach ($request->input('files', []) as $file) {
             $folder->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
@@ -68,7 +71,10 @@ class FoldersController extends Controller
 
     public function update(UpdateFolderRequest $request, Folder $folder)
     {
-        $folder->update($request->all());
+        $folder->update([
+            'name' => $request->name,
+            'updated_by' => \Auth::user()->id
+        ]);
 
         if (count($folder->files) > 0) {
             foreach ($folder->files as $media) {
@@ -93,7 +99,7 @@ class FoldersController extends Controller
     {
         abort_if(Gate::denies('folder_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $folder->load('project', 'parent');
+        $folder->load('project', 'parent', 'userCreatedFolderBy', 'userUpdatedFolderBy');
 
         return view('admin.folders.show', compact('folder'));
     }

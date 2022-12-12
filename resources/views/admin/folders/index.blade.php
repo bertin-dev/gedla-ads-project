@@ -38,6 +38,12 @@
                             {{ trans('cruds.folder.fields.parent') }}
                         </th>
                         <th>
+                            {{ trans('cruds.folder.fields.created_by') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.folder.fields.updated_by') }}
+                        </th>
+                        <th>
                             &nbsp;
                         </th>
                     </tr>
@@ -66,6 +72,12 @@
                             </td>
                             <td>
                                 {{ $folder->parent->name ?? '' }}
+                            </td>
+                            <td>
+                                {{ $folder->userCreatedFolderBy->name ?? '' }}
+                            </td>
+                            <td>
+                                {{ $folder->userUpdatedFolderBy->name ?? '' }}
                             </td>
                             <td>
                                 @can('folder_show')
@@ -146,7 +158,7 @@
       $($.fn.dataTable.tables(true)).DataTable()
           .columns.adjust();
   });
-  
+
 })
 
 </script>

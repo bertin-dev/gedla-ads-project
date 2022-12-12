@@ -105,6 +105,8 @@ return [
             'project_helper'    => ' ',
             'files'             => 'File(s)',
             'files_helper'      => ' ',
+            'created_by'        => 'Created by',
+            'updated_by'        => 'Updated by',
         ]
     ],
 

@@ -112,6 +112,8 @@ return [
             'project_helper'    => ' ',
             'files'             => 'Fichier(s)',
             'files_helper'      => ' ',
+            'created_by'        => 'Créée par',
+            'updated_by'        => 'Modifié par',
         ]
     ],
 
