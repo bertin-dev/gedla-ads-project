@@ -33,6 +33,23 @@
                     </tr>
                     <tr>
                         <th>
+                            {{ trans('cruds.role.fields.created_by') }}
+                        </th>
+                        <td>
+                            {{ $role->userCreatedRoleBy->name }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.role.fields.updated_by') }}
+                        </th>
+                        <td>
+                            {{ $role->userUpdatedRoleBy->name }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>
                             {{ trans('cruds.role.fields.permissions') }}
                         </th>
                         <td>

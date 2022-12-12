@@ -17,8 +17,7 @@ class PermissionsController extends Controller
     {
         abort_if(Gate::denies('permission_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $permissions = Permission::with('userCreatedPermissionBy')
-            ->with('userUpdatedPermissionBy')
+        $permissions = Permission::with(['userCreatedPermissionBy', 'userUpdatedPermissionBy'])
             ->get();
 
         return view('admin.permissions.index', compact('permissions'));

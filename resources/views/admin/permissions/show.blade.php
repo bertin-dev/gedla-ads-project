@@ -31,6 +31,22 @@
                             {{ $permission->title }}
                         </td>
                     </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.permission.fields.created_by') }}
+                        </th>
+                        <td>
+                            {{ $permission->userCreatedPermissionBy->name }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.permission.fields.updated_by') }}
+                        </th>
+                        <td>
+                            {{ $permission->userUpdatedPermissionBy->name }}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <div class="form-group">

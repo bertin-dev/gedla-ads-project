@@ -34,7 +34,11 @@ class RolesController extends Controller
 
     public function store(StoreRoleRequest $request)
     {
-        $role = Role::create($request->all());
+        $role = Role::create([
+            'title' => $request->title,
+            'permissions' => $request->permissions,
+            'created_by' => \Auth::user()->id
+        ]);
         $role->permissions()->sync($request->input('permissions', []));
 
         return redirect()->route('admin.roles.index');
@@ -53,7 +57,11 @@ class RolesController extends Controller
 
     public function update(UpdateRoleRequest $request, Role $role)
     {
-        $role->update($request->all());
+        $role->update([
+            'title' => $request->title,
+            'permissions' => $request->permissions,
+            'updated_by' => \Auth::user()->id
+        ]);
         $role->permissions()->sync($request->input('permissions', []));
 
         return redirect()->route('admin.roles.index');
@@ -63,7 +71,7 @@ class RolesController extends Controller
     {
         abort_if(Gate::denies('role_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $role->load('permissions');
+        $role->load(['permissions', 'userCreatedRoleBy', 'userUpdatedRoleBy']);
 
         return view('admin.roles.show', compact('role'));
     }

@@ -32,6 +32,8 @@ return [
             'permissions' => 'permissions',
             'title_helper' => 'title helper',
             'permissions_helper' => 'permissions helper',
+            'created_by' => 'Created by',
+            'updated_by' => 'Updated by',
         ]
     ],
     'user' => [
