@@ -153,6 +153,7 @@ return [
             'created_at_helper' => ' ',
             'updated_at'        => 'Modifier',
             'updated_at_helper' => ' ',
+            'created_by'        => 'Modifié par',
         ],
     ],
 ];

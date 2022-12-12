@@ -45,10 +45,4 @@ class UserAlert extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-
-    //UPDATED BY
-    public function userUpdatedAlertBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
 }

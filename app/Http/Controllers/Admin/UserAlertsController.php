@@ -59,6 +59,10 @@ class UserAlertsController extends Controller
                 return implode(' ', $labels);
             });
 
+            $table->editColumn('created_by', function ($row) {
+                return $row->userCreatedAlertBy->name ? $row->userCreatedAlertBy->name : '';
+            });
+
             $table->rawColumns(['actions', 'placeholder', 'user']);
 
             return $table->make(true);

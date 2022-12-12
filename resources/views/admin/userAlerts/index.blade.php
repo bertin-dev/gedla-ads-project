@@ -36,6 +36,9 @@
                                     {{ trans('cruds.userAlert.fields.user') }}
                                 </th>
                                 <th>
+                                    {{ trans('cruds.userAlert.fields.created_by') }}
+                                </th>
+                                <th>
                                     {{ trans('cruds.userAlert.fields.created_at') }}
                                 </th>
                                 <th>
@@ -98,6 +101,7 @@
                     { data: 'alert_text', name: 'alert_text' },
                     { data: 'alert_link', name: 'alert_link' },
                     { data: 'user', name: 'users.name' },
+                    { data: 'created_by', name: 'userCreatedAlertBy.name' },
                     { data: 'created_at', name: 'created_at' },
                     { data: 'actions', name: '{{ trans('global.actions') }}' }
                 ],
