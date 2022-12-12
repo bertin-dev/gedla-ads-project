@@ -18,7 +18,7 @@ class UsersController extends Controller
     {
         abort_if(Gate::denies('user_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $users = User::all();
+        $users = User::with('childrenUsers')->get();
 
         return view('admin.users.index', compact('users'));
     }
@@ -34,7 +34,13 @@ class UsersController extends Controller
 
     public function store(StoreUserRequest $request)
     {
-        $user = User::create($request->all());
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password,
+            'roles' => $request->roles,
+            'created_by' => \Auth::user()->id,
+        ]);
         $user->roles()->sync($request->input('roles', []));
 
         return redirect()->route('admin.users.index');
@@ -53,7 +59,13 @@ class UsersController extends Controller
 
     public function update(UpdateUserRequest $request, User $user)
     {
-        $user->update($request->all());
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password,
+            'roles' => $request->roles,
+            'created_by' => \Auth::user()->id,
+        ]);
         $user->roles()->sync($request->input('roles', []));
 
         return redirect()->route('admin.users.index');

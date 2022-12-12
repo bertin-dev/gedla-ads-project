@@ -67,6 +67,7 @@ return [
             'updated_at_helper'        => ' ',
             'deleted_at'               => 'Supprimer',
             'deleted_at_helper'        => ' ',
+            'created_by'               => 'Utilisateur Créée',
         ]
     ],
 
