@@ -19,6 +19,8 @@ return [
             'updated_at_helper' => ' ',
             'deleted_at'        => 'Supprimer',
             'deleted_at_helper' => ' ',
+            'created_by'        => 'Créée par',
+            'updated_by'        => 'Modifié par',
         ]
     ],
     'role' => [

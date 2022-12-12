@@ -17,7 +17,9 @@ class PermissionsController extends Controller
     {
         abort_if(Gate::denies('permission_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $permissions = Permission::all();
+        $permissions = Permission::with('userCreatedPermissionBy')
+            ->with('userUpdatedPermissionBy')
+            ->get();
 
         return view('admin.permissions.index', compact('permissions'));
     }
@@ -31,8 +33,10 @@ class PermissionsController extends Controller
 
     public function store(StorePermissionRequest $request)
     {
-        $permission = Permission::create($request->all());
-
+        $permission = Permission::create([
+            'title' => $request->title,
+            'created_by' => \Auth::user()->id
+        ]);
         return redirect()->route('admin.permissions.index');
     }
 
@@ -45,7 +49,10 @@ class PermissionsController extends Controller
 
     public function update(UpdatePermissionRequest $request, Permission $permission)
     {
-        $permission->update($request->all());
+        $permission->update([
+            'title' => $request->title,
+            'updated_by' => \Auth::user()->id
+        ]);
 
         return redirect()->route('admin.permissions.index');
     }

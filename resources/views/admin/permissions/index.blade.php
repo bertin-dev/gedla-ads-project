@@ -29,6 +29,12 @@
                             {{ trans('cruds.permission.fields.title') }}
                         </th>
                         <th>
+                            {{ trans('cruds.permission.fields.created_by') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.permission.fields.updated_by') }}
+                        </th>
+                        <th>
                             &nbsp;
                         </th>
                     </tr>
@@ -44,6 +50,12 @@
                             </td>
                             <td>
                                 {{ $permission->title ?? '' }}
+                            </td>
+                            <td>
+                                {{ $permission->userCreatedPermissionBy->name ?? '' }}
+                            </td>
+                            <td>
+                                {{ $permission->userUpdatedPermissionBy->name ?? '' }}
                             </td>
                             <td>
                                 @can('permission_show')
@@ -124,7 +136,7 @@
       $($.fn.dataTable.tables(true)).DataTable()
           .columns.adjust();
   });
-  
+
 })
 
 </script>
