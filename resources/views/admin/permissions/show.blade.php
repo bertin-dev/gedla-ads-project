@@ -36,7 +36,7 @@
                             {{ trans('cruds.permission.fields.created_by') }}
                         </th>
                         <td>
-                            {{ $permission->userCreatedPermissionBy->name }}
+                            {{ $permission->userCreatedPermissionBy->name ?? '' }}
                         </td>
                     </tr>
                     <tr>
@@ -44,7 +44,7 @@
                             {{ trans('cruds.permission.fields.updated_by') }}
                         </th>
                         <td>
-                            {{ $permission->userUpdatedPermissionBy->name }}
+                            {{ $permission->userUpdatedPermissionBy->name ?? '' }}
                         </td>
                     </tr>
                 </tbody>

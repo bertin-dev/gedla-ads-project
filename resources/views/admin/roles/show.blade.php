@@ -36,7 +36,7 @@
                             {{ trans('cruds.role.fields.created_by') }}
                         </th>
                         <td>
-                            {{ $role->userCreatedRoleBy->name }}
+                            {{ $role->userCreatedRoleBy->name ?? '' }}
                         </td>
                     </tr>
                     <tr>
@@ -44,7 +44,7 @@
                             {{ trans('cruds.role.fields.updated_by') }}
                         </th>
                         <td>
-                            {{ $role->userUpdatedRoleBy->name }}
+                            {{ $role->userUpdatedRoleBy->name ?? '' }}
                         </td>
                     </tr>
 
@@ -54,7 +54,7 @@
                         </th>
                         <td>
                             @foreach($role->permissions as $key => $permissions)
-                                <span class="label label-info">{{ $permissions->title }}</span>
+                                <span class="badge badge-light">{{ $permissions->title }}</span>
                             @endforeach
                         </td>
                     </tr>
