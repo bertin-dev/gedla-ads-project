@@ -23,7 +23,7 @@
             <div class="form-group">
                 <label for="description">{{ trans('cruds.folder.fields.desc') }}</label>
                 <textarea class="form-control {{ $errors->has('description') ? 'is-invalid' : '' }}" type="text" name="description" id="description">
-                    {{ old('description', '') }}
+                    {{ old('description', $folder->description) }}
                 </textarea>
                 @if($errors->has('description'))
                     <div class="invalid-feedback">
