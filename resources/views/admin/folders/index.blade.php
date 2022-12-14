@@ -29,6 +29,9 @@
                             {{ trans('cruds.folder.fields.name') }}
                         </th>
                         <th>
+                            {{ trans('cruds.folder.fields.desc') }}
+                        </th>
+                        <th>
                             {{ trans('cruds.folder.fields.project') }}
                         </th>
                         <th>
@@ -61,6 +64,9 @@
                                 {{ $folder->name ?? '' }}
                             </td>
                             <td>
+                                {{ $folder->description ?? '' }}
+                            </td>
+                            <td>
                                 {{ $folder->project->name ?? '' }}
                             </td>
                             <td>
@@ -80,26 +86,27 @@
                                 {{ $folder->userUpdatedFolderBy->name ?? '' }}
                             </td>
                             <td>
-                                @can('folder_show')
-                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.folders.show', $folder->id) }}">
-                                        {{ trans('global.view') }}
-                                    </a>
-                                @endcan
+                                @if($folder->functionality == false)
+                                    @can('folder_show')
+                                        <a class="btn btn-xs btn-primary" href="{{ route('admin.folders.show', $folder->id) }}">
+                                            {{ trans('global.view') }}
+                                        </a>
+                                    @endcan
 
-                                @can('folder_edit')
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.folders.edit', $folder->id) }}">
-                                        {{ trans('global.edit') }}
-                                    </a>
-                                @endcan
+                                    @can('folder_edit')
+                                        <a class="btn btn-xs btn-info" href="{{ route('admin.folders.edit', $folder->id) }}">
+                                            {{ trans('global.edit') }}
+                                        </a>
+                                    @endcan
 
-                                @can('folder_delete')
-                                    <form action="{{ route('admin.folders.destroy', $folder->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
-                                    </form>
-                                @endcan
-
+                                    @can('folder_delete')
+                                        <form action="{{ route('admin.folders.destroy', $folder->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                            <input type="hidden" name="_method" value="DELETE">
+                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                            <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                        </form>
+                                    @endcan
+                                @endif
                             </td>
 
                         </tr>

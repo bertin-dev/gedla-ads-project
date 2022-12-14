@@ -21,8 +21,20 @@
                 <span class="help-block">{{ trans('cruds.folder.fields.name_helper') }}</span>
             </div>
             <div class="form-group">
-                <label for="project_id">{{ trans('cruds.folder.fields.project') }}</label>
-                <select class="form-control select2 {{ $errors->has('project') ? 'is-invalid' : '' }}" name="project_id" id="project_id">
+                <label for="description">{{ trans('cruds.folder.fields.desc') }}</label>
+                <textarea class="form-control {{ $errors->has('description') ? 'is-invalid' : '' }}" type="text" name="description" id="description">
+                    {{ old('description', '') }}
+                </textarea>
+                @if($errors->has('description'))
+                    <div class="invalid-feedback">
+                        {{ $errors->first('description') }}
+                    </div>
+                @endif
+                <span class="help-block">{{ trans('cruds.folder.fields.desc_helper') }}</span>
+            </div>
+            <div class="form-group">
+                <label class="required" for="project_id">{{ trans('cruds.folder.fields.project') }}</label>
+                <select class="form-control select2 {{ $errors->has('project') ? 'is-invalid' : '' }}" name="project_id" id="project_id" required>
                     @foreach($projects as $id => $project)
                         <option value="{{ $id }}" {{ (old('project_id') ? old('project_id') : $folder->project->id ?? '') == $id ? 'selected' : '' }}>{{ $project }}</option>
                     @endforeach

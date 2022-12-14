@@ -94,6 +94,8 @@ return [
             'id'                => 'ID',
             'id_helper'         => ' ',
             'name'              => 'Name',
+            'desc'              => 'Description',
+            'desc_helper'       => ' ',
             'name_helper'       => ' ',
             'created_at'        => 'Created at',
             'created_at_helper' => ' ',
@@ -155,5 +157,10 @@ return [
             'updated_at_helper' => ' ',
             'created_by'        => 'Created by',
         ],
+    ],
+
+    'userParaph' => [
+        'title' => 'Paraph Management',
+        'title_singular' => 'Paraph management',
     ],
 ];

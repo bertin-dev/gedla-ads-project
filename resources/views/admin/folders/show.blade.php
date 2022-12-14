@@ -33,6 +33,14 @@
                     </tr>
                     <tr>
                         <th>
+                            {{ trans('cruds.folder.fields.desc') }}
+                        </th>
+                        <td>
+                            {{ $folder->description }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
                             {{ trans('cruds.folder.fields.project') }}
                         </th>
                         <td>

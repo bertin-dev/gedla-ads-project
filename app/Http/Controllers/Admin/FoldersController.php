@@ -33,7 +33,7 @@ class FoldersController extends Controller
 
         $projects = Project::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        $parents = Folder::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $parents = Folder::where('functionality', false)->get()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
         return view('admin.folders.create', compact('projects', 'parents'));
     }
@@ -42,15 +42,25 @@ class FoldersController extends Controller
     {
         $folder = Folder::create([
             'name' => $request->name,
+            'description' => $request->description,
+            'project_id' => $request->project_id,
+            'parent_id' => $request->parent_id,
+            'thumbnail_id' => $request->thumbnail_id,
             'created_by' => \Auth::user()->id
         ]);
 
         foreach ($request->input('files', []) as $file) {
             $folder->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
+            Media::where('model_id', $folder->id)->update([
+                'created_by' => \Auth::user()->id
+            ]);
         }
 
         if ($media = $request->input('ck-media', false)) {
-            Media::whereIn('id', $media)->update(['model_id' => $folder->id]);
+            Media::whereIn('id', $media)->update([
+                'model_id' => $folder->id,
+                'created_by' => \Auth::user()->id
+            ]);
         }
 
         return redirect()->route('admin.folders.index');
@@ -62,7 +72,7 @@ class FoldersController extends Controller
 
         $projects = Project::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        $parents = Folder::all()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $parents = Folder::where('functionality', false)->get()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
         $folder->load('project', 'parent');
 
@@ -73,6 +83,10 @@ class FoldersController extends Controller
     {
         $folder->update([
             'name' => $request->name,
+            'description' => $request->description,
+            'project_id' => $request->project_id,
+            'parent_id' => $request->parent_id,
+            'thumbnail_id' => $request->thumbnail_id,
             'updated_by' => \Auth::user()->id
         ]);
 
