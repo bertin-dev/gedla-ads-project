@@ -21,7 +21,6 @@ class CustomerMedia extends Media
         'media_signing',
         'media_save',
         'created_by',
-        'updated_by',
         'signed_by'
     ];
 
@@ -31,21 +30,21 @@ class CustomerMedia extends Media
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    //UPDATED BY
-    public function userUpdatedCustomerMediaBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
     //SIGNED BY
     public function userSignedCustomerMediaBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'signed_by');
     }
 
-    //UN MEDIA PEUT AVOIR UN OU PLUSIEURS WORKFLOW DE VALIDATION
+    //UN MEDIA PEUT AVOIR UN OU PLUSIEURS OPERATIONS
     public function workflowValidates(): HasMany
     {
-        return $this->hasMany(ValidationWorkflow::class);
+        return $this->hasMany(Operation::class);
+    }
+
+    //UN MEDIA APPARTIENT A UNE SEUL CATEGORY
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 }

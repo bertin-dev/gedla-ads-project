@@ -11,6 +11,8 @@ class CreateFoldersTable extends Migration
         Schema::create('folders', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('description')->nullable()->comment('description of content');
+            $table->boolean('functionality')->default(false)->comment('if functionality is true, so all users will seen folder as card content functionality');
             $table->timestamps();
             $table->softDeletes();
         });

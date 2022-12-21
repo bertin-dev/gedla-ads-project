@@ -180,7 +180,23 @@ class PermissionsTableSeeder extends Seeder
             ],
             [
                 'id'    => 41,
-                'title' => 'validation_workflow_access',
+                'title' => 'operation_access',
+            ],
+            [
+                'id'    => 42,
+                'title' => 'folder_access_create',
+            ],
+            [
+                'id'    => 43,
+                'title' => 'folder_access_show',
+            ],
+            [
+                'id'    => 44,
+                'title' => 'folder_access_edit',
+            ],
+            [
+                'id'    => 45,
+                'title' => 'folder_access_delete',
             ],
         ];
 

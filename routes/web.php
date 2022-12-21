@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\FoldersAccessController;
 use App\Http\Controllers\OcrController;
+use App\Http\Controllers\OperationController;
 use App\Http\Controllers\ValidationWorkflowController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -47,9 +49,9 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::post('storeOCR', [OcrController::class, 'storeImgOCR'])->name('storeImgOCR');
     Route::post('uploadOCR', [OcrController::class, 'postUploadOCR'])->name('postUploadOCR');
 
-    //WORKFLOW VALIDATE
-    Route::post('workflow/store', [ValidationWorkflowController::class, 'store'])->name('workflow.store');
-    Route::get('workflow/index', [ValidationWorkflowController::class, 'index'])->name('workflow.index');
+    //OPERATIONS
+    Route::post('operation/store', [OperationController::class, 'store'])->name('operation.store');
+    Route::get('operation/index', [OperationController::class, 'index'])->name('operation.index');
 
 
 });
@@ -80,6 +82,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('folders/media', [FoldersController::class, 'storeMedia'])->name('folders.storeMedia');
     Route::post('folders/ckmedia', [FoldersController::class, 'storeCKEditorImages'])->name('folders.storeCKEditorImages');
     Route::resource('folders', FoldersController::class);
+    Route::resource('folders_access', FoldersAccessController::class);
+    Route::delete('folders_access/destroy', [FoldersAccessController::class, 'massDestroy'])->name('folders_access.massDestroy');
 
 
     // Audit Logs

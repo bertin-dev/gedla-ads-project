@@ -14,6 +14,7 @@ class ProjectController extends Controller
             $query->where('id', auth()->id());
         })->get();*/
 
+        $functionality = Folder::where('functionality', true)->get();
 
         $children_level_n = Folder::with('project')
             ->whereHas('project.users', function($query) {
@@ -23,21 +24,19 @@ class ProjectController extends Controller
             ->with('subChildren')
             ->get();
 
-
-        //dd($categories);
-
-        /*$resultAss = Folder::with('project')->where('folders.project_id', $projects->first()->id)
-            //->select(['folders.name'])
-            ->get();
-
-        $folder = Folder::with('project')
+        /*$dev = Folder::with('project', 'multiUsers')
             ->whereHas('project.users', function($query) {
                 $query->where('id', auth()->id());
-            })->findOrFail($projects->first()->id);*/
+            })
+            ->whereNull('parent_id')
+            ->with('subChildren')
+            ->get();*/
 
 
+        //dd($children_level_n->toArray());
 
-        return view('front.projects.index', compact('children_level_n'));
+
+        return view('front.projects.index', compact('children_level_n', 'functionality'));
     }
 
     public function show($id)

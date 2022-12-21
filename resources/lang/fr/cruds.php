@@ -170,4 +170,24 @@ return [
         'title' => 'Gestion Parapheur',
         'title_singular' => 'Gestion Parapheur',
     ],
+
+    'folder_access' => [
+        'folder_management'  => 'Gestion Dossier',
+        'access_folder'      => 'Accès Dossier',
+        'title_singular' => 'Accès Dossier',
+        'fields'  => [
+            'id'                => 'ID',
+            'id_helper'         => ' ',
+            'user_access'       => 'Accès utilisateur',
+            'user_access_helper'       => ' ',
+            'folder_access'         => 'Accès Dossier',
+            'folder_access_helper'       => ' ',
+            'created_at'        => 'Créée le',
+            'created_at_helper' => ' ',
+            'updated_at'        => 'Modifié le',
+            'updated_at_helper' => ' ',
+            'deleted_at'        => 'Supprimé le',
+            'deleted_at_helper' => ' ',
+        ]
+    ],
 ];

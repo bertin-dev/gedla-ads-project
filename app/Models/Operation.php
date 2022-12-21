@@ -8,35 +8,40 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use PhpOffice\PhpWord\Media;
 
-class ValidationWorkflow extends Model
+class Operation extends Model
 {
     use HasFactory;
     use Auditable;
 
-     public $table = 'validation_workflows';
+    public $table = 'operations';
 
     protected $fillable = [
-      'deadline',
-      'priority',
-      'status',
-      'workflow_sender',
-      'workflow_receiver',
-      'media_id',
-      'message',
-      'receive_mail_notification'
+        'deadline',
+        'operation_type',
+        'priority',
+        'status',
+        'user_id_sender',
+        'user_id_receiver',
+        'media_id',
+        'message',
+        'operation_state',
+        'num_operation',
+        'receive_mail_notification',
+        'receiver_read_doc',
+        'receiver_read_doc_at',
     ];
 
     /*NOUS POURRIONS EGALEMENT IMPLEMENTER LA POSSIBILITE QUE LA VALIDATION DU WORKFLOW SOIT EFFECTUE PAR 1 OU
     PLUSIEURS UTILISATEURS SIMULTANÉMENT*/
 
-    //A L'ETAT ACTUEL LA VALIDATION DU WORKFLOW EST EFFECTUE PAR UN UTILISATEUR A LA FOIS.
+    //UNE OPERATION EST EFFECTUE PAR 1 SEUL UTILISATEUR.
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
 
-    //LA VALIDATION DU WORKFLOW CONCERNE UN ET UN SEUL MEDIA A LA FOIS.
+    //L' OPERATION CONCERNE 1 SEUL MEDIA A LA FOIS
     public function mediaFile(): BelongsTo
     {
         return $this->belongsTo(Media::class);

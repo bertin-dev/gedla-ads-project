@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\HttpFoundation\Response;
 
-class StoreValidationWorkflowRequest extends FormRequest
+class StoreOperationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,7 +16,7 @@ class StoreValidationWorkflowRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        abort_if(Gate::denies('validation_workflow_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('operation_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return true;
     }

@@ -36,59 +36,62 @@
 
 
 
-                <div class="col-lg-12">
-                    <a class="btn btn-success" href="{{ route('folders.upload') }}?folder_id={{ $folder->id }}">
-                        {{ trans('global.add') }} Upload file
-                    </a>
-                    <a class="btn btn-success" href="{{ route('folders.create') }}?parent_id={{ $folder->id }}">
-                        {{ trans('global.add') }} Create a new folder
-                    </a>
-                </div>
+                @foreach($foldersUsers->multiFolders->where('id', $folder->id) as $folderItems)
+                    <div class="col-lg-12">
+                        <a class="btn btn-success" href="{{ route('folders.upload') }}?folder_id={{ $folderItems->id }}&functionality={{$folderItems->functionality}}">
+                            {{ trans('global.add') }} Upload file
+                        </a>
+                        <a class="btn btn-success" href="{{ route('folders.create') }}?parent_id={{ $folderItems->id }}">
+                            {{ trans('global.add') }} Create a new folder
+                        </a>
+                    </div>
 
 
-                <div class="col-lg-12" style="margin-top: 20px">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
+                    <div class="col-lg-12" style="margin-top: 20px">
+                        @if (session('status'))
+                            <div class="alert alert-success" role="alert">
+                                {{ session('status') }}
+                            </div>
+                        @endif
+                    </div>
+
+
+                    @if($folderItems->files->isEmpty())
+                        @include('front.folders.upload', ['folder' => $foldersUsers])
                     @endif
-                </div>
-
-
-                @if($folder->files->isEmpty())
-                   @include('front.folders.upload', ['folder_id' => $folder->id])
-                @endif
 
 
 
-                @foreach ($folder->files as $file)
-                    @php
-                        $result=match($file->mime_type){"application/pdf"=>url('images/pdf.png'),"text/plain"=>url('images/txt.png'),"application/vnd.openxmlformats-officedocument.wordprocessingml.document"=>url('images/docx.png'),"application/x-msaccess"=>url('images/access.png'),"application/vnd.ms-visio.drawing.main+xml"=>url('images/visio.png'),"application/vnd.openxmlformats-officedocument.presentationml.presentation"=>url('images/power_point.png'),"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"=>url('images/xlsx.png'),"image/jpeg"=>url('images/file-thumbnail.png'),default => '',};
-                        $realSize = number_format($file->size/1024, 1, '.', '');
-                    @endphp
-                    <div class="col-lg-4">
-                        <div class="card" data-toggle="modal" data-target=".bd-example-modal-lg"
-                             data-id="{{$file->id}}" data-name="{{ucfirst(strtolower(Str::substr($file->file_name, 14)))}}" data-size="{{$realSize}}"
-                             data-item_type="{{$result}}" data-url="{{$file->getUrl()}}">
-                            <div class="row no-gutters">
-                                <div class="col-sm-4">
-                                    <img class="img-thumbnail" src="{{ $result ?? url('images/file-thumbnail.png') }}"
-                                         alt="{{ $file->name }}" title="{{ $file->name }}">
-                                </div>
-                                <div class="col-sm-8">
-                                    <div class="card-body" style="padding: 5px 5px 0;">
-                                        <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 42)) }}</h5>
-                                        <div style="margin-top: 23px">
-                                            <span>{{ date('d/m/Y' , strtotime($file->created_at)) }}</span>
-                                            <div class="text-right"> {{$realSize}} KO</div>
-                                            {{--<a href="{{ $file->getUrl() }}" target="_blank" class="btn-link">Acquisition</a>--}}
+                    @foreach ($folderItems->files as $file)
+                        @php
+                            $result=match($file->mime_type){"application/pdf"=>url('images/pdf.png'),"text/plain"=>url('images/txt.png'),"application/vnd.openxmlformats-officedocument.wordprocessingml.document"=>url('images/docx.png'),"application/x-msaccess"=>url('images/access.png'),"application/vnd.ms-visio.drawing.main+xml"=>url('images/visio.png'),"application/vnd.openxmlformats-officedocument.presentationml.presentation"=>url('images/power_point.png'),"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"=>url('images/xlsx.png'),"image/jpeg"=>url('images/file-thumbnail.png'),default => '',};
+                            $realSize = number_format($file->size/1024, 1, '.', '');
+                        @endphp
+                        <div class="col-lg-4">
+                            <div class="card" data-toggle="modal" data-target=".bd-example-modal-lg"
+                                 data-id="{{$file->id}}" data-name="{{ucfirst(strtolower(Str::substr($file->file_name, 14)))}}" data-size="{{$realSize}}"
+                                 data-item_type="{{$result}}" data-url="{{$file->getUrl()}}">
+                                <div class="row no-gutters">
+                                    <div class="col-sm-4">
+                                        <img class="img-thumbnail" src="{{ $result ?? url('images/file-thumbnail.png') }}"
+                                             alt="{{ $file->name }}" title="{{ $file->name }}">
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="card-body" style="padding: 5px 5px 0;">
+                                            <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 42)) }}</h5>
+                                            <div style="margin-top: 23px">
+                                                <span>{{ date('d/m/Y' , strtotime($file->created_at)) }}</span>
+                                                <div class="text-right"> {{$realSize}} KO</div>
+                                                {{--<a href="{{ $file->getUrl() }}" target="_blank" class="btn-link">Acquisition</a>--}}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    @endforeach
                 @endforeach
+
 
             </div>
 
@@ -138,7 +141,7 @@
                                             </div>
                                         @endif
 
-                                        <form method="POST" action="{{ route('workflow.store') }}">
+                                        <form method="POST" action="{{ route('operation.store') }}">
                                             @csrf
                                             <input id="media_id" type="hidden" name="media_id" />
                                                 <div class="form-group">
@@ -208,7 +211,7 @@
                     <h5 class="modal-title">{{ trans('global.file_action') }}</h5><br>
                     <ul>
                         <li><a href="#">Valider</a></li>
-                        @can('validation_workflow_access')
+                        @can('operation_access')
                             <li><a href="#" class="workflow_validate">Démarrer le workflow de validation</a></li>
                         @endcan
                     </ul>

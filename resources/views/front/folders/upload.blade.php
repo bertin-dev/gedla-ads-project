@@ -6,7 +6,6 @@
             <div class="col-md-10">
                 <div class="card">
                     <div class="card-header">Upload files</div>
-
                     <div class="card-body">
                         @if (session('status'))
                             <div class="alert alert-success" role="alert">
@@ -16,7 +15,9 @@
 
                         <form method="POST" action="{{ route('folders.postUpload') }}">
                             @csrf
-                            <input type="hidden" name="folder_id" value="{{ request('folder_id') ?? $folder_id }}" />
+
+                            <input type="hidden" name="folder_id" value="{{ request('folder_id') ?? $folder->id }}" />
+                            <input type="hidden" name="functionality" value="{{ request('functionality') ?? $folder->functionality }}" />
 
                             <div class="form-group">
                                 <label for="files">Files</label>

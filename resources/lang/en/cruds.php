@@ -163,4 +163,24 @@ return [
         'title' => 'Paraph Management',
         'title_singular' => 'Paraph management',
     ],
+
+    'folder_access' => [
+        'folder_management'  => 'Folder Management',
+        'access_folder'      => 'Access Folder',
+        'title_singular' => 'Access Folder',
+        'fields'  => [
+            'id'                => 'ID',
+            'id_helper'         => ' ',
+            'user_access'       => 'User Access',
+            'user_access_helper'       => ' ',
+            'folder_access'         => 'Folder Access',
+            'folder_access_helper'       => ' ',
+            'created_at'        => 'Created at',
+            'created_at_helper' => ' ',
+            'updated_at'        => 'Updated at',
+            'updated_at_helper' => ' ',
+            'deleted_at'        => 'Deleted at',
+            'deleted_at_helper' => ' ',
+        ]
+    ],
 ];

@@ -50,6 +50,7 @@ class User extends Authenticatable
         'created_at',
         'updated_at',
         'deleted_at',
+        'user_access'
     ];
 
     protected function serializeDate(DateTimeInterface $date): string
@@ -145,15 +146,21 @@ class User extends Authenticatable
         return $this->hasMany(User::class, 'created_by');
     }
 
-    //UN UTILISATEUR PEUT EFFECTUER PLUSIEURS WORKFLOW DE VALIDATION
-    public function sendValidateWorkflows(): HasMany
+    //UN UTILISATEUR PEUT EFFECTUER PLUSIEURS OPERATIONS
+    public function sendOperations(): HasMany
     {
-        return $this->hasMany(ValidationWorkflow::class, 'workflow_sender');
+        return $this->hasMany(Operation::class, 'user_id_sender');
     }
 
-    //UN UTILISATEUR PEUT RECEPTION UN OU PLUSIEURS WORKFLOW A VALIDER
-    public function receiveValidateWorkflows(): HasMany
+    //UN UTILISATEUR PEUT RECEPTION UN OU PLUSIEURS OPERATIONS
+    public function receiveOperations(): HasMany
     {
-        return $this->hasMany(ValidationWorkflow::class, 'workflow_receiver');
+        return $this->hasMany(Operation::class, 'user_id_receiver');
+    }
+
+    //UN UTILISATEUR APPARTIENT A PLUSIEURS DOSSIERS
+    public function multiFolders(): BelongsToMany
+    {
+        return $this->belongsToMany(Folder::class, 'folder_user', 'user_id', 'folder_id');
     }
 }

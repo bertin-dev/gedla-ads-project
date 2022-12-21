@@ -102,14 +102,28 @@
 
 
                 @can('folder_access')
-                    <li class="c-sidebar-nav-item">
-                        <a href="{{ route("admin.folders.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/folders") || request()->is("admin/folders/*") ? "active" : "" }}">
-                            <i class="fa-fw fas fa-folder-open c-sidebar-nav-icon">
+                        <li class="c-sidebar-nav-dropdown">
+                            <a class="c-sidebar-nav-dropdown-toggle" href="#">
+                                <i class="fa-fw fas fa-folder-open c-sidebar-nav-icon"></i>
+                                {{ trans('cruds.folder_access.folder_management') }}
+                            </a>
+                        <ul class="c-sidebar-nav-dropdown-items">
+                            <li class="c-sidebar-nav-item">
+                                <a href="{{ route("admin.folders.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/folders") || request()->is("admin/folders/*") ? "active" : "" }}">
+                                    <i class="fa-fw fas fa-folder c-sidebar-nav-icon">
 
-                            </i>
-                            {{ trans('cruds.folder.title') }}
-                        </a>
-                    </li>
+                                    </i>
+                                    {{ trans('cruds.folder.title') }}
+                                </a>
+                            </li>
+                            <li class="c-sidebar-nav-item">
+                                <a href="{{ route("admin.folders_access.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/folders_access") || request()->is("admin/folders_access/*") ? "active" : "" }}">
+                                    <i class="fa-fw fas fa-key c-sidebar-nav-icon"></i>
+                                    {{ trans('cruds.folder_access.access_folder') }}
+                                </a>
+                            </li>
+                        </ul>
+                        </li>
                 @endcan
                     @can('user_alert_access')
                         <li class="c-sidebar-nav-item">

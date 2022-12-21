@@ -12,6 +12,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use \Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Folder extends Model implements HasMedia
 {
@@ -31,6 +32,7 @@ class Folder extends Model implements HasMedia
 
     protected $fillable = [
         'name',
+        'description',
         'project_id',
         'parent_id',
         'thumbnail_id',
@@ -39,6 +41,7 @@ class Folder extends Model implements HasMedia
         'created_at',
         'updated_at',
         'deleted_at',
+        'folder_access'
     ];
 
     protected function serializeDate(DateTimeInterface $date): string
@@ -106,4 +109,11 @@ class Folder extends Model implements HasMedia
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+
+    //UN DOSSIER PEUT-ETRE UTILISE PAR PLUSIEURS UTILISATEURS
+    public function multiUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'folder_user', 'folder_id', 'user_id')
+            ->withPivot('user_id');
+    }
 }

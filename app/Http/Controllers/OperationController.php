@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreValidationWorkflowRequest;
-use App\Models\Folder;
-use App\Models\ValidationWorkflow;
+use App\Http\Requests\StoreOperationRequest;
+use App\Models\Operation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
-class ValidationWorkflowController extends Controller
+class OperationController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,9 +17,8 @@ class ValidationWorkflowController extends Controller
      */
     public function index()
     {
-        abort_if(Gate::denies('validation_workflow_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        //abort_if(Gate::denies('operation_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        //
     }
 
     /**
@@ -29,9 +27,17 @@ class ValidationWorkflowController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreValidationWorkflowRequest $request)
+    public function store(StoreOperationRequest $request)
     {
-        $newWorkflowValidate = ValidationWorkflow::create([
+        /*$result = \DB::table('validation_workflows')->join('media', 'validation_workflows.media_id', '=', 'media.id')->select('model_id')
+            ->where('validation_workflows.media_id', '=', 1)->get();
+        dd($result);
+        foreach ($result as $dev):
+            dd($dev->model_id);
+        endforeach;*/
+
+
+        $newWorkflowValidate = Operation::create([
             'deadline' => $request->deadline,
             'priority' => $request->priority,
             'status' => $request->visibility,
@@ -41,6 +47,8 @@ class ValidationWorkflowController extends Controller
             'message' => $request->message,
             'receive_mail_notification' => $request->boolean('flexCheckChecked'),
         ]);
+
+
 
         return redirect()
             ->route('workflow.index', [$newWorkflowValidate])

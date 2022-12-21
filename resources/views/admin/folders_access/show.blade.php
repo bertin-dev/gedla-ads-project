@@ -3,13 +3,13 @@
 
 <div class="card">
     <div class="card-header">
-        {{ trans('global.show') }} {{ trans('cruds.user.title') }}
+        {{ trans('global.show') }} {{ trans('cruds.folder.title') }}
     </div>
 
     <div class="card-body">
         <div class="form-group">
             <div class="form-group">
-                <a class="btn btn-default" href="{{ route('admin.users.index') }}">
+                <a class="btn btn-default" href="{{ route('admin.folders_access.index') }}">
                     {{ trans('global.back_to_list') }}
                 </a>
             </div>
@@ -17,50 +17,58 @@
                 <tbody>
                     <tr>
                         <th>
-                            {{ trans('cruds.user.fields.id') }}
+                            {{ trans('cruds.folder.fields.id') }}
                         </th>
                         <td>
-                            {{ $user->id }}
+                            {{ $folder->id }}
                         </td>
                     </tr>
                     <tr>
                         <th>
-                            {{ trans('cruds.user.fields.name') }}
+                            {{ trans('cruds.folder.fields.name') }}
                         </th>
                         <td>
-                            {{ $user->name }}
+                            {{ $folder->name }}
                         </td>
                     </tr>
                     <tr>
                         <th>
-                            {{ trans('cruds.user.fields.email') }}
+                            {{ trans('cruds.folder.fields.project') }}
                         </th>
                         <td>
-                            {{ $user->email }}
+                            {{ $folder->project->name ?? '' }}
                         </td>
                     </tr>
                     <tr>
                         <th>
-                            {{ trans('cruds.user.fields.email_verified_at') }}
+                            {{ trans('cruds.folder_access.fields.folder_access') }}
                         </th>
                         <td>
-                            {{ $user->email_verified_at }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>
-                            {{ trans('cruds.user.fields.roles') }}
-                        </th>
-                        <td>
-                            @foreach($user->roles as $key => $roles)
-                                <span class="label label-info">{{ $roles->title }}</span>
+                            @foreach($folder->multiUsers as $key => $user)
+                                <span class="badge badge-info">{{ $user->name ?? '' }}</span>
                             @endforeach
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.folder.fields.created_by') }}
+                        </th>
+                        <td>
+                            {{ $folder->userCreatedFolderBy->name ?? '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.folder.fields.updated_by') }}
+                        </th>
+                        <td>
+                            {{ $folder->userUpdatedFolderBy->name ?? '' }}
                         </td>
                     </tr>
                 </tbody>
             </table>
             <div class="form-group">
-                <a class="btn btn-default" href="{{ route('admin.users.index') }}">
+                <a class="btn btn-default" href="{{ route('admin.folders_access.index') }}">
                     {{ trans('global.back_to_list') }}
                 </a>
             </div>
