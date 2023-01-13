@@ -74,6 +74,7 @@ return [
     'project' => [
         'title'          => 'Entité',
         'title_singular' => 'Entité',
+        'workflow_management' => 'Gestion Workflows',
         'fields'  => [
             'id'                => 'ID',
             'id_helper'         => ' ',
@@ -190,4 +191,30 @@ return [
             'deleted_at_helper' => ' ',
         ]
     ],
+
+
+    'workflow_management' => [
+        'title'          => 'Gestion Workflows',
+        'new_workflow'      => 'Workflow validation',
+        'title_singular' => 'Gestion Workflows',
+        'fields'  => [
+            'id'                => 'ID',
+            'id_helper'         => ' ',
+            'name'              => 'Nom',
+            'name_helper'       => ' ',
+            'created_at'        => 'Créer',
+            'created_at_helper' => ' ',
+            'updated_at'        => 'Modifier',
+            'updated_at_helper' => ' ',
+            'deleted_at'        => 'Supprimer',
+            'deleted_at_helper' => ' ',
+            'thumbnail'         => 'Thumbnail',
+            'thumbnail_helper'  => ' ',
+            'users'             => 'Utilisateur(s)',
+            'users_helper' => ' ',
+            'created_by'        => 'Créée par',
+            'updated_by'        => 'Modifié par',
+        ]
+    ],
+
 ];

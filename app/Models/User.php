@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,6 +16,7 @@ use Laravel\Passport\HasApiTokens;
 use \DateTimeInterface;
 use \Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use \Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class User extends Authenticatable
 {
@@ -50,7 +52,8 @@ class User extends Authenticatable
         'created_at',
         'updated_at',
         'deleted_at',
-        'user_access'
+        'user_access',
+        'parapheur_id'
     ];
 
     protected function serializeDate(DateTimeInterface $date): string
@@ -128,10 +131,10 @@ class User extends Authenticatable
         return $this->hasMany(Project::class);
     }
 
-    //CUSTOMER MEDIA
-    public function userCustomerMediasBy(): HasMany
+    //MEDIA
+    public function medias(): HasMany
     {
-        return $this->hasMany(CustomerMedia::class);
+        return $this->hasMany(Media::class);
     }
 
     //PARENT USER
@@ -163,4 +166,6 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Folder::class, 'folder_user', 'user_id', 'folder_id');
     }
+
+
 }

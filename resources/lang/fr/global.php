@@ -366,6 +366,8 @@ return [
     'folder'                         => 'Dossier',
     'file_details'                   => 'Détails du fichier',
     'file_action'                    => 'Action sur le fichier',
-    'size'                         =>  'Taille',
+    'size'                           =>  'Taille',
+    'validate'                       =>  'Valider',
+    'version'                        =>  'Version',
 
 ];

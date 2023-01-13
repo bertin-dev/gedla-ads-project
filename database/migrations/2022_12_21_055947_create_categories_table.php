@@ -21,8 +21,8 @@ return new class extends Migration
         });
 
         Schema::table('media', function (Blueprint $table){
-            $table->unsignedInteger('category_id')->index();
-            $table->foreign('category_id')->references('id')->on('media')->onDelete('cascade');
+            $table->unsignedInteger('category_id')->nullable()->index();
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
         });
     }
 

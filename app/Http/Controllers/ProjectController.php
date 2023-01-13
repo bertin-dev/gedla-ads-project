@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Folder;
+use App\Models\Parapheur;
 use App\Models\Project;
 use Illuminate\Http\Request;
 
@@ -35,8 +36,10 @@ class ProjectController extends Controller
 
         //dd($children_level_n->toArray());
 
+        $parapheurCount = Parapheur::with('medias')->where('user_id', auth()->id())->get();
 
-        return view('front.projects.index', compact('children_level_n', 'functionality'));
+
+        return view('front.projects.index', compact('children_level_n', 'functionality', 'parapheurCount'));
     }
 
     public function show($id)

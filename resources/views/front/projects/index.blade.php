@@ -25,6 +25,8 @@
                     @php
                         $result = \DB::table('media')->join('folders', 'media.model_id', '=', 'folders.id')
                         ->where('functionality', '=', true);
+
+
                     @endphp
 
                     @switch($item->id)
@@ -97,12 +99,16 @@
                                                 <h5 class="card-title">PARAPHEUR</h5>
                                                 <p class="text-right">
                                                     <i class="icon-user"></i>
-                                                    <a href="{{ route('folders.show', $item->id) }}" class="btn-link">Informations</a>
+                                                    <a href="{{ route('parapheur.index') }}" class="btn-link">Ouvrir</a>
                                                 </p>
                                                 {{--  <a href="#" class="btn btn-primary">View Profile</a>--}}
                                             </div>
                                         </div>
-                                        <span class="position-absolute badge rounded-pill badge-danger">{{$result->where('folders.id', $item->id)->count()}}</span>
+                                        <span class="position-absolute badge rounded-pill badge-danger">
+                                            @foreach($parapheurCount as $dev)
+                                                {{$dev->medias->count()}}
+                                            @endforeach
+                                        </span>
                                     </div>
                                 </div>
 

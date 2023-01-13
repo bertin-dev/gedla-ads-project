@@ -367,4 +367,6 @@ return [
     'file_details'                   => 'File Details',
     'file_action'                    =>  'File Action',
     'size'                           =>  'Size',
+    'validate'                       =>  'Validate',
+    'version'                       =>  'Version',
 ];

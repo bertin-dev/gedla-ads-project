@@ -1,9 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin\FoldersAccessController;
+use App\Http\Controllers\Admin\WorkflowManagementController;
 use App\Http\Controllers\OcrController;
 use App\Http\Controllers\OperationController;
-use App\Http\Controllers\ValidationWorkflowController;
+use App\Http\Controllers\ParapheurController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\ProjectController;
@@ -53,6 +54,10 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::post('operation/store', [OperationController::class, 'store'])->name('operation.store');
     Route::get('operation/index', [OperationController::class, 'index'])->name('operation.index');
 
+    //PARAPHEUR
+    Route::get('parapheur/index', [ParapheurController::class, 'index'])->name('parapheur.index');
+    Route::post('parapheur/download', [ParapheurController::class, 'download'])->name('parapheur.download');
+
 
 });
 
@@ -96,6 +101,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     // Global Search
     Route::get('global-search', 'GlobalSearchController@search')->name('globalSearch');
+
+    // Workflow Managemement
+    Route::resource('workflow-management', WorkflowManagementController::class);
+    Route::post('workflow-management/media', [WorkflowManagementController::class, 'storeMedia'])->name('workflow-management.storeMedia');
+    Route::post('workflow-management/hasReadMedia', [WorkflowManagementController::class, 'hasReadMedia'])->name('workflow-management.hasReadMedia');
+
 
 });
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {

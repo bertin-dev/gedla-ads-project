@@ -102,4 +102,10 @@ class Project extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
+    //UN PROJET CONTIENT 1 OU PLUSIEURS PARAPHEURS
+    public function multiParapheurs(): HasMany
+    {
+        return $this->hasMany(Parapheur::class);
+    }
 }

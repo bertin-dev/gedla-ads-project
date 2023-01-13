@@ -340,12 +340,20 @@
 @yield('scripts')
 
 <script>
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+
     $(function () {
         $('.bd-example-modal-lg').on('show.bs.modal', function (e) {
             let id = $(e.relatedTarget).data('id');
             let url = $(e.relatedTarget).data('url');
             let name = $(e.relatedTarget).data('name');
             let size = $(e.relatedTarget).data('size');
+            let version = $(e.relatedTarget).data('version');
             let itemType = $(e.relatedTarget).data('item_type');
             //let objects = $('#objectLink').data('name');
             $('.img_detail').attr({
@@ -356,9 +364,12 @@
             $('.file-title').text('{{trans('global.file_details')}} : ' + name);
             $('.folder_id').text('{{ trans('global.folder') }} : ' + id + '');
             $('.folder_size').text('{{ trans('global.size') }} : ' + size + ' KO');
+            $('.version').text('{{ trans('global.version') }} : ' + version);
             $('.myUrl').attr("href", url);
+            $('.mediaDownload').attr("href", id);
             $('#media_id').attr("value", id);
             console.log(id);
+            updateMediaTable(id);
         });
 
 
@@ -367,6 +378,63 @@
         });
 
 
+        //when user as seen Media, media tableupdate
+        function updateMediaTable(id) {
+
+            /*let url = "{{ route('admin.workflow-management.hasReadMedia', ":id") }}";
+            url = url.replace(':id', id);*/
+
+            $.ajax({
+                url: "{{ route('admin.workflow-management.hasReadMedia') }}",
+                method: 'POST',
+                data: {
+                    id: id
+                },
+                dataType: 'json',
+                success: function (data) {
+                    alert(data.id);
+                    /*$('.menu').html(data.notification);
+
+                    if (data.unseen_notification > 0) {
+                        $('.count').html(data.unseen_notification);
+                    }*/
+
+                },
+                error: function(){
+                    alert("sdfsdfdsf");
+                    console.log('Error founded where user display document');
+                }
+            });
+        }
+
+    });
+
+    $(function () {
+       $('.mediaDownload').on('click', function (e) {
+           e.preventDefault();
+           let getId = $('.mediaDownload').attr('href');
+           //alert(link);
+           let url = "{{ route('parapheur.download') }}";
+           //url = url.replace(':link', link);
+           //alert(url);
+           $.ajax({
+               url: url,
+               method: 'POST',
+               data:{
+                   id: getId
+               },
+               dataType: 'json',
+               success: function (data) {
+                   /*$('.success_download').css({
+                   'display': 'block',
+                   })*/
+                   $('.success_download').text(data);
+               },
+               error: function (data){
+                   console.log('Link not found');
+               }
+           });
+       });
     });
 </script>
 </body>

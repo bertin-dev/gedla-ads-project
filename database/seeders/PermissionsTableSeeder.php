@@ -198,6 +198,10 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 45,
                 'title' => 'folder_access_delete',
             ],
+            [
+                'id'    => 46,
+                'title' => 'workflow_validation_management_access',
+            ],
         ];
 
 

@@ -142,8 +142,6 @@ class FolderController extends Controller
 
     public function postUpload(Request $request)
     {
-
-
         if(!$request->functionality){
             $folder = Folder::with('project')
                 ->whereHas('project.users', function($query) {

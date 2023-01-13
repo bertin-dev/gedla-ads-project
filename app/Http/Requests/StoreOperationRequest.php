@@ -26,7 +26,7 @@ class StoreOperationRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    #[ArrayShape(['deadline' => "string[]", 'priority' => "string[]", 'visibility' => "string[]", 'workflow_sender' => "string[]", 'user_assign' => "string[]", 'media_id' => "string[]", 'message' => "string[]"])] public function rules(): array
+    #[ArrayShape(['deadline' => "string[]", 'priority' => "string[]", 'visibility' => "string[]", 'user_assign' => "string[]", 'media_id' => "string[]", 'message' => "string[]"])] public function rules(): array
     {
         return [
             'deadline'     => [

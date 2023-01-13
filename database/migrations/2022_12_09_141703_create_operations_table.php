@@ -32,6 +32,7 @@ return new class extends Migration
             $table->foreign('user_id_receiver')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('media_id')->references('id')->on('media')->onDelete('cascade');
 
+            $table->json('workflow_step')->nullable();
             $table->timestamps();
         });
     }

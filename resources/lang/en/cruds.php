@@ -67,6 +67,7 @@ return [
     'project' => [
         'title'          => 'Entity',
         'title_singular' => 'Entity',
+        'workflow_management' => 'Workflow Management',
         'fields'  => [
             'id'                => 'ID',
             'id_helper'         => ' ',
@@ -181,6 +182,30 @@ return [
             'updated_at_helper' => ' ',
             'deleted_at'        => 'Deleted at',
             'deleted_at_helper' => ' ',
+        ]
+    ],
+
+    'workflow_management' => [
+        'title'          => 'Workflow Management',
+        'new_workflow'      => 'Workflow validation',
+        'title_singular' => 'Workflow Management',
+        'fields'  => [
+            'id'                => 'ID',
+            'id_helper'         => ' ',
+            'name'              => 'Name',
+            'name_helper'       => ' ',
+            'created_at'        => 'Created at',
+            'created_at_helper' => ' ',
+            'updated_at'        => 'Updated at',
+            'updated_at_helper' => ' ',
+            'deleted_at'        => 'Deleted at',
+            'deleted_at_helper' => ' ',
+            'thumbnail'         => 'Thumbnail',
+            'thumbnail_helper'  => ' ',
+            'users'             => 'User(s)',
+            'users_helper'      => ' ',
+            'created_by'        => 'Created by',
+            'updated_by'        => 'Updated by',
         ]
     ],
 ];

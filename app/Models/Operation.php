@@ -6,7 +6,7 @@ use App\Http\Controllers\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use PhpOffice\PhpWord\Media;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Operation extends Model
 {
