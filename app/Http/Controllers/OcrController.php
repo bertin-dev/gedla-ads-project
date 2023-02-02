@@ -46,7 +46,7 @@ class OcrController extends Controller
             ]);
         }
 
-        $path = storage_path('tmp/uploads');
+        $path = public_path('uploads');
 
         try {
             if (!file_exists($path)) {
@@ -65,7 +65,7 @@ class OcrController extends Controller
             $fileRead = (new TesseractOCR('tmp/uploads/'. $name))
                 ->lang('fra')
                 ->run();
-            //dd($fileRead);
+            dd($fileRead);
         } catch (Exception $e){
             dd($e->getMessage());
         }*/
@@ -80,16 +80,46 @@ class OcrController extends Controller
     public function postUploadOCR(Request $request)
     {
         //dd($request->folder_id);
-        $folder = Folder::with('project')
-            ->whereHas('project.users', function($query) {
-                $query->where('id', auth()->id());
-            })->findOrFail($request->folder_id);
-
-
         foreach ($request->input('files', []) as $file) {
-            $folder->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
+            try {
+                $fileRead = (new TesseractOCR('uploads/' . $file))
+                    ->lang('fra')
+                    ->run();
+                //dd($fileRead);
+
+
+                /*$phpWord = new \PhpOffice\PhpWord\PhpWord();
+                $section = $phpWord->addSection();
+                $text = $section->addText($fileRead);
+                //$text = $section->addText($request->get('emp_salary'));
+                //$text = $section->addText($request->get('emp_age'),array('name'=>'Arial','size' => 20,'bold' => true));
+
+                $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+                $objWriter->save('Appdividend.docx');
+                response()->download(public_path('phpflow.docx'));*/
+
+
+            } catch (Exception $e){
+                dd($e->getMessage());
+            }
+            //$folder->addMedia(public_path('uploads/' . $file))->toMediaCollection('files');
         }
 
-        return redirect()->route('folders.show', $folder)->withStatus('Files has been uploaded');
+        //chargement de la barre lattérale gauche
+        $children_level_n = Folder::with('project')
+            ->whereHas('project.users', function($query) {
+                $query->where('id', auth()->id());
+            })
+            ->whereNull('parent_id')
+            ->with('subChildren')
+            ->get();
+
+
+        return view('front.ocr.show', compact('children_level_n', 'fileRead'))->with('status', 'OCR réussi');
+    }
+
+
+    public function postUploadFile(){
+
     }
 }

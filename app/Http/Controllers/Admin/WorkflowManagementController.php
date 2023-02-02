@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use setasign\Fpdi\Fpdi;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -217,4 +218,63 @@ class WorkflowManagementController extends Controller
             'user' => $allUser
         ], Response::HTTP_OK);
     }
+
+
+    public function validateDocument(Request $request){
+        $getMediaDocument = Media::find($request->id);
+        //$path = storage_path($getMediaDocument->file_name);
+
+        $filePath = $getMediaDocument->getPath();
+        //$filePath = asset('uploads/official.pdf');
+        $outputFilePath = $getMediaDocument->getPath();
+        //$outputFilePath = asset('uploads/official.pdf');
+        $this->fillPDFFile($filePath, $outputFilePath);
+        //return response()->file($outputFilePath);
+
+        //update media table
+        $getMediaDocument->signing = 1;
+        $getMediaDocument->save();
+
+        return response()->json([
+            'title' => 'Votre validation a été effectué avec succès'
+        ]);
+
+    }
+
+    /**
+     * Write code on Method
+     *
+     * @return string()
+     */
+    public function fillPDFFile($file, $outputFilePath)
+    {
+        $fpdi = new FPDI;
+
+        $count = $fpdi->setSourceFile($file);
+
+        for ($i=1; $i<=$count; $i++) {
+
+            $template = $fpdi->importPage($i);
+            $size = $fpdi->getTemplateSize($template);
+            $fpdi->AddPage($size['orientation'], array($size['width'], $size['height']));
+            $fpdi->useTemplate($template);
+
+            $fpdi->SetFont("helvetica", "", 15);
+            $fpdi->SetTextColor(153,0,153);
+
+            $left = 10;
+            $top = 10;
+            $text = "NiceSnippets.com";
+            $fpdi->Text($left,$top,$text);
+
+            $getSignature = Media::where('signed_by', auth()->id())->first();
+
+            $fpdi->Image($getSignature->getPath(), 40, 90);
+
+            //$fpdi->Image("file:///var/www/example-app/public/nice-logo.png", 40, 90);
+        }
+
+        return $fpdi->Output($outputFilePath, 'F');
+    }
+
 }

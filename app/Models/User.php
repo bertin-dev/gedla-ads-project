@@ -16,11 +16,13 @@ use Laravel\Passport\HasApiTokens;
 use \DateTimeInterface;
 use \Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use \Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
-    use SoftDeletes, Notifiable, HasApiTokens, Auditable;
+    use SoftDeletes, Notifiable, HasApiTokens, Auditable, InteractsWithMedia;
 
     public $table = 'users';
 

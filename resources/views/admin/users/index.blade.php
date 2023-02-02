@@ -6,6 +6,12 @@
             <a class="btn btn-success" href="{{ route('admin.users.create') }}">
                 {{ trans('global.add') }} {{ trans('cruds.user.title_singular') }}
             </a>
+
+
+            <a class="btn btn-success" href="{{ route('admin.users.display-view-importation') }}">
+                {{ trans('global.import') }} {{ trans('cruds.user.title_singular') }}
+            </a>
+
         </div>
     </div>
 @endcan
@@ -15,6 +21,13 @@
     </div>
 
     <div class="card-body">
+        @if (\Session::has('success'))
+            <div class="alert alert-success">
+                <ul>
+                    <li>{!! \Session::get('success') !!}</li>
+                </ul>
+            </div>
+        @endif
         <div class="table-responsive">
             <table class=" table table-bordered table-striped table-hover datatable datatable-User">
                 <thead>

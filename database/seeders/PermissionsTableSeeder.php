@@ -202,6 +202,42 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 46,
                 'title' => 'workflow_validation_management_access',
             ],
+            [
+                'id'    => 47,
+                'title' => 'signature_access',
+            ],
+            [
+                'id'    => 48,
+                'title' => 'download_access',
+            ],
+            [
+                'id'    => 49,
+                'title' => 'open_file_access',
+            ],
+            [
+                'id'    => 50,
+                'title' => 'archive_file_access',
+            ],
+            [
+                'id'    => 51,
+                'title' => 'signature_access_show',
+            ],
+            [
+                'id'    => 52,
+                'title' => 'signature_access_edit',
+            ],
+            [
+                'id'    => 53,
+                'title' => 'signature_access_delete',
+            ],
+            [
+                'id'    => 54,
+                'title' => 'signature_access_create',
+            ],
+            [
+                'id'    => 55,
+                'title' => 'validate_file_access',
+            ],
         ];
 
 

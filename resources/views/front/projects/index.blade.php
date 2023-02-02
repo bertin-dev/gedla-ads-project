@@ -11,15 +11,6 @@
 
             <div class="row">
 
-                {{--<form action="{{route('post-upload-ocr')}}" method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                        @csrf
-                        <label for="filechoose">Choose File</label>
-                        <input type="file" name="file" class="form-control-file" id="filechoose">
-                        <button class="btn btn-success mt-3" type="submit" name="submit">Upload</button>
-                    </div>
-                </form>--}}
-
                 @foreach($functionality as $item)
 
                     @php
@@ -99,15 +90,13 @@
                                                 <h5 class="card-title">PARAPHEUR</h5>
                                                 <p class="text-right">
                                                     <i class="icon-user"></i>
-                                                    <a href="{{ route('parapheur.index') }}" class="btn-link">Ouvrir</a>
+                                                    <a href="{{ route('parapheur.show') }}?parapheur_id={{$parapheur->id}}" class="btn-link">Ouvrir</a>
                                                 </p>
                                                 {{--  <a href="#" class="btn btn-primary">View Profile</a>--}}
                                             </div>
                                         </div>
                                         <span class="position-absolute badge rounded-pill badge-danger">
-                                            @foreach($parapheurCount as $dev)
-                                                {{$dev->medias->count()}}
-                                            @endforeach
+                                                {{$parapheur->medias->count()}}
                                         </span>
                                     </div>
                                 </div>

@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin\FoldersAccessController;
+use App\Http\Controllers\Admin\SignatureController;
 use App\Http\Controllers\Admin\WorkflowManagementController;
+use App\Http\Controllers\ExcelController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\OcrController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\ParapheurController;
@@ -49,6 +52,7 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::get('openOCR', [OcrController::class, 'openOCR'])->name('openOCR');
     Route::post('storeOCR', [OcrController::class, 'storeImgOCR'])->name('storeImgOCR');
     Route::post('uploadOCR', [OcrController::class, 'postUploadOCR'])->name('postUploadOCR');
+    Route::post('storeFile', [OcrController::class, 'postUploadFile'])->name('post-upload-file');
 
     //OPERATIONS
     Route::post('operation/store', [OperationController::class, 'store'])->name('operation.store');
@@ -56,7 +60,11 @@ Route::group(['middleware' => ['auth', 'user']], function() {
 
     //PARAPHEUR
     Route::get('parapheur/index', [ParapheurController::class, 'index'])->name('parapheur.index');
+    Route::get('parapheur/show', [ParapheurController::class, 'show'])->name('parapheur.show');
     Route::post('parapheur/download', [ParapheurController::class, 'download'])->name('parapheur.download');
+    Route::get('parapheur/upload', [ParapheurController::class, 'upload'])->name('parapheur.upload');
+    Route::post('parapheur/upload', [ParapheurController::class, 'postUpload'])->name('parapheur.postUpload');
+    Route::post('parapheur/media', [ParapheurController::class, 'storeMedia'])->name('parapheur.storeMedia');
 
 
 });
@@ -106,7 +114,16 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('workflow-management', WorkflowManagementController::class);
     Route::post('workflow-management/media', [WorkflowManagementController::class, 'storeMedia'])->name('workflow-management.storeMedia');
     Route::post('workflow-management/hasReadMedia', [WorkflowManagementController::class, 'hasReadMedia'])->name('workflow-management.hasReadMedia');
+    Route::post('workflow-management/validateDocument', [WorkflowManagementController::class, 'validateDocument'])->name('workflow-management.validateDocument');
 
+    //Signature
+    Route::resource('signature', SignatureController::class);
+    Route::delete('signature/destroy', [SignatureController::class, 'massDestroy'])->name('signature.massDestroy');
+
+    //Import & Export users
+    Route::get('display-view', [ExcelController::class, 'displayView'])->name('users.display-view-importation');
+    Route::post('import-users', [ExcelController::class, 'importUsers'])->name('import-users');
+    Route::get('export-users', [ExcelController::class, 'exportUsers'])->name('export-users');
 
 });
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {

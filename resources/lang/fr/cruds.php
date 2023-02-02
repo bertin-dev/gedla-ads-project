@@ -217,4 +217,17 @@ return [
         ]
     ],
 
+    'signature' => [
+        'title'          => 'Signature',
+        'title_singular' => 'Signature',
+        'fields'         => [
+            'id'                => 'ID',
+            'id_helper'         => ' ',
+            'signature_text'        => 'Signature',
+            'signature_text_helper' => ' ',
+            'owner'                 => 'Propriétaire',
+            'created_by'        => 'Créée par',
+        ],
+    ],
+
 ];

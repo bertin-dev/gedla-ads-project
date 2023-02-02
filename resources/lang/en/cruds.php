@@ -208,4 +208,17 @@ return [
             'updated_by'        => 'Updated by',
         ]
     ],
+
+    'signature' => [
+        'title'          => 'Signature',
+        'title_singular' => 'Signature',
+        'fields'         => [
+            'id'                => 'ID',
+            'id_helper'         => ' ',
+            'signature_text'        => 'Signature',
+            'signature_text_helper' => ' ',
+            'owner'                 => 'Owner',
+            'created_by'        => 'Created by',
+        ],
+    ],
 ];

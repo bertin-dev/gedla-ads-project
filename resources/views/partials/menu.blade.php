@@ -155,6 +155,16 @@
                     </li>
                 @endcan
 
+                @can('signature_access')
+                        <li class="c-sidebar-nav-item">
+                            <a href="{{ route("admin.signature.index") }}"
+                               class="c-sidebar-nav-link {{ request()->is("admin/signature") || request()->is("admin/signature/*") ? "active" : "" }}">
+                                <i class="fa-fw fas fa-pencil-square c-sidebar-nav-icon"></i>
+                                {{ trans('cruds.signature.title') }}
+                            </a>
+                        </li>
+                @endcan
+
                 @if(file_exists(app_path('Http/Controllers/Auth/ChangePasswordController.php')))
                     @can('profile_password_edit')
                         <li class="c-sidebar-nav-item">
@@ -170,7 +180,6 @@
 
             </ul>
         </li>
-
 
         <li class="c-sidebar-nav-item">
             <a href="#" class="c-sidebar-nav-link"

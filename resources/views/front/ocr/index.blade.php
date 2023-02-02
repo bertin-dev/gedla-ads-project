@@ -17,7 +17,7 @@
                         <form method="POST" action="{{ route('postUploadOCR') }}">
                             @csrf
                             <input id="folder_id" type="hidden" name="folder_id" value="" />
-                            <div class="form-group">
+                            {{--<div class="form-group">
                                 <label for="parent_id">{{ trans('cruds.folder.fields.parent') }}</label>
                                 <select class="form-control select2 {{ $errors->has('parent') ? 'is-invalid' : '' }}" name="parent_id" id="parent_id" required>
                                     @foreach($parents as $id => $parent)
@@ -30,7 +30,7 @@
                                     </div>
                                 @endif
                                 <span class="help-block">{{ trans('cruds.folder.fields.parent_helper') }}</span>
-                            </div>
+                            </div>--}}
 
                             <div class="form-group">
                                 <label for="files">Image File</label>
@@ -120,4 +120,17 @@
             }
         }
     </script>
+
+    {{--<script src="//cdn.ckeditor.com/4.20.1/standard/ckeditor5.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.ckeditor').ckeditor();
+    });
+
+    CKEDITOR.replace('description', {
+        filebrowserUploadUrl: "--}}{{--{{route('ckeditor.image-upload', ['_token' => csrf_token() ])}}--}}{{--",
+        filebrowserUploadMethod: 'form'
+    });
+
+</script>--}}
 @endsection

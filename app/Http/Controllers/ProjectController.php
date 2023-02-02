@@ -36,10 +36,18 @@ class ProjectController extends Controller
 
         //dd($children_level_n->toArray());
 
-        $parapheurCount = Parapheur::with('medias')->where('user_id', auth()->id())->get();
+        $getParapheur = Parapheur::where('user_id', auth()->id())->first();
+        if($getParapheur == null){
+            $getLastInsertId = Parapheur::all()->max('id');
+            Parapheur::create([
+                'name' => 'parapheur'. $getLastInsertId + 1,
+                'project_id' => 1,
+                'user_id' => auth()->id()
+            ]);
+        }
+        $parapheur = Parapheur::with('medias')->where('user_id', auth()->id())->first();
 
-
-        return view('front.projects.index', compact('children_level_n', 'functionality', 'parapheurCount'));
+        return view('front.projects.index', compact('children_level_n', 'functionality', 'parapheur'));
     }
 
     public function show($id)
