@@ -96,7 +96,7 @@
                                             </div>
                                         </div>
                                         <span class="position-absolute badge rounded-pill badge-danger">
-                                                {{$parapheur->medias->count()}}
+                                                {{ $parapheur->medias->where('state', 'unlocked')->where('signing', 0)->count() }}
                                         </span>
                                     </div>
                                 </div>

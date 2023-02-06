@@ -47,7 +47,7 @@
         Dropzone.options.filesDropzone = {
             url: '{{ route('folders.storeMedia') }}',
             maxFilesize: 2, // MB
-            acceptedFiles: '.jpeg,.jpg,.png,.pdf,.doc,.docx',
+            acceptedFiles: '.jpeg,.jpg,.png,.pdf,.doc,.docx,.xls',
             addRemoveLinks: true,
             headers: {
                 'X-CSRF-TOKEN': "{{ csrf_token() }}"

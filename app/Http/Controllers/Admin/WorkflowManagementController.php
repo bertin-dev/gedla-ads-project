@@ -223,7 +223,6 @@ class WorkflowManagementController extends Controller
     public function validateDocument(Request $request){
         $getMediaDocument = Media::find($request->id);
         //$path = storage_path($getMediaDocument->file_name);
-
         $filePath = $getMediaDocument->getPath();
         //$filePath = asset('uploads/official.pdf');
         $outputFilePath = $getMediaDocument->getPath();
