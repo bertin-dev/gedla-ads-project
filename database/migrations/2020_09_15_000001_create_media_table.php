@@ -31,7 +31,7 @@ return new class extends Migration
             $table->enum('state', ['unlocked', 'locked'])->default('unlocked')->comment('unlocked=0, locked=1');
             $table->boolean('signing')->default(false)->comment('false=not signed, true=signed');
             $table->boolean('archived')->default(false)->comment('false=unarchived, true=archived');
-
+            $table->json('step_workflow')->nullable();
             $table->nullableTimestamps();
         });
     }

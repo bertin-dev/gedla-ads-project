@@ -388,5 +388,6 @@ return [
     'edit_document'                  =>  'Editer le Document',
     'upload_file'                    =>  'Uploader le document',
     'import'                         =>  'Import',
+    'expiry'                         =>  'Expiration',
 
 ];

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 @section('content')
-    @can('folder_access_create')
+    @can('workflow_management_access_create')
         <div style="margin-bottom: 10px;" class="row">
             <div class="col-lg-12">
                 <a class="btn btn-success" href="{{ route('admin.workflow-management.create') }}">
@@ -23,13 +23,34 @@
 
                         </th>
                         <th>
-                            {{ trans('cruds.folder_access.fields.id') }}
+                            {{ trans('cruds.workflow_management.fields.id') }}
                         </th>
                         <th>
-                            {{ trans('cruds.folder_access.fields.folder_access') }}
+                            {{ trans('cruds.workflow_management.sender') }}
                         </th>
                         <th>
-                            {{ trans('cruds.folder_access.fields.user_access') }}
+                            {{ trans('cruds.workflow_management.receiver') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.workflow_management.operation_state') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.workflow_management.term') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.workflow_management.priority') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.workflow_management.visibility') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.workflow_management.view_file') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.workflow_management.message') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.workflow_management.workflow_users') }}
                         </th>
                         <th>
                             &nbsp;
@@ -37,48 +58,77 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {{--@foreach($folderUser as $key => $folder)
 
-                        <tr data-entry-id="{{ $folder->id }}">
-                            <td>
+                    @foreach($allMedia as $key => $media)
 
-                            </td>
-                            <td>
-                                {{ $folder->id ?? '' }}
-                            </td>
-                            <td>
-                                <span class="badge badge-success">{{ $folder->name }}</span>
-                            </td>
-                            <td>
-                                @foreach($folder->multiUsers as $key => $item)
-                                    <span class="badge badge-info">{{ $item->name }}</span>
-                                @endforeach
-                            </td>
+                        @foreach($media->operations as $key => $operation)
+                            <tr data-entry-id="{{ $media->id }}">
+                                <td>
 
-                            <td>
-                                @can('folder_access_show')
-                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.folders_access.show', $folder->id) }}">
-                                        {{ trans('global.view') }}
-                                    </a>
-                                @endcan
+                                </td>
+                                <td>
+                                    {{ $media->id ?? '' }}
+                                </td>
 
-                                @can('folder_access_edit')
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.folders_access.edit', $folder->id) }}">
-                                        {{ trans('global.edit') }}
-                                    </a>
-                                @endcan
+                                <td>
+                                    <span class="badge badge-success">{{ \App\Models\User::findOrFail($operation->user_id_sender)->name ?? '' }}</span>
+                                </td>
 
-                                --}}{{--@can('folder_access_delete')
-                                    <form action="{{ route('admin.folders_access.destroy', $folder->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                        <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
-                                    </form>
-                                @endcan--}}{{--
-                            </td>
+                                <td>
+                                    <span class="badge badge-primary">{{ \App\Models\User::findOrFail($operation->user_id_receiver)->name ?? '' }}</span>
+                                </td>
 
-                        </tr>
-                    @endforeach--}}
+                                <td>
+                                    {{ $operation->operation_state ?? '' }}
+                                </td>
+
+                                <td>
+                                    {{ now()->diffForHumans($operation->deadline) ?? '' }}
+                                </td>
+                                <td>
+                                    {{ $operation->priority ?? '' }}
+                                </td>
+                                <td>
+                                    {{ $media->status ?? '' }}
+                                </td>
+                                <td>
+                                    <iframe src="{{ $media->getUrl() }}" frameborder="1"></iframe>
+                                </td>
+                                <td>
+                                    {{ $operation->message ?? '' }}
+                                </td>
+                                <td>
+                                    @foreach(json_decode($media->step_workflow)->step_workflow as $key => $id)
+                                            <span class="badge badge-info"> {{ \App\Models\User::findOrFail($id)->name ?? '' }} </span>
+                                    @endforeach
+                                </td>
+
+                                <td>
+                                    @can('workflow_management_access_show')
+                                        <a class="btn btn-xs btn-primary" href="{{ route('admin.workflow-management.show', $media->id) }}">
+                                            {{ trans('global.view') }}
+                                        </a>
+                                    @endcan
+
+                                    @can('workflow_management_access_edit')
+                                        <a class="btn btn-xs btn-info" href="{{ route('admin.folders_access.edit', $media->id) }}">
+                                            {{ trans('global.edit') }}
+                                        </a>
+                                    @endcan
+
+                                    @can('workflow_management_access_delete')
+                                        <form action="{{ route('admin.workflow-management.destroy', $operation->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                            <input type="hidden" name="_method" value="DELETE">
+                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                            <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
+                                        </form>
+                                    @endcan
+                                </td>
+
+                            </tr>
+                        @endforeach
+
+                    @endforeach
                     </tbody>
                 </table>
             </div>
@@ -93,7 +143,7 @@
     <script>
         $(function () {
             let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
-            @can('folder_access_delete')
+            @can('workflow_management_access_delete')
             let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
             let deleteButton = {
                 text: deleteButtonTrans,

@@ -238,6 +238,24 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 55,
                 'title' => 'validate_file_access',
             ],
+            [
+                'id'    => 56,
+                'title' => 'workflow_management_access_create',
+            ],
+            [
+                'id'    => 57,
+                'title' => 'workflow_management_access_show',
+            ],
+            [
+                'id'    => 58,
+                'title' => 'workflow_management_access_edit',
+            ],
+            [
+                'id'    => 59,
+                'title' => 'workflow_management_access_delete',
+            ],
+
+
         ];
 
 

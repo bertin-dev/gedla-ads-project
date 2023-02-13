@@ -57,7 +57,7 @@ class FolderController extends Controller
                 })
                 ->findOrFail($folder->id);*/
 
-            $foldersUsers = User::with('multiFolders')->findOrFail(auth()->id());
+            $foldersUsers = User::with('multiFolders', 'receiveOperations')->findOrFail(auth()->id());
 
            //dd($foldersUsers->multiFolders->where('id', 11)->toArray());
             /*foreach ($foldersUsers->multiFolders->where('id', $folder->id) as $dev):
@@ -82,7 +82,13 @@ class FolderController extends Controller
             ->with('subChildren')
             ->get();
 
-        return view('front.folders.show_files', compact('folder', 'children_level_n', 'foldersUsers'));
+
+        $users = User::where('id', '!=', \Auth::user()->id)
+            ->whereHas('multiFolders')
+            ->pluck('name', 'id')
+            ->prepend(trans('global.pleaseSelect'), '');
+
+        return view('front.folders.show_files', compact('folder', 'children_level_n', 'foldersUsers', 'users'));
         //return view('front.folders.show', compact('folder','projects'));
     }
 

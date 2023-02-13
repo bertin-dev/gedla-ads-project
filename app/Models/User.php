@@ -170,4 +170,9 @@ class User extends Authenticatable implements HasMedia
     }
 
 
+    //CHAQUE UTILISATEUR PEUT POSSEDER UN OU PLUSIEURS MEDIAS A VALIDER
+    public function mediasSelectedForWorkflowValidations(): BelongsToMany
+    {
+        return $this->belongsToMany(Media::class, 'media_user', 'user_id', 'media_id');
+    }
 }

@@ -388,4 +388,5 @@ return [
     'edit_document'                  =>  'Edit Document',
     'upload_file'                    =>  'Upload file',
     'import'                         =>  'Import',
+    'expiry'                         =>  'Expiry',
 ];

@@ -32,7 +32,6 @@
                              </div>
                          </div>
                      @endforeach--}}
-
                 @foreach($foldersUsers->multiFolders->where('id', $folder->id) as $folderItems)
                     <div class="col-lg-12">
                         <a class="btn btn-success" href="{{ route('folders.upload') }}?folder_id={{ $folderItems->id }}&functionality={{$folderItems->functionality}}">
@@ -69,7 +68,7 @@
                         <div class="col-lg-4">
                             <div class="card" data-toggle="modal" data-target=".bd-example-modal-lg"
                                  data-id="{{$file->id}}" data-name="{{ucfirst(strtolower(Str::substr($file->file_name, 14)))}}" data-size="{{$realSize}}"
-                                 data-item_type="{{$result}}" data-url="{{$file->getUrl()}}">
+                                 data-item_type="{{$result}}" data-url="{{$file->getUrl()}}" data-version="{{$file->version}}">
                                 <div class="row no-gutters">
                                     <div class="col-sm-4">
                                         <img class="img-thumbnail" src="{{ $result ?? url('images/file-thumbnail.png') }}"
@@ -78,11 +77,39 @@
                                     <div class="col-sm-8">
                                         <div class="card-body" style="padding: 5px 5px 0;">
                                             <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 42)) }}</h5>
-                                            <div style="margin-top: 23px">
-                                                <span>{{ date('d/m/Y' , strtotime($file->created_at)) }}</span>
-                                                <div class="text-right"> {{$realSize}} KO</div>
-                                                {{--<a href="{{ $file->getUrl() }}" target="_blank" class="btn-link">Acquisition</a>--}}
+                                            <div style="margin-top: 13px">
+                                                <span><small style="margin-right: 70px">{{ date('d/m/Y' , strtotime($file->created_at)) }}</small></span>
+                                                <span> <small class="text-right">{{$realSize}} KO</small></span>
                                             </div>
+
+                                            {{--@dd($foldersUsers->receiveOperations->where('media_id', $file->id)->first()->priority)--}}
+                                            @php
+                                                $mediaAndOperation = $foldersUsers->receiveOperations->where('media_id', $file->id)->first();
+                                            @endphp
+                                            @if($mediaAndOperation != null)
+                                                @if($mediaAndOperation->priority == "high")
+                                                    <span class="badge rounded-pill badge-danger">.</span>
+                                                @elseif($mediaAndOperation->priority == "medium")
+                                                    <span class="badge rounded-pill badge-warning">.</span>
+                                                @else
+                                                    <span class="badge rounded-pill badge-info">.</span>
+                                                @endif
+                                            @endif
+
+
+                                            <span>
+                                                @if($file->step_workflow !=null)
+
+                                                    @if($file->signing == 0)
+                                                        <small class="alert-success">receive</small>
+                                                    @else
+                                                        <small class="alert-success">validate</small>
+                                                    @endif
+                                                        <small class="alert-link">{{trans('global.expiry')}}: {{now()->diffForHumans($mediaAndOperation->deadline)}}</small>
+                                                @else
+                                                    <small class="alert-info">import</small>
+                                                @endif
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -137,6 +164,12 @@
                                 <span class="version col-lg-4"></span>
                                 <hr>
 
+                                <div class="myActivity">
+                                    <h5>{{trans('global.my_recent_activity')}}</h5>
+                                    <small><strong>Bertin</strong> à envoyer un document en attente de validation à <strong>cyrille</strong></small><br>
+                                    <small>il y a 10h</small>
+                                </div>
+
                                 <div class="card workflow_form" style="display: none">
                                     <div class="card-header">{{trans('global.workflow_validation')}}</div>
 
@@ -176,10 +209,8 @@
                                             <div class="form-group">
                                                 <label for="user_assign">{{trans('global.assigned_to')}}</label>
                                                 <select name="user_assign" id="user_assign" class="form-control">
-                                                    @foreach(\App\Models\User::all() as $user)
-                                                         @if($user->id != Auth::user()->id)
-                                                            <option value="{{$user->id}}">{{$user->name}}</option>
-                                                        @endif
+                                                    @foreach($users as $id => $user)
+                                                        <option value="{{ $id }}" {{ in_array($id, old('user_assign', [])) ? 'selected' : '' }}>{{ $user }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -217,10 +248,13 @@
                     <h5 class="modal-title">{{ trans('global.file_action') }}</h5><br>
                     <ul>
                         @can('validate_file_access')
-                        <li><a href="#" class="document_id validate_file_access">{{trans('global.validate')}}</a></li>
+                        <li><a href="#" class="document_id validate_file_access" title="validation">{{trans('global.validate')}}</a></li>
+                        <li><a href="#" class="document_id validate_file_access" title="validation_signature">validation avec signature</a></li>
+                        <li><a href="#" class="validate_file_access" title="validation_paraphe">validation avec paraphe</a></li>
+                        <li><a href="#" class="document_id validate_file_access" title="rejected">Rejeter/refuser</a></li>
                         @endcan
                         @can('operation_access')
-                            <li><a href="#" class="workflow_validate">{{trans('global.start_workflow_validation')}}</a></li>
+                            <li><a href="#" class="workflow_validate workflow">{{trans('global.start_workflow_validation')}}</a></li>
                         @endcan
                     </ul>
                 </div>

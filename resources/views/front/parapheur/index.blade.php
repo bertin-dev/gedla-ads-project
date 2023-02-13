@@ -42,11 +42,36 @@
                                 <div class="col-sm-8">
                                     <div class="card-body" style="padding: 5px 5px 0;">
                                         <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 42)) }}</h5>
-                                        <div style="margin-top: 23px">
-                                            <span>{{ date('d/m/Y' , strtotime($file->created_at)) }}</span>
-                                            <div class="text-right"> {{$realSize}} KO</div>
-                                            {{--<a href="{{ $file->getUrl() }}" target="_blank" class="btn-link">Acquisition</a>--}}
+                                        <div style="margin-top: 13px">
+                                            <span><small style="margin-right: 70px">{{ date('d/m/Y' , strtotime($file->created_at)) }}</small></span>
+                                            <span> <small class="text-right">{{$realSize}} KO</small></span>
                                         </div>
+                                        @php
+                                            $priority = $foldersUsers->receiveOperations->where('media_id', $file->id)->first();
+                                        @endphp
+                                        @if($priority != null)
+                                            @if($priority->priority == "high")
+                                                <span class="badge rounded-pill badge-danger">.</span>
+                                            @elseif($priority->priority == "medium")
+                                                <span class="badge rounded-pill badge-warning">.</span>
+                                            @else
+                                                <span class="badge rounded-pill badge-info">.</span>
+                                            @endif
+                                        @endif
+
+                                        <span>
+                                                @if($file->step_workflow !=null)
+
+                                                @if($file->signing == 0)
+                                                    <small class="alert-success">receive</small>
+                                                @else
+                                                    <small class="alert-success">validate</small>
+                                                @endif
+
+                                            @else
+                                                <small class="alert-info">import</small>
+                                            @endif
+                                            </span>
                                     </div>
                                 </div>
                             </div>
@@ -119,7 +144,7 @@
                                             <input type="hidden" name="send_validation_workflow" value="send_validation_workflow">
                                             <input id="media_id" type="hidden" name="media_id" />
                                             <input type="hidden" name="parapheur_id" value="{{$parapheurWithMedia->id}}" />
-                                            
+
                                             <div class="form-group">
                                                 <label for="deadline">{{trans('global.term')}}</label>
                                                 <input type="date" id="deadline" name="deadline" class="form-control">
