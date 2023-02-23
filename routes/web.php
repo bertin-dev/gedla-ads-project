@@ -65,8 +65,6 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::get('parapheur/upload', [ParapheurController::class, 'upload'])->name('parapheur.upload');
     Route::post('parapheur/upload', [ParapheurController::class, 'postUpload'])->name('parapheur.postUpload');
     Route::post('parapheur/media', [ParapheurController::class, 'storeMedia'])->name('parapheur.storeMedia');
-
-
 });
 
 Auth::routes(['register' => false]);
@@ -119,6 +117,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     //Signature
     Route::resource('signature', SignatureController::class);
     Route::delete('signature/destroy', [SignatureController::class, 'massDestroy'])->name('signature.massDestroy');
+    Route::post('import/media_signature', [SignatureController::class, 'storeMedia'])->name('signature.store-media');
+    Route::post('signature/upload', [SignatureController::class, 'postUpload'])->name('signature.postUpload');
 
     //Import & Export users
     Route::get('display-view', [ExcelController::class, 'displayView'])->name('users.display-view-importation');
@@ -135,6 +135,9 @@ Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 
         Route::post('profile/destroy', 'ChangePasswordController@destroy')->name('password.destroyProfile');
     }
 });
+
+//Import Signature or Paraphe
+Route::get('signature/upload', [SignatureController::class, 'upload'])->name('signature.upload');
 
 
 //Route::post('uploadOCR', [PostUploadOCRController::class, 'postUploadOCR'])->name('post-upload-ocr');

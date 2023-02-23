@@ -93,8 +93,8 @@
                                 {{ trans('cruds.workflow_management.workflow_users') }}
                             </th>
                             <td>
-                                @foreach(json_decode($media->step_workflow)->step_workflow as $key => $id)
-                                    <span class="badge badge-info"> {{ \App\Models\User::findOrFail($id)->name ?? '' }} </span>
+                                @foreach(json_decode($media->step_workflow) as $key => $id)
+                                    <span class="badge badge-info"> {{ \App\Models\User::findOrFail($id->user_id)->name ?? '' }} </span>
                                 @endforeach
                             </td>
                         </tr>

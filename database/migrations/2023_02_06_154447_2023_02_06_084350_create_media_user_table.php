@@ -17,10 +17,10 @@ return new class extends Migration
             $table->increments('id');
             $table->integer('media_id')->unsigned()->index();
             $table->integer('user_id')->unsigned()->index();
-            $table->string('state');
+            //$table->string('state');
             $table->foreign('media_id')->references('id')->on('media')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->timestamps();
+            //$table->timestamps();
         });
     }
 

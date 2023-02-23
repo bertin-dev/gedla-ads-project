@@ -26,6 +26,9 @@
                             {{ trans('cruds.workflow_management.fields.id') }}
                         </th>
                         <th>
+                            {{ trans('cruds.workflow_management.view_file') }}
+                        </th>
+                        <th>
                             {{ trans('cruds.workflow_management.sender') }}
                         </th>
                         <th>
@@ -71,6 +74,10 @@
                                 </td>
 
                                 <td>
+                                    {{ $media->file_name ?? '' }}
+                                </td>
+
+                                <td>
                                     <span class="badge badge-success">{{ \App\Models\User::findOrFail($operation->user_id_sender)->name ?? '' }}</span>
                                 </td>
 
@@ -89,7 +96,7 @@
                                     {{ $operation->priority ?? '' }}
                                 </td>
                                 <td>
-                                    {{ $media->status ?? '' }}
+                                    {{ $operation->status ?? '' }}
                                 </td>
                                 <td>
                                     <iframe src="{{ $media->getUrl() }}" frameborder="1"></iframe>
@@ -98,8 +105,13 @@
                                     {{ $operation->message ?? '' }}
                                 </td>
                                 <td>
-                                    @foreach(json_decode($media->step_workflow)->step_workflow as $key => $id)
-                                            <span class="badge badge-info"> {{ \App\Models\User::findOrFail($id)->name ?? '' }} </span>
+                                    @php
+                                        $step = json_decode($media->step_workflow);
+                                    @endphp
+                                    @foreach($step as $key => $jsonItem)
+                                            <span class="badge {{ $jsonItem->state=="finish" ? "badge-success" : ($jsonItem->state=="pending" ? "badge-info" : "badge-warning")  }}">
+                                                {{ \App\Models\User::findOrFail($jsonItem->user_id)->name ?? '' }}
+                                            </span>
                                     @endforeach
                                 </td>
 

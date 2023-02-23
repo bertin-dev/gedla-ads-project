@@ -157,7 +157,7 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(Operation::class, 'user_id_sender');
     }
 
-    //UN UTILISATEUR PEUT RECEPTION UN OU PLUSIEURS OPERATIONS
+    //UN UTILISATEUR PEUT RECEPTIONNER UN OU PLUSIEURS OPERATIONS
     public function receiveOperations(): HasMany
     {
         return $this->hasMany(Operation::class, 'user_id_receiver');

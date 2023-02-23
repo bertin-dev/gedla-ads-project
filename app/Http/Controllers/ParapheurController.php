@@ -131,14 +131,14 @@ class ParapheurController extends Controller
      */
     public function show(Parapheur $parapheur)
     {
-        $getMediaDocument = Media::with('operations', 'usersListSelectedForWorkflowValidations')->find(29);
+        /*$getMediaDocument = Media::with('operations', 'usersListSelectedForWorkflowValidations')->find(29);
         //dd($getMediaDocument->toArray());
         //dd(json_decode($getMediaDocument->step_workflow)->step_workflow);
         foreach(json_decode($getMediaDocument->step_workflow)->step_workflow as $item){
             if($item==5){
                 dd(json_decode($getMediaDocument->step_workflow));
             }
-        }
+        }*/
 
         $children_level_n = Folder::with('project')
             ->whereHas('project.users', function($query) {

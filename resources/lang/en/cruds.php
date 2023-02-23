@@ -230,4 +230,9 @@ return [
             'created_by'        => 'Created by',
         ],
     ],
+
+    'parapheur' => [
+        'title'          => 'Initial',
+        'title_singular' => 'Initial',
+    ],
 ];

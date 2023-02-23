@@ -40,80 +40,85 @@
                 <span class="help-block">{{ trans('cruds.folder_access.fields.folder_access_helper') }}</span>
             </div>--}}
 
-            <div class="form-group">
-                <label for="deadline">{{trans('global.term')}}</label>
-                <input type="date" id="deadline" name="deadline" class="form-control">
-            </div>
-
-            <div class="form-group">
-                <label for="priority">{{trans('global.priority')}}</label>
-                <select name="priority" id="priority" class="form-control">
-                    <option value="low">{{trans('global.low')}}</option>
-                    <option value="medium">{{trans('global.means')}}</option>
-                    <option value="high">{{trans('global.important')}}</option>
-                </select>
-            </div>
-
-
-            <div class="form-group">
-                <label for="visibility">{{trans('global.visibility')}}</label>
-                <select name="visibility" id="visibility" class="form-control">
-                    <option value="public">{{trans('global.public')}}</option>
-                    <option value="private">{{trans('global.private')}}</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="files">{{ trans('global.add') }} {{ trans('global.file') }}</label>
-                <div class="needsclick dropzone {{ $errors->has('files') ? 'is-invalid' : '' }}" id="files-dropzone">
-                </div>
-                @if($errors->has('files'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('files') }}
+            <div class="container">
+                <div class="row">
+                    <div class="form-group col">
+                        <label for="deadline">{{trans('global.term')}}</label>
+                        <input type="datetime-local" id="deadline" name="deadline" class="form-control">
                     </div>
-                @endif
-            </div>
 
-
-            <div class="form-group">
-                <label for="message">{{ trans('global.message') }}</label>
-                <textarea name="message" id="message" class="form-control"></textarea>
-            </div>
-
-            <div class="form-group">
-                <div class="form-check checkbox">
-                    <input class="form-check-input" type="checkbox" name="flexCheckChecked" id="flexCheckChecked" style="vertical-align: middle;">
-                    <label class="form-check-label" for="flexCheckChecked" style="vertical-align: middle;">
-                        {{trans('global.send_notification_by_email')}}
-                    </label>
-                </div>
-            </div>
-
-
-            <div class="form-group">
-                <label class="required" for="user_list">{{ trans('global.add') }} {{ trans('cruds.workflow_management.fields.users') }}</label>
-                <div style="padding-bottom: 4px">
-                    <span class="btn btn-info btn-xs select-all" style="border-radius: 0">{{ trans('global.select_all') }}</span>
-                    <span class="btn btn-info btn-xs deselect-all" style="border-radius: 0">{{ trans('global.deselect_all') }}</span>
-                </div>
-                <select class="form-control select2 {{ $errors->has('user_list') ? 'is-invalid' : '' }}" name="user_list[]" id="user_list" multiple required>
-                    @foreach($users as $id => $user)
-                        <option value="{{ $id }}" {{ in_array($id, old('user_list', [])) ? 'selected' : '' }}>{{ $user }}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('user_list'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('user_list') }}
+                    <div class="form-group col">
+                        <label for="priority">{{trans('global.priority')}}</label>
+                        <select name="priority" id="priority" class="form-control">
+                            <option value="low">{{trans('global.low')}}</option>
+                            <option value="medium">{{trans('global.means')}}</option>
+                            <option value="high">{{trans('global.important')}}</option>
+                        </select>
                     </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.workflow_management.fields.users_helper') }}</span>
-            </div>
 
+                    <div class="form-group col">
+                        <label for="visibility">{{trans('global.visibility')}}</label>
+                        <select name="visibility" id="visibility" class="form-control">
+                            <option value="public">{{trans('global.public')}}</option>
+                            <option value="private">{{trans('global.private')}}</option>
+                        </select>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <button class="btn btn-danger" type="submit">
-                    {{ trans('global.validate') }}
-                </button>
+                <div class="row">
+
+                    <div class="form-group col-6">
+                        <label for="files">{{ trans('global.add') }} {{ trans('global.file') }}</label>
+                        <div class="needsclick dropzone {{ $errors->has('files') ? 'is-invalid' : '' }}" id="files-dropzone">
+                        </div>
+                        @if($errors->has('files'))
+                            <div class="invalid-feedback">
+                                {{ $errors->first('files') }}
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="message">{{ trans('global.message') }}</label>
+                        <textarea name="message" id="message" class="form-control"></textarea>
+                    </div>
+
+                    <div class="form-group col-lg-12">
+                        <div class="form-check checkbox">
+                            <input class="form-check-input" type="checkbox" name="flexCheckChecked" id="flexCheckChecked" style="vertical-align: middle;">
+                            <label class="form-check-label" for="flexCheckChecked" style="vertical-align: middle;">
+                                {{trans('global.send_notification_by_email')}}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-lg-12">
+                        <label class="required" for="user_list">{{ trans('global.add') }} {{ trans('cruds.workflow_management.fields.users') }}</label>
+                        <div style="padding-bottom: 4px">
+                            <span class="btn btn-info btn-xs select-all" style="border-radius: 0">{{ trans('global.select_all') }}</span>
+                            <span class="btn btn-info btn-xs deselect-all" style="border-radius: 0">{{ trans('global.deselect_all') }}</span>
+                        </div>
+                        <select class="form-control select2 {{ $errors->has('user_list') ? 'is-invalid' : '' }}" name="user_list[]" id="user_list" multiple required>
+                            @foreach($users as $id => $user)
+                                <option value="{{ $id }}" {{ in_array($id, old('user_list', [])) ? 'selected' : '' }}>{{ $user }}</option>
+                            @endforeach
+                        </select>
+                        @if($errors->has('user_list'))
+                            <div class="invalid-feedback">
+                                {{ $errors->first('user_list') }}
+                            </div>
+                        @endif
+                        <span class="help-block">{{ trans('cruds.workflow_management.fields.users_helper') }}</span>
+                    </div>
+                </div>
+
+                <div id="section2"><!-- for dynamic controls--></div>
+
+                <div class="form-group">
+                    <button class="btn btn-danger" type="submit">
+                        {{ trans('global.validate') }}
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -236,4 +241,71 @@
 
     });
 </script>--}}
+
+    <script>
+
+        $(function () {
+
+            let getUserSelect = $('#user_list');
+            getUserSelect.on('change', function () {
+
+                    let values = [];
+                    let username = [];
+                    let input = [];
+                    let $selectedOptions = $(this).find('option:selected');
+                    $selectedOptions.each(function(){
+                        values.push($(this).val());
+                        username.push($(this).text());
+                    });
+
+                    const userId = values.toString().split(",");
+                    const name = username.toString().split(",");
+                    for(let i=0; i<userId.length; i++){
+                         input[i] = $("<div class='card'><div class='row'>" +
+
+                             "<div class='col text-center'>"+
+                             "<img id='profil' src='{{asset('images/profil.png')}}' alt='' width='50'><br>"+
+                             "<label for='profil'>"+name[i]+"</label>"+
+                             "</div>" +
+
+                            "<div class='form-group col'>" +
+                            "<label for='deadline"+userId[i]+"'>{{ trans('global.term') }} {{ trans('global.for') }} " +name[i]+ "</label>" +
+                            "<input id='deadline"+userId[i]+"' name='deadline"+userId[i]+"' type='datetime-local' class='form-control'>" +
+                            "</div> " +
+
+                            "<div class='col'> " +
+                            "<label>{{ trans('global.enable_delegation') }}</label><br>"+
+                            "<label class='switch'>"+
+                             "<input class='switch"+userId[i]+"' type='checkbox' name='switch"+userId[i]+"' value='"+userId[i]+"'>"+
+                             "<span class='slider round'></span>"+
+                             "</label>" +
+                             "</div> " +
+
+
+                            "<div class='form-group col switch"+userId[i]+"' style='display:none'>" +
+                            "<label class='required' for='user_list"+userId[i]+"'> Utilisateur délégué</label>" +
+                            "<select id='user_list"+userId[i]+"' name='user_list"+userId[i]+"' class='form-control' required>" +
+                            @foreach($users as $id => $user)
+                                "<option value='{{ $id }}'>{{ $user }}</option>" +
+                            @endforeach +
+                                "</select>" +
+                            "</div> "+
+
+                            "</div></div>");
+                    }
+
+                $('#section2').find('.card').remove().end().append(input);
+            });
+
+            //$('.switch').on('click', '.switch'+counter, function () {}
+            $('#section2').on('click', '.switch input', function () {
+                const getId = $(this).val();
+                $('.switch'+getId).toggle();
+                //alert($(this).val());
+            });
+        });
+
+
+
+    </script>
 @endsection

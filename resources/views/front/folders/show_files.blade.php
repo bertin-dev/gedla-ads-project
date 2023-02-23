@@ -100,12 +100,25 @@
                                             <span>
                                                 @if($file->step_workflow !=null)
 
-                                                    @if($file->signing == 0)
-                                                        <small class="alert-success">receive</small>
-                                                    @else
-                                                        <small class="alert-success">validate</small>
-                                                    @endif
-                                                        <small class="alert-link">{{trans('global.expiry')}}: {{now()->diffForHumans($mediaAndOperation->deadline)}}</small>
+                                                    @php
+                                                        $oldValue = json_decode($file->step_workflow);
+                                                        $counter = 0;
+                                                        for($i=0; $i<count($oldValue); $i++){
+                                                            if($oldValue[$i]->state == "finish"){
+                                                                $counter++;
+                                                            }
+                                                        }
+                                                    @endphp
+
+
+                                                        @if($counter==count($oldValue))
+                                                            <small class="alert-success">validate</small>
+                                                        @else
+                                                            <small class="alert-success">receive</small>
+                                                        @endif
+
+
+                                                    <small class="alert-link" style="font-size: 9px;">{{trans('global.expiry')}}: {{now()->diffForHumans($mediaAndOperation->deadline)}}</small>
                                                 @else
                                                     <small class="alert-info">import</small>
                                                 @endif
@@ -248,10 +261,10 @@
                     <h5 class="modal-title">{{ trans('global.file_action') }}</h5><br>
                     <ul>
                         @can('validate_file_access')
-                        <li><a href="#" class="document_id validate_file_access" title="validation">{{trans('global.validate')}}</a></li>
-                        <li><a href="#" class="document_id validate_file_access" title="validation_signature">validation avec signature</a></li>
-                        <li><a href="#" class="validate_file_access" title="validation_paraphe">validation avec paraphe</a></li>
-                        <li><a href="#" class="document_id validate_file_access" title="rejected">Rejeter/refuser</a></li>
+                        <li><a href="#" class="document_id validation validate_file_access" title="validation">{{trans('global.validate')}}</a></li>
+                        <li><a href="#" class="document_id validation_signature validate_file_access" title="validation_signature">validation avec signature</a></li>
+                        <li><a href="#" class="validation_paraphe validate_file_access" title="validation_paraphe">validation avec paraphe</a></li>
+                        <li><a href="#" class="document_id rejected validate_file_access" title="rejected">Rejeter/refuser</a></li>
                         @endcan
                         @can('operation_access')
                             <li><a href="#" class="workflow_validate workflow">{{trans('global.start_workflow_validation')}}</a></li>

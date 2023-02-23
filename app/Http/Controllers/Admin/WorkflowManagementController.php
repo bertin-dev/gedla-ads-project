@@ -11,7 +11,6 @@ use App\Models\Project;
 use App\Models\User;
 use App\Notifications\sendEmailNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Notification;
@@ -68,6 +67,15 @@ class WorkflowManagementController extends Controller
      */
     public function store(Request $request)
     {
+        $getUserListForWorkflowValidation = collect();
+        for($i =0; $i<count($request->user_list); $i++){
+            $getUserListForWorkflowValidation->push([
+                'id' => $i,
+                'user_id' => $request->user_list[$i],
+                'state' => 'pending'
+            ]);
+        }
+
         //step 1: check visibility of file
         if($request->visibility == 'private'){
             //parapheur
@@ -81,21 +89,13 @@ class WorkflowManagementController extends Controller
                 ]);
             }
 
-            $workflow = [
-                'step_workflow' => $request->user_list,
-                'current_user' => [
-                    'id' => $request->user_list[0],
-                    'state' => 'pending'
-                ]
-            ];
-
             foreach ($request->input('files', []) as $file) {
                 $media = $parapheur->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
                 $media->created_by = \Auth::user()->id;
                 $media->parapheur_id = $parapheur->id;
                 $media->model_id = 0;
                 $media->version = $media->version + 1;
-                $media->step_workflow = $workflow;
+                $media->step_workflow = $getUserListForWorkflowValidation->all();
 
                 $media->save();
                 $media->usersListSelectedForWorkflowValidations()->sync([$request->user_list[0]]);
@@ -136,19 +136,11 @@ class WorkflowManagementController extends Controller
             $user = User::with('multiFolders')->where('id', $request->user_list[0])->first();
             $folder = $user->multiFolders->first();
 
-            $workflow = [
-                'step_workflow' => $request->user_list,
-                'current_user' => [
-                    'id' => $request->user_list[0],
-                    'state' => 'pending'
-                ]
-            ];
-
             foreach ($request->input('files', []) as $file) {
                 //Create Media table with new datas for receiver user
                 $media = $folder->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
                 $media->version = $media->version + 1;
-                $media->step_workflow = $workflow;
+                $media->step_workflow = $getUserListForWorkflowValidation->all();
                 $media->save();
                 $media->usersListSelectedForWorkflowValidations()->sync([$request->user_list[0]]);
 
@@ -328,60 +320,103 @@ class WorkflowManagementController extends Controller
 
     public function validateDocument(Request $request){
         $getMediaDocument = Media::with('operations')->find($request->id);
-
         switch ($request->validationType){
             case "validation":
 
-                //get and update of step workflow
-                $workflow = [
-                        'id' => auth()->id(),
-                        'state' => 'pending'
-                ];
-
+                $idNextUser = "";
+                $counterPreviousUser = 0;
 
                 $oldValue = json_decode($getMediaDocument->step_workflow);
-                //dd([$oldValue->current_user]);
+
+                for ($i =0; $i<count($oldValue); $i++){
+
+                    //check if all users are pending
+                    if($oldValue[$i]->state == "pending"){
+
+                        //check if user connected exist in workflow if yes then update state
+                        if($oldValue[$i]->user_id == auth()->id()){
+                            $oldValue[$i]->state = "finish";
+                            $counterPreviousUser = $oldValue[$i]->id;
+                        }
+                        //get id of next user
+                        if($counterPreviousUser + 1 == $i){
+                         $idNextUser = $oldValue[$i]->user_id;
+                        }
+
+                    }
+
+                }
+
+                if($idNextUser != ""){
+                    //$getDataNextUser = User::findOrFail($idNextUser);
+                    $getMediaWithOperationDocument = $getMediaDocument->operations->first();
+
+                    if($getMediaWithOperationDocument != null){
+
+                        if($getMediaWithOperationDocument->status == "public"){
+
+                            $user = User::with('multiFolders')->where('id', $idNextUser)->first();
+                            $folder = $user->multiFolders->first();
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->model_id = $folder->id;
+                            $getMediaDocument->step_workflow = $oldValue;
+                            $getMediaDocument->save();
+
+                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
+
+                        }else{
+
+                            $parapheur = Parapheur::where('user_id', $idNextUser)->first();
+                            if($parapheur == null){
+                                $getLastInsertId = Parapheur::all()->max('id');
+                                $parapheur = Parapheur::create([
+                                    'name' => 'parapheur'. $getLastInsertId + 1,
+                                    'project_id' => 1,
+                                    'user_id' => $idNextUser
+                                ]);
+                            }
+
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->parapheur_id = $parapheur->id;
+                            $getMediaDocument->step_workflow = $oldValue;
+                            $getMediaDocument->save();
+
+                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
+
+                        }
+
+                        //store datas operation table
+                        Operation::create([
+                            'deadline' => $getMediaWithOperationDocument->deadline,
+                            'priority' => $getMediaWithOperationDocument->priority,
+                            'status' => $getMediaWithOperationDocument->status,
+                            'user_id_sender' => auth()->id(),
+                            'user_id_receiver' => $idNextUser,
+                            'media_id' => $getMediaDocument->id,
+                            'message' => $getMediaWithOperationDocument->message,
+                            'receive_mail_notification' => $getMediaWithOperationDocument->receive_mail_notification,
+                            'operation_type' => $request->validationType,
+                            'operation_state' => 'pending',
+                            'num_operation' => (string) Str::orderedUuid(),
+                        ]);
+
+                        $getOperations = Operation::where('media_id', $getMediaDocument->id)
+                            ->where('user_id_receiver', auth()->id())
+                            //->orWhere('user_id_sender', auth()->id())
+                            ->get();
+
+                        foreach ($getOperations as $operationList){
+                            $operationList->update(['operation_state' => 'success']);
+                        }
+                    }
+
+                }
+
+                //dd($idNextUser);
 
 
-                $collection = collect([
-                    $oldValue->current_user,
-                ]);
-
-                //$collection->push($workflow);
-
-                $collection->all();
-
-                dd($collection);
-
-
-
-
-                $getMediaDocument->step_workflow = \Arr::add([$oldValue->current_user], $workflow);
-                dd($getMediaDocument->step_workflow);
-                //update media table
-                /*$getMediaDocument->version = $getMediaDocument->version + 1;
-                $getMediaDocument->signing = 1;
-                $getMediaDocument->save();*/
-
-
-
-                /*$getMediaWithOperationDocument = $getMediaDocument->operations->first();
-                if($getMediaWithOperationDocument != null){
-                    //store data in operation table
-                    Operation::create([
-                        'deadline' => $getMediaWithOperationDocument->deadline,
-                        'priority' => $getMediaWithOperationDocument->priority,
-                        'status' => $getMediaWithOperationDocument->status,
-                        'user_id_sender' => \Auth::user()->id,
-                        'user_id_receiver' => $request->user_assign,
-                        'media_id' => $request->id,
-                        'message' => $getMediaWithOperationDocument->message,
-                        'receive_mail_notification' => $getMediaWithOperationDocument->receive_mail_notification,
-                        'operation_type' => $request->validationType,
-                        'operation_state' => 'pending',
-                        'num_operation' => (string) Str::orderedUuid(),
-                    ]);
-                }*/
 
             break;
             case "validation_signature":
@@ -390,17 +425,13 @@ class WorkflowManagementController extends Controller
                 //$filePath = asset('uploads/official.pdf');
                 $outputFilePath = $getMediaDocument->getPath();
                 //$outputFilePath = asset('uploads/official.pdf');
-                $this->fillPDFFile($filePath, $outputFilePath);
+                $this->fillPDFFileSignature($filePath, $outputFilePath);
                 //return response()->file($outputFilePath);
-
-                //update media table
-                $getMediaDocument->signing = 1;
-                $getMediaDocument->save();
                 break;
             case "validation_paraphe":
-                //update media table
-                /*$getMediaDocument->signing = 1;
-                $getMediaDocument->save();*/
+                $filePath = $getMediaDocument->getPath();
+                $outputFilePath = $getMediaDocument->getPath();
+                $this->fillPDFFileParaphe($filePath, $outputFilePath);
                 break;
         }
 
@@ -415,7 +446,7 @@ class WorkflowManagementController extends Controller
      *
      * @return string()
      */
-    public function fillPDFFile($file, $outputFilePath)
+    public function fillPDFFileSignature($file, $outputFilePath)
     {
         $fpdi = new FPDI;
 
@@ -431,14 +462,53 @@ class WorkflowManagementController extends Controller
             $fpdi->SetFont("helvetica", "", 15);
             $fpdi->SetTextColor(153,0,153);
 
-            $left = 10;
-            $top = 10;
-            $text = "NiceSnippets.com";
-            $fpdi->Text($left,$top,$text);
+            //$left = 10;
+            //$top = 10;
+            //$text = "NiceSnippets.com";
+            //$fpdi->Text($left,$top,$text);
 
-            $getSignature = Media::where('signed_by', auth()->id())->first();
+            if($i==$count){
+                $getSignature = Media::where('signed_by', auth()->id())->where('collection_name', 'signature')->first();
+                $fpdi->Image($getSignature->getPath(), 130, 200, 40);
+            }
 
-            $fpdi->Image($getSignature->getPath(), 40, 90);
+            //$fpdi->SetXY(90, 50);
+            //$fpdi->Write(10, "Bertin Mounok");
+
+            //$fpdi->Image("file:///var/www/example-app/public/nice-logo.png", 40, 90);
+        }
+
+        return $fpdi->Output($outputFilePath, 'F');
+    }
+
+    public function fillPDFFileParaphe($file, $outputFilePath)
+    {
+        $fpdi = new FPDI;
+
+        $count = $fpdi->setSourceFile($file);
+
+        for ($i=1; $i<=$count; $i++) {
+
+            $template = $fpdi->importPage($i);
+            $size = $fpdi->getTemplateSize($template);
+            $fpdi->AddPage($size['orientation'], array($size['width'], $size['height']));
+            $fpdi->useTemplate($template);
+
+            $fpdi->SetFont("helvetica", "", 15);
+            $fpdi->SetTextColor(153,0,153);
+
+            //$left = 10;
+            //$top = 10;
+            //$text = "BERTIN MOUNOK";
+            //$fpdi->Text($left,$top,$text);
+
+
+            if($i<$count){
+                $getSignature = Media::where('signed_by', auth()->id())->where('collection_name', 'paraphe')->first();
+                $fpdi->Image($getSignature->getPath(), 10, 10, 40);
+            }
+            //$fpdi->SetXY(90, 50);
+            //$fpdi->Write(10, "Bertin Mounok");
 
             //$fpdi->Image("file:///var/www/example-app/public/nice-logo.png", 40, 90);
         }

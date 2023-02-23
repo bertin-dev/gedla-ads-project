@@ -239,4 +239,9 @@ return [
         ],
     ],
 
+    'parapheur' => [
+        'title'          => 'Paraphe',
+        'title_singular' => 'Paraphe',
+    ],
+
 ];

@@ -389,4 +389,7 @@ return [
     'upload_file'                    =>  'Upload file',
     'import'                         =>  'Import',
     'expiry'                         =>  'Expiry',
+    'or'                             =>  'or',
+    'for'                            =>  'For',
+    'enable_delegation'              =>  'Enable signing delegation ?',
 ];

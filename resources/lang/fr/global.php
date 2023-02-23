@@ -389,5 +389,8 @@ return [
     'upload_file'                    =>  'Uploader le document',
     'import'                         =>  'Import',
     'expiry'                         =>  'Expiration',
+    'or'                             =>  'Ou',
+    'for'                            =>  'Pour',
+    'enable_delegation'              =>  'Activer la délégation de signature?',
 
 ];
