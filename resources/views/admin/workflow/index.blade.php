@@ -99,7 +99,7 @@
                                     {{ $operation->status ?? '' }}
                                 </td>
                                 <td>
-                                    <iframe src="{{ $media->getUrl() }}" frameborder="1"></iframe>
+                                    <embed src="{{ $media->getUrl() }}" frameborder="1">
                                 </td>
                                 <td>
                                     {{ $operation->message ?? '' }}

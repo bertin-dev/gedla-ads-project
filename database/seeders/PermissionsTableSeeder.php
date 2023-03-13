@@ -254,6 +254,18 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 59,
                 'title' => 'workflow_management_access_delete',
             ],
+            [
+                'id'    => 60,
+                'title' => 'import_user',
+            ],
+            [
+                'id'    => 61,
+                'title' => 'archive_show',
+            ],
+            [
+                'id'    => 62,
+                'title' => 'archive_delete',
+            ],
 
 
         ];

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ArchiveController;
 use App\Http\Controllers\Admin\FoldersAccessController;
 use App\Http\Controllers\Admin\SignatureController;
 use App\Http\Controllers\Admin\WorkflowManagementController;
@@ -65,6 +66,9 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::get('parapheur/upload', [ParapheurController::class, 'upload'])->name('parapheur.upload');
     Route::post('parapheur/upload', [ParapheurController::class, 'postUpload'])->name('parapheur.postUpload');
     Route::post('parapheur/media', [ParapheurController::class, 'storeMedia'])->name('parapheur.storeMedia');
+
+    //find user by id
+    Route::get('find/{id}', [UsersController::class, 'findUser'])->name('users.user-find');
 });
 
 Auth::routes(['register' => false]);
@@ -124,6 +128,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::get('display-view', [ExcelController::class, 'displayView'])->name('users.display-view-importation');
     Route::post('import-users', [ExcelController::class, 'importUsers'])->name('import-users');
     Route::get('export-users', [ExcelController::class, 'exportUsers'])->name('export-users');
+
+    //Archive document
+    Route::resource('archive', ArchiveController::class);
 
 });
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {

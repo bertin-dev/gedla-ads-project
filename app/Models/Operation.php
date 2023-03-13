@@ -34,10 +34,16 @@ class Operation extends Model
     /*NOUS POURRIONS EGALEMENT IMPLEMENTER LA POSSIBILITE QUE LA VALIDATION DU WORKFLOW SOIT EFFECTUE PAR 1 OU
     PLUSIEURS UTILISATEURS SIMULTANÉMENT*/
 
-    //UNE OPERATION EST EFFECTUE PAR 1 SEUL UTILISATEUR.
-    public function user(): BelongsTo
+    //UNE OPERATION EST EFFECTUE PAR 1 SEUL UTILISATEUR SENDER.
+    public function senderUser(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id_sender');
+    }
+
+    //UNE OPERATION EST EFFECTUE PAR 1 SEUL UTILISATEUR RECEIVER.
+    public function receiverUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id_receiver');
     }
 
 

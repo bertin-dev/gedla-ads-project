@@ -132,6 +132,7 @@
                     @endif
                     @yield('content')
 
+                    @yield('javascript')
                 </div>
 
 

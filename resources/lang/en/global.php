@@ -392,4 +392,6 @@ return [
     'or'                             =>  'or',
     'for'                            =>  'For',
     'enable_delegation'              =>  'Enable signing delegation ?',
+    'delegated_user'                 =>  'Delegated user',
+    'shared_file'                    =>  'In a shared folder on',
 ];

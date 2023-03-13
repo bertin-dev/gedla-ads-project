@@ -11,7 +11,9 @@ use App\Models\Project;
 use App\Models\User;
 use App\Notifications\sendEmailNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Notification;
 use setasign\Fpdi\Fpdi;
@@ -67,25 +69,45 @@ class WorkflowManagementController extends Controller
      */
     public function store(Request $request)
     {
+        $globalDeadline = Carbon::parse($request->deadline);
         $getUserListForWorkflowValidation = collect();
-        for($i =0; $i<count($request->user_list); $i++){
+        $usersId = $request->user_list;
+        //Get ID of first main user or delegate user
+        $firstUserId = $request->get("user_list".$usersId[0]) != null ? $request->get("user_list".$usersId[0]) : $usersId[0];
+
+
+        for($i=0; $i<count($usersId); $i++){
+
+            $smallDeadline = Carbon::parse($request->get("deadline".$usersId[$i]));
+
+            if($globalDeadline->lessThan($smallDeadline)){
+                //deadline global inférieur
+                return back()->withInput($request->input())->withErrors(['errors' => 'Le deadline d\'un ou plusieurs utilisateurs est supérieur au deadline global du circuit de validation' ]);
+            }
+
+            //si userList est différent de null alors nous avons une délégation de signature
             $getUserListForWorkflowValidation->push([
                 'id' => $i,
-                'user_id' => $request->user_list[$i],
-                'state' => 'pending'
+                'user_id' => $request->get("user_list".$usersId[$i]) != null ? $request->get("user_list".$usersId[$i]) : $usersId[$i],
+                'state' => 'pending',
+                'deadline' => $request->get("deadline".$usersId[$i])
             ]);
         }
 
+        //dd($getUserListForWorkflowValidation->all());
+
+
+
         //step 1: check visibility of file
         if($request->visibility == 'private'){
-            //parapheur
-            $parapheur = Parapheur::where('user_id', $request->user_list[0])->first();
+           //parapheur
+            $parapheur = Parapheur::where('user_id', $firstUserId)->first();
             if($parapheur == null){
                 $getLastInsertId = Parapheur::all()->max('id');
                 $parapheur = Parapheur::create([
                     'name' => 'parapheur'. $getLastInsertId + 1,
                     'project_id' => 1,
-                    'user_id' => $request->user_list[0]
+                    'user_id' => $firstUserId
                 ]);
             }
 
@@ -98,14 +120,14 @@ class WorkflowManagementController extends Controller
                 $media->step_workflow = $getUserListForWorkflowValidation->all();
 
                 $media->save();
-                $media->usersListSelectedForWorkflowValidations()->sync([$request->user_list[0]]);
+                $media->usersListSelectedForWorkflowValidations()->sync([$firstUserId]);
 
                 Operation::create([
                     'deadline' => $request->deadline,
                     'priority' => $request->priority,
                     'status' => $request->visibility,
                     'user_id_sender' => \Auth::user()->id,
-                    'user_id_receiver' => $request->user_list[0],
+                    'user_id_receiver' => $firstUserId,
                     'media_id' => $media->id,
                     'message' => $request->message,
                     'receive_mail_notification' => $request->boolean('flexCheckChecked'),
@@ -133,7 +155,7 @@ class WorkflowManagementController extends Controller
         }
         else{
             //Get Folder
-            $user = User::with('multiFolders')->where('id', $request->user_list[0])->first();
+            $user = User::with('multiFolders')->where('id', $firstUserId)->first();
             $folder = $user->multiFolders->first();
 
             foreach ($request->input('files', []) as $file) {
@@ -142,14 +164,14 @@ class WorkflowManagementController extends Controller
                 $media->version = $media->version + 1;
                 $media->step_workflow = $getUserListForWorkflowValidation->all();
                 $media->save();
-                $media->usersListSelectedForWorkflowValidations()->sync([$request->user_list[0]]);
+                $media->usersListSelectedForWorkflowValidations()->sync([$firstUserId]);
 
                 Operation::create([
                     'deadline' => $request->deadline,
                     'priority' => $request->priority,
                     'status' => $request->visibility,
                     'user_id_sender' => \Auth::user()->id,
-                    'user_id_receiver' => $request->user_list[0],
+                    'user_id_receiver' => $firstUserId,
                     'media_id' => $media->id,
                     'message' => $request->message,
                     'receive_mail_notification' => $request->boolean('flexCheckChecked'),
@@ -290,11 +312,17 @@ class WorkflowManagementController extends Controller
         }
 
         //$infoUser = User::with(['receiveOperations', 'sendOperations', 'multiFolders'])->find(auth()->id());
-        $infoMedia = Media::with(['parapheur', 'category', 'operations', 'createdBy', 'signedBy'])->find($request->id);
-        /*foreach ($infoMedia->operations as $parapheurItem){
-            dd($parapheurItem->toArray());
+        $infoMedia = Media::with(['parapheur', 'category', 'createdBy', 'signedBy', 'operations' => function($q){
+            $q->orderBy('id', 'DESC');
+        }])->find($request->id);
+        /*$infoOperationsAndUsers = [];
+        foreach ($infoMedia->operations as $parapheurItem){
+            //$infoOperationsAndUsers = $parapheurItem->with(['senderUser', 'receiverUser'])->get();
+            $infoOperationsAndUsers = $parapheurItem->senderUser;
         }*/
+        //dd($infoMedia->toArray());
 
+        //dd($infoMedia->toArray());
         $allUser = User::with(['receiveOperations', 'sendOperations'])->get();
         $userData = [];
 
@@ -415,9 +443,6 @@ class WorkflowManagementController extends Controller
                 }
 
                 //dd($idNextUser);
-
-
-
             break;
             case "validation_signature":
                 //$path = storage_path($getMediaDocument->file_name);
@@ -432,7 +457,11 @@ class WorkflowManagementController extends Controller
                 $filePath = $getMediaDocument->getPath();
                 $outputFilePath = $getMediaDocument->getPath();
                 $this->fillPDFFileParaphe($filePath, $outputFilePath);
-                break;
+            break;
+
+            case "rejected":
+                dd($getMediaDocument->toArray());
+            break;
         }
 
         return response()->json([
@@ -516,4 +545,8 @@ class WorkflowManagementController extends Controller
         return $fpdi->Output($outputFilePath, 'F');
     }
 
+
+    public function rejectedDocument(Request $request){
+
+    }
 }

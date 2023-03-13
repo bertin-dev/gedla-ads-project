@@ -21,7 +21,7 @@
                 <i class="c-sidebar-nav-icon fas fa-fw fa-home">
 
                 </i>
-                {{ trans('global.home') }}
+                {{ trans('global.dashboard') }}
             </a>
         </li>
 
@@ -142,6 +142,16 @@
                         </li>
                 @endcan
 
+                @can('archive_file_access')
+                        <li class="c-sidebar-nav-item">
+                            <a href="{{ route("admin.archive.index") }}" class="c-sidebar-nav-link">
+                                <i class="c-sidebar-nav-icon fas fa-fw fa-save">
+
+                                </i>
+                                {{ trans('global.archive_document') }}
+                            </a>
+                        </li>
+                @endcan
 
                 @can('user_alert_access')
                     <li class="c-sidebar-nav-item">

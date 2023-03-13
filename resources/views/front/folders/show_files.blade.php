@@ -157,7 +157,8 @@
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-md-6">
-                                <img class="img-thumbnail img_detail">
+                                {{--<img class="img-thumbnail img_detail">--}}
+                                <embed class="iframeFile" id='100' width='100%' height='600px'/>
                                 <div class="text-left">
                                     @can('open_file_access')
                                     <a class="myUrl col-lg-4" target="_blank">{{trans('global.open')}} </a>
@@ -177,10 +178,13 @@
                                 <span class="version col-lg-4"></span>
                                 <hr>
 
-                                <div class="myActivity">
+                                <div class="">
                                     <h5>{{trans('global.my_recent_activity')}}</h5>
-                                    <small><strong>Bertin</strong> à envoyer un document en attente de validation à <strong>cyrille</strong></small><br>
-                                    <small>il y a 10h</small>
+                                    <div class="loading">
+                                        <center><img src="{{asset('images/loading.gif')}}" alt=""></center>
+                                    </div>
+                                    <h6 class="initMyActivity"></h6>
+                                    <ul class="myActivity"></ul>
                                 </div>
 
                                 <div class="card workflow_form" style="display: none">

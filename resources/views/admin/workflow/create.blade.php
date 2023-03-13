@@ -9,47 +9,16 @@
     <div class="card-body">
         <form method="POST" action="{{ route("admin.workflow-management.store") }}" enctype="multipart/form-data">
             @csrf
-
-            {{--<div class="form-group">
-                <label class="required" for="project_id">{{ trans('cruds.folder.fields.project') }}</label>
-                <select class="form-control select2 {{ $errors->has('project') ? 'is-invalid' : '' }}" name="project_id" id="project_id" required>
-                    @foreach($projects as $id => $project)
-                        <option value="{{ $id }}" {{ old('project_id') == $id ? 'selected' : '' }}>{{ $project }}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('project'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('project') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.folder.fields.project_helper') }}</span>
-            </div>
-
-            <div class="form-group">
-                <label class="required" for="folder_access">{{ trans('cruds.folder_access.fields.folder_access') }}</label>
-                <select class="form-control select2 {{ $errors->has('folder_access') ? 'is-invalid' : '' }}" name="folder_access" id="folder_access" required>
-                    @foreach($folders as $id => $folder)
-                        <option value="{{ $id }}" {{ old('folder_access') == $id ? 'selected' : '' }}>{{ $folder }}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('folder_access'))
-                    <div class="invalid-feedback">
-                        {{ $errors->first('folder_access') }}
-                    </div>
-                @endif
-                <span class="help-block">{{ trans('cruds.folder_access.fields.folder_access_helper') }}</span>
-            </div>--}}
-
             <div class="container">
                 <div class="row">
                     <div class="form-group col">
-                        <label for="deadline">{{trans('global.term')}}</label>
-                        <input type="datetime-local" id="deadline" name="deadline" class="form-control">
+                        <label for="deadline">{{trans('global.term')}} *</label>
+                        <input type="datetime-local" id="deadline" value="{{ old('deadline') }}" name="deadline" class="form-control" required>
                     </div>
 
                     <div class="form-group col">
-                        <label for="priority">{{trans('global.priority')}}</label>
-                        <select name="priority" id="priority" class="form-control">
+                        <label for="priority">{{trans('global.priority')}} *</label>
+                        <select name="priority" id="priority" class="form-control" required>
                             <option value="low">{{trans('global.low')}}</option>
                             <option value="medium">{{trans('global.means')}}</option>
                             <option value="high">{{trans('global.important')}}</option>
@@ -80,7 +49,7 @@
 
                     <div class="form-group col-6">
                         <label for="message">{{ trans('global.message') }}</label>
-                        <textarea name="message" id="message" class="form-control"></textarea>
+                        <textarea name="message" id="message" class="form-control">{{old('message')}}</textarea>
                     </div>
 
                     <div class="form-group col-lg-12">
@@ -270,7 +239,7 @@
 
                             "<div class='form-group col'>" +
                             "<label for='deadline"+userId[i]+"'>{{ trans('global.term') }} {{ trans('global.for') }} " +name[i]+ "</label>" +
-                            "<input id='deadline"+userId[i]+"' name='deadline"+userId[i]+"' type='datetime-local' class='form-control'>" +
+                            "<input id='deadline"+userId[i]+"' name='deadline"+userId[i]+"' type='datetime-local' class='form-control' required>" +
                             "</div> " +
 
                             "<div class='col'> " +
@@ -283,10 +252,10 @@
 
 
                             "<div class='form-group col switch"+userId[i]+"' style='display:none'>" +
-                            "<label class='required' for='user_list"+userId[i]+"'> Utilisateur délégué</label>" +
-                            "<select id='user_list"+userId[i]+"' name='user_list"+userId[i]+"' class='form-control' required>" +
+                            "<label for='user_list"+userId[i]+"'>{{trans('global.delegated_user')}}</label>" +
+                            "<select id='user_list"+userId[i]+"' name='user_list"+userId[i]+"' class='form-control'>" +
                             @foreach($users as $id => $user)
-                                "<option value='{{ $id }}'>{{ $user }}</option>" +
+                                "<option value='{{ $id }}' {{ in_array($id, old('switch"+userId[i]+"', [])) ? 'selected' : '' }}>{{ $user }}</option>" +
                             @endforeach +
                                 "</select>" +
                             "</div> "+

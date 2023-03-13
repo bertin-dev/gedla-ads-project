@@ -113,9 +113,10 @@
 
                     <div class="container-fluid">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-7">
                                 {{--<img class="img-thumbnail img_detail">--}}
-                                <iframe class="iframeFile" src="" width="350" height="500"></iframe>
+                               <embed class="iframeFile" id='100' width='100%' height='600px'/>
+
                                 <div class="text-left">
                                     @can('open_file_access')
                                         <a class="myUrl col-lg-4" target="_blank">{{trans('global.open')}} </a>
@@ -129,17 +130,19 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6 ml-auto">
+                            <div class="col-md-5 ml-auto">
                                 <span class="folder_id col-lg-4"></span>
                                 <span class="folder_size col-lg-4"></span>
                                 <span class="version col-lg-4"></span>
                                 <hr>
 
-                                <div class="myActivity">
+                                <div class="">
                                     <h5>{{trans('global.my_recent_activity')}}</h5>
-                                    <ul>
-                                        <li><small><strong>Bertin</strong> à envoyer un document en attente de validation à <strong>cyrille</strong> il y a 10h</small></li>
-                                    </ul>
+                                    <div class="loading">
+                                        <center><img src="{{asset('images/loading.gif')}}" alt=""></center>
+                                    </div>
+                                    <h6 class="initMyActivity"></h6>
+                                    <ul class="myActivity"></ul>
                                 </div>
 
                                 <div class="card workflow_form" style="display: none">
@@ -223,7 +226,10 @@
                     <h5 class="modal-title">{{ trans('global.file_action') }}</h5><br>
                     <ul>
                         @can('validate_file_access')
-                            <li><a href="#" class="document_id validate_file_access">{{trans('global.validate')}}</a></li>
+                            <li><a href="#" class="document_id validation validate_file_access" title="validation">{{trans('global.validate')}}</a></li>
+                            <li><a href="#" class="document_id validation_signature validate_file_access" title="validation_signature">validation avec signature</a></li>
+                            <li><a href="#" class="validation_paraphe validate_file_access" title="validation_paraphe">validation avec paraphe</a></li>
+                            <li><a href="#" class="document_id rejected validate_file_access" title="rejected">Rejeter/refuser</a></li>
                         @endcan
                         @can('operation_access')
                             <li><a href="#" class="workflow_validate workflow">{{trans('global.start_workflow_validation')}}</a></li>

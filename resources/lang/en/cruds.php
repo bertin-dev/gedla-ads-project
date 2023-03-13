@@ -235,4 +235,25 @@ return [
         'title'          => 'Initial',
         'title_singular' => 'Initial',
     ],
+
+    'archive' => [
+        'title'          => 'Archive',
+        'title_singular' => 'Archive',
+        'fields'         => [
+            'id'                => 'ID',
+            'id_helper'         => ' ',
+            'document'          => 'Document',
+            'archive_text'      => 'Name',
+            'archive_text_helper' => ' ',
+            'file_type'         => 'file type',
+            'size'              => 'Size',
+            'state'             => 'State',
+            'archive'           => 'archive',
+            'visibility'        => 'visibility',
+            'version'           => 'version',
+            'created_by'        => 'Created by',
+            'created_at'        => 'Created at',
+            'updated_at'        => 'updated_at',
+        ],
+    ],
 ];

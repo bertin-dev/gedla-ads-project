@@ -244,4 +244,25 @@ return [
         'title_singular' => 'Paraphe',
     ],
 
+    'archive' => [
+        'title'          => 'Archive',
+        'title_singular' => 'Archive',
+        'fields'         => [
+            'id'                => 'ID',
+            'id_helper'         => ' ',
+            'document'          => 'Document',
+            'archive_text'      => 'Nom',
+            'archive_text_helper' => ' ',
+            'file_type'         => 'Type Fichier',
+            'size'              => 'Taille',
+            'state'             => 'Etat',
+            'archive'           => 'archive',
+            'visibility'        => 'visibilité',
+            'version'           => 'version',
+            'created_by'        => 'Créee par',
+            'created_at'        => 'Créée le',
+            'updated_at'        => 'Modifié le',
+        ],
+    ],
+
 ];

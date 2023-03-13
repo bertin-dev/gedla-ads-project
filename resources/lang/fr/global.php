@@ -392,5 +392,7 @@ return [
     'or'                             =>  'Ou',
     'for'                            =>  'Pour',
     'enable_delegation'              =>  'Activer la délégation de signature?',
+    'delegated_user'                 =>  'Utilisateur délégué',
+    'shared_file'                    =>  'Dans un dossier partagé le',
 
 ];

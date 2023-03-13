@@ -433,6 +433,10 @@
         function updateMediaTable(id) {
             /*let url = "{{ route('admin.workflow-management.hasReadMedia', ":id") }}";
             url = url.replace(':id', id);*/
+            let myActivity = $(".myActivity");
+            let initMyActivity = $('.initMyActivity');
+            myActivity.empty();
+            initMyActivity.empty();
             $.ajax({
                 url: "{{ route('admin.workflow-management.hasReadMedia') }}",
                 method: 'POST',
@@ -440,13 +444,23 @@
                     id: id
                 },
                 dataType: 'json',
+                beforeSend: function (){
+                    $('.loading').show();
+                },
                 success: function (data) {
-                    //alert(data.user[0]);
-                    /*$('.menu').html(data.notification);
 
-                    if (data.unseen_notification > 0) {
-                        $('.count').html(data.unseen_notification);
-                    }*/
+                    if(data.media.parapheur == null){
+                        initMyActivity.text("{{trans('global.import')}} {{trans('global.file')}} " + data.media.file_name.substring(14) + " {{trans('global.shared_file')}} " + formatDate(data.media.created_at));
+                    }
+
+                    $.each(data.media.operations, function(index, operationItem){
+
+                        if(operationItem.operation_state==="pending"){
+                            myActivity.append('<li><strong>' + getUser(operationItem.user_id_sender) + '</strong> à envoyer un document en attente de validation à <strong>' + getUser(operationItem.user_id_receiver) + '</strong></li>');
+                        }else{
+                            myActivity.append('<li><strong>' + getUser(operationItem.user_id_receiver) + '</strong> a validé le document ' + data.media.file_name.substring(14) + '</li>');
+                        }
+                    });
 
 
                     //let dataURL = $(this).attr('data-id');
@@ -459,6 +473,9 @@
                 error: function(){
                     alert("Error founded where user display document");
                     console.log('Error founded where user display document');
+                },
+                complete:function (){
+                    $('.loading').hide();
                 }
             });
         }
@@ -596,6 +613,37 @@
 
     });
 
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
+
+        return [day, month, year].join('-');
+    }
+
+    function getUser(id = ''){
+        let result;
+        $.ajax({
+            type: 'GET', //THIS NEEDS TO BE GET
+            url:"{{ route('users.user-find', '') }}"+"/"+id,
+            dataType: 'json',
+            async:false,
+            success: function (data) {
+                console.log(data);
+                result = data.user.name;
+            },error:function(){
+                alert("une erreur a ete trouvé");
+            },
+        });
+        return result;
+    }
 </script>
 
 

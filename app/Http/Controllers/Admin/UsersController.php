@@ -95,4 +95,11 @@ class UsersController extends Controller
 
         return response(null, Response::HTTP_NO_CONTENT);
     }
+
+    public function findUser($id){
+        $user = User::findOrFail($id);
+        return response()->json([
+            'user' => $user,
+        ], Response::HTTP_OK);
+    }
 }
