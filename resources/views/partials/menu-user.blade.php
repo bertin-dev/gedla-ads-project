@@ -17,27 +17,31 @@
         </li>
         @foreach ($children_level_n as $child)
             <li class="c-sidebar-nav-dropdown">
-
                 <a class="c-sidebar-nav-dropdown-toggle" href="#">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-home"></i>
+                    <i class="c-sidebar-nav-icon fas fa-fw fa-list"></i>
                     {{ strtolower(trans('panel.work_space')) }} ({{ strtolower($child->name) }})
                 </a>
-
             <ul class="c-sidebar-nav-dropdown-items">
                 @foreach ($child->subChildren as $childCategory)
                     @include('partials.child_category', ['child_category' => $childCategory])
                 @endforeach
             </ul>
             </li>
-            <li class="c-sidebar-nav-item">
-                <a href="#" class="c-sidebar-nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-sign-out-alt">
-
-                    </i>
-                    {{ trans('global.logout') }}
-                </a>
-            </li>
         @endforeach
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ route('gedla-messenger') }}">
+                <i class="c-sidebar-nav-icon fas fa-fw fa-send"></i>
+                {{ trans('panel.gedla-messenger') }}
+            </a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a href="#" class="c-sidebar-nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
+                <i class="c-sidebar-nav-icon fas fa-fw fa-sign-out-alt">
+
+                </i>
+                {{ trans('global.logout') }}
+            </a>
+        </li>
     </ul>
 
     {{--<ul class="c-sidebar-nav">

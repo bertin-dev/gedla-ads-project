@@ -13,4 +13,6 @@ return [
     'open' => 'Open',
     'ocr' => 'OCR',
     'acquisition_by' => 'Acquisition by',
+    'gedla-messenger' => 'Gedla Messenger',
+    'gedla-calendar' => 'Gedla Calendar',
 ];
