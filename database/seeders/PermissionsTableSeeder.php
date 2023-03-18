@@ -266,8 +266,18 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 62,
                 'title' => 'archive_delete',
             ],
-
-
+            [
+                'id'    => 63,
+                'title' => 'edit_file_access',
+            ],
+            [
+                'id'    => 64,
+                'title' => 'messenger_access',
+            ],
+            [
+                'id'    => 65,
+                'title' => 'calendar_access',
+            ],
         ];
 
 

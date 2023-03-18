@@ -28,12 +28,24 @@
             </ul>
             </li>
         @endforeach
+
+        @can('messenger_access')
         <li class="c-sidebar-nav-item">
             <a class="c-sidebar-nav-link" href="{{ route('gedla-messenger') }}">
                 <i class="c-sidebar-nav-icon fas fa-fw fa-send"></i>
                 {{ trans('panel.gedla-messenger') }}
             </a>
         </li>
+        @endcan
+
+        @can('calendar_access')
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ route('calendar.home') }}">
+                <i class="c-sidebar-nav-icon fas fa-fw fa-calendar"></i>
+                {{ trans('panel.gedla-calendar') }}
+            </a>
+        </li>
+        @endcan
         <li class="c-sidebar-nav-item">
             <a href="#" class="c-sidebar-nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
                 <i class="c-sidebar-nav-icon fas fa-fw fa-sign-out-alt">

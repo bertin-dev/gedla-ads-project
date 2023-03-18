@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\ArchiveController;
+use App\Http\Controllers\Admin\CalendarAdminController;
 use App\Http\Controllers\Admin\FoldersAccessController;
 use App\Http\Controllers\Admin\SignatureController;
 use App\Http\Controllers\Admin\WorkflowManagementController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\OcrController;
@@ -69,6 +71,9 @@ Route::group(['middleware' => ['auth', 'user']], function() {
 
     //find user by id
     Route::get('find/{id}', [UsersController::class, 'findUser'])->name('users.user-find');
+
+    //Calendar
+    Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.home');
 });
 
 Auth::routes(['register' => false]);
@@ -132,6 +137,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     //Archive document
     Route::resource('archive', ArchiveController::class);
 
+    //Calendar admin
+    Route::get('calendar-admin', [CalendarAdminController::class, 'index'])->name('calendar.admin');
 });
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {
 // Change password
