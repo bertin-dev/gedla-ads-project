@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\FoldersAccessController;
 use App\Http\Controllers\Admin\SignatureController;
 use App\Http\Controllers\Admin\WorkflowManagementController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\createDocumentController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\OcrController;
@@ -152,6 +153,9 @@ Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 
 
 //Import Signature or Paraphe
 Route::get('signature/upload', [SignatureController::class, 'upload'])->name('signature.upload');
+//Create document
+Route::get('create-document', [createDocumentController::class, 'create'])->name('create-document');
+Route::post('upload-document', [createDocumentController::class, 'upload'])->name('upload-document');
 
 
 //Route::post('uploadOCR', [PostUploadOCRController::class, 'postUploadOCR'])->name('post-upload-ocr');

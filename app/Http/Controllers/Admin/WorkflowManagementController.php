@@ -460,7 +460,84 @@ class WorkflowManagementController extends Controller
             break;
 
             case "rejected":
-                dd($getMediaDocument->toArray());
+                $getIdPreviousUser = $getMediaDocument->operations->where('user_id_receiver', auth()->id())->first()->user_id_sender;
+                $oldValue = json_decode($getMediaDocument->step_workflow);
+                for ($i =0; $i<count($oldValue); $i++){
+
+                    //check if all users are pending
+                    if($oldValue[$i]->state == "finish"){
+                        //check if user connected exist in workflow if yes then update state
+                        if($oldValue[$i]->user_id == auth()->id()){
+                            $oldValue[$i]->state = "pending";
+                        }
+                    }
+                }
+
+                    //$getDataNextUser = User::findOrFail($idNextUser);
+                    $getMediaWithOperationDocument = $getMediaDocument->operations->first();
+
+                    if($getMediaWithOperationDocument != null){
+
+                        if($getMediaWithOperationDocument->status == "public"){
+
+                            $user = User::with('multiFolders')->where('id', $getIdPreviousUser)->first();
+                            $folder = $user->multiFolders->first();
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->model_id = $folder->id;
+                            $getMediaDocument->step_workflow = $oldValue;
+                            $getMediaDocument->save();
+
+                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$getIdPreviousUser]);
+
+                        }else{
+
+                            $parapheur = Parapheur::where('user_id', $getIdPreviousUser)->first();
+                            if($parapheur == null){
+                                $getLastInsertId = Parapheur::all()->max('id');
+                                $parapheur = Parapheur::create([
+                                    'name' => 'parapheur'. $getLastInsertId + 1,
+                                    'project_id' => 1,
+                                    'user_id' => $getIdPreviousUser
+                                ]);
+                            }
+
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->parapheur_id = $parapheur->id;
+                            $getMediaDocument->step_workflow = $oldValue;
+                            $getMediaDocument->save();
+
+                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$getIdPreviousUser]);
+
+                        }
+
+                        //store datas operation table
+                        Operation::create([
+                            'deadline' => $getMediaWithOperationDocument->deadline,
+                            'priority' => $getMediaWithOperationDocument->priority,
+                            'status' => $getMediaWithOperationDocument->status,
+                            'user_id_sender' => auth()->id(),
+                            'user_id_receiver' => $getIdPreviousUser,
+                            'media_id' => $getMediaDocument->id,
+                            'message' => $getMediaWithOperationDocument->message,
+                            'receive_mail_notification' => $getMediaWithOperationDocument->receive_mail_notification,
+                            'operation_type' => $request->validationType,
+                            'operation_state' => 'rejected',
+                            'num_operation' => (string) Str::orderedUuid(),
+                        ]);
+
+                        $getOperations = Operation::where('media_id', $getMediaDocument->id)
+                            ->where('user_id_receiver', auth()->id())
+                            //->orWhere('user_id_sender', auth()->id())
+                            ->get();
+
+                        foreach ($getOperations as $operationList){
+                            $operationList->update(['operation_state' => 'rejected']);
+                        }
+                    }
+
+                //dd($getMediaDocument->operations->where('user_id_receiver', auth()->id())->toArray());
             break;
         }
 

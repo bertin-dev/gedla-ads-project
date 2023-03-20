@@ -14,6 +14,10 @@
                         <a class="btn btn-success" href="{{ route('parapheur.upload') }}?parapheur_id={{ $parapheurWithMedia->id }}">
                             {{ trans('global.add') }} {{trans('global.upload_file')}}
                         </a>
+                        <a class="btn btn-success" href="{{ route('create-document') }}?parapheur_id={{ $parapheurWithMedia->id }}">
+                            {{ trans('global.create') }} {{trans('global.file')}}
+                        </a>
+
                     </div>
 
                     <div class="col-lg-12" style="margin-top: 20px">
@@ -40,7 +44,7 @@
                         <div class="col-lg-4">
                             <div class="card" data-toggle="modal" data-target=".bd-example-modal-lg"
                                  data-id="{{$file->id}}" data-name="{{ucfirst(strtolower(Str::substr($file->file_name, 14)))}}" data-size="{{$realSize}}"
-                                 data-item_type="{{$result}}" data-url="{{$file->getUrl()}}" data-version="{{$file->version}}">
+                                 data-item_type="{{$result}}" data-url="{{$file->getUrl()}}" data-version="{{$file->version}}" data-mime_type="{{$file->mime_type}}">
                                 <div class="row no-gutters">
                                     <div class="col-sm-4">
                                         <img class="img-thumbnail" src="{{ $result ?? url('images/file-thumbnail.png') }}"
@@ -114,12 +118,15 @@
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-md-7">
-                                {{--<img class="img-thumbnail img_detail">--}}
-                               <embed class="iframeFile" id='100' width='100%' height='600px'/>
 
+                                <div class="iframeFile"></div>
+                               {{--<embed class="iframeFile" id='100' width='100%' height='600px'/>--}}
                                 <div class="text-left">
                                     @can('open_file_access')
                                         <a class="myUrl col-lg-4" target="_blank">{{trans('global.open')}} </a>
+                                    @endcan
+                                    @can('edit_file_access')
+                                        <a class="col-lg-4 mediaEdit" target="_blank" href="#">{{trans('global.edit_document')}} </a>
                                     @endcan
                                     @can('download_access')
                                         <a href="#" class="mediaDownload col-lg-4"> {{trans('global.download')}}</a>
