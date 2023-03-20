@@ -42,6 +42,7 @@
 
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet" />
     @yield('styles')
+    @livewireStyles
 </head>
 <body class="c-app">
 
@@ -116,6 +117,7 @@
             @if(count(config('panel.available_languages', [])) > 1)
                 <li class="c-header-nav-item dropdown d-md-down-none">
                     <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-sign-language fa-sm fa-fw mr-2 text-gray-400"></i>
                         {{ strtoupper(app()->getLocale()) }}
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
@@ -127,32 +129,134 @@
             @endif
         </ul>
 
-        <ul class="navbar-nav ml-auto">
-            @guest
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                </li>
-            @else
-                <li class="nav-item dropdown">
-                    <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                        {{ Auth::user()->name }} <span class="caret"></span>
-                    </a>
-
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{{ route('logout') }}"
-                           onclick="event.preventDefault();
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown notification-ui show">
+                            <a class="nav-link dropdown-toggle notification-ui_icon" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-bell"></i>
+                                <span class="unread-notification"></span>
+                            </a>
+                            <div class="dropdown-menu notification-ui_dd" aria-labelledby="navbarDropdown">
+                                <div class="notification-ui_dd-header">
+                                    <h3 class="text-center">Notification</h3>
+                                </div>
+                                <div class="notification-ui_dd-content">
+                                    <a href="#!" class="notification-list notification-list--unread text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user1.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>John Doe</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>10 mins ago</small></p>
+                                    </a>
+                                    <a href="#!" class="notification-list notification-list--unread text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user2.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>Richard Miles</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>1 day ago</small></p>
+                                    </a>
+                                    <a href="#!" class="notification-list text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user3.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>Brian Cumin</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>1 day ago</small></p>
+                                    </a>
+                                    <a href="#!" class="notification-list text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user4.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>Lance Bogrol</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>1 day ago</small></p>
+                                    </a>
+                                    <a href="#!" class="notification-list notification-list--unread text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user1.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>John Doe</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>10 mins ago</small></p>
+                                    </a>
+                                    <a href="#!" class="notification-list notification-list--unread text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user2.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>Richard Miles</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>1 day ago</small></p>
+                                    </a>
+                                    <a href="#!" class="notification-list text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user3.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>Brian Cumin</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>1 day ago</small></p>
+                                    </a>
+                                    <a href="#!" class="notification-list text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user4.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>Lance Bogrol</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>1 day ago</small></p>
+                                    </a>
+                                </div>
+                                <div class="notification-ui_dd-footer">
+                                    <a href="#!" class="btn btn-success btn-block">View All</a>
+                                </div>
+                            </div>
+                        </li>
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                        @guest
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                            </li>
+                        @else
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ ucfirst(Auth::user()->name) }}</span>
+                                    <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('logout') }}" data-toggle="modal" data-target="#logoutModal"
+                                       onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
-                            {{ __('Logout') }}
-                        </a>
-
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                            @csrf
-                        </form>
-                    </div>
-                </li>
-            @endguest
-        </ul>
-
+                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        {{ __('Logout') }}
+                                    </a>
+                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                        @csrf
+                                    </form>
+                                </div>
+                            </li>
+                        @endguest
+                    </ul>
+                </div>
+            </div>
+        </nav>
     </header>
 
     <div class="c-body">
@@ -252,11 +356,13 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/select/1.3.0/js/dataTables.select.min.js"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/23.0.0/classic/ckeditor.js"></script>
+{{--<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/super-build/ckeditor.js"></script>--}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.js"></script>
-
+<script src="{{asset('js/mustache.js')}}"></script>
+<script src="{{asset('js/jquery.notif.js')}}"></script>
 <script src="{{ asset('js/main.js') }}"></script>
 <script>
     $(function() {
@@ -374,17 +480,51 @@
 </script>
 @yield('scripts')
 
-{{--<script src="//cdn.ckeditor.com/4.20.1/standard/ckeditor5.js"></script>
-<script>
-    $(document).ready(function() {
-        $('.ckeditor').ckeditor();
-    });
 
-    /*CKEDITOR.replace('description', {
-        filebrowserUploadUrl: "{{route('ckeditor.image-upload', ['_token' => csrf_token() ])}}",
+
+<script>
+    let editor;
+      ClassicEditor
+        .create( document.querySelector( '#description1' ) )
+          .then( newEditor => {
+              editor = newEditor;
+          } )
+        .catch( error => {
+            console.error( error );
+        } );
+
+    /*CKEDITOR.replace('description1', {
+        filebrowserUploadUrl: "{{ route('folders.storeMedia') }}",
         filebrowserUploadMethod: 'form'
     });*/
-</script>--}}
+
+
+    $(function () {
+        $('#submit').on('click', function () {
+            const editorData = editor.getData();
+            //alert($('#description1').val());
+
+            $.ajax({
+                url: "{{ route('upload-document') }}",
+                method: 'POST',
+                data: {
+                    description1: editorData,
+                    folder_id: {{$folderId ?? 0}},
+                    parapheur_id: {{$parapheurId ?? 0}},
+                },
+                dataType: 'json',
+                success: function (data) {
+                    //alert(data.title);
+                    /*window.location.href = "{{--{{ route('show-all-prescription')}}--}}";*/
+                },
+                error: function () {
+                    alert("une erreur est survenue");
+                }
+            });
+
+        });
+    });
+</script>
 
 
 <script>
@@ -402,15 +542,32 @@
             let size = $(e.relatedTarget).data('size');
             let version = $(e.relatedTarget).data('version');
             let itemType = $(e.relatedTarget).data('item_type');
+            let mimeType = $(e.relatedTarget).data('mime_type');
+            let loadFile = $('.iframeFile');
             //let objects = $('#objectLink').data('name');
-            $('.img_detail').attr({
-                src: itemType,
-                alt: name,
-                title: name
-            });
-            $('.iframeFile').attr({
+
+            switch (mimeType){
+                case "application/pdf":
+                    loadFile.html("<embed src='"+url+"' id='100' width='100%' height='600px'/>");
+                    break;
+                case "image/jpeg":
+                    loadFile.html("<img class='img-thumbnail' src='"+itemType+"' alt='"+name+"' title='"+name+"' >");
+                    break;
+                case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                    //loadFile.html("<iframe src='https://view.officeapps.live.com/op/view.aspx?src=http%3A%2F%2Fieee802%2Eorg%3A80%2Fsecmail%2FdocIZSEwEqHFr%2Edoc' frameborder='0' style='width:100%;min-height:640px;'></iframe>");
+                    //loadFile.html("<iframe src='https://view.officeapps.live.com/op/embed.aspx?src="+encodeURIComponent(url)+"' width='100%' height='623px' frameborder='0'></iframe>");
+                    loadFile.html("<iframe src='https://view.officeapps.live.com/op/embed.aspx?src=http%3A%2F%2Fieee802%2Eorg%3A80%2Fsecmail%2FdocIZSEwEqHFr%2Edoc' width='100%' height='600px' frameborder='0'></iframe>");
+                    break;
+                case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                    loadFile.html("<iframe src='https://view.officeapps.live.com/op/embed.aspx?src="+encodeURIComponent(url)+"' width='100%' height='623px' frameborder='0'></iframe>");
+                    break;
+                default:
+                    loadFile.html("<img class='img-thumbnail' src='"+itemType+"' alt='"+name+"' title='"+name+"' >");
+            }
+
+           /* $('.iframeFile').attr({
                 src: url
-            });
+            });*/
             $('.file-title').text('{{trans('global.file_details')}} : ' + name);
             $('.folder_id').text('{{ trans('global.folder') }} : ' + id + '');
             $('.folder_size').text('{{ trans('global.size') }} : ' + size + ' KO');
@@ -498,17 +655,26 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    /*$('.success_download').css({
-                    'display': 'block',
-                    })*/
-                    $('.success_download').text(data);
+                    $('body').notif({
+                        title: 'Opération Réussie',
+                        content: data,
+                        img: '{{asset('images/success-notif.jpg')}}',
+                        cls: 'success1'
+                    });
                 },
-                error: function (data) {
+                error: function () {
                     console.log('Link not found');
+                },
+                complete: function (){
+                    $('body').notif({
+                        title: 'Opération Réussie',
+                        content: 'Element Téléchargé avec succès.',
+                        img: '{{asset('images/success-notif.jpg')}}',
+                        cls: 'success1'
+                    });
                 }
             });
         });
-
 
         //When user has validate media
         $('.validation').on('click', function (e) {
@@ -611,6 +777,11 @@
             });
         });
 
+        $('.mediaEdit').on('click', function (e) {
+            e.preventDefault();
+            alert("dsfsdf");
+        });
+
     });
 
 
@@ -646,8 +817,10 @@
     }
 </script>
 
+@livewireScripts
+@stack('scripts')
 
-<script>
+{{--<script>
     import ExportPdf from '@ckeditor/ckeditor5-export-pdf/src/exportpdf';
     console.log(ExportPdf);
 
@@ -682,7 +855,252 @@
         .catch( error => {
             console.error( error );
         } );
-</script>
+</script>--}}
+
+
+
+<!--
+	https://ckeditor.com/docs/ckeditor5/latest/features/images/image-upload/ckbox.html
+-->
+{{--<script src="https://cdn.ckbox.io/CKBox/1.3.2/ckbox.js"></script>--}}
+<!--
+	The "super-build" of CKEditor 5 served via CDN contains a large set of plugins and multiple editor types.
+	See https://ckeditor.com/docs/ckeditor5/latest/installation/getting-started/quick-start.html#running-a-full-featured-editor-from-cdn
+-->
+
+<!--
+	Uncomment to load the Spanish translation
+<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/super-build/translations/es.js"></script>
+-->
+{{--<script>
+    // This sample still does not showcase all CKEditor 5 features (!)
+    // Visit https://ckeditor.com/docs/ckeditor5/latest/features/index.html to browse all the features.
+    CKEDITOR.ClassicEditor.create( document.querySelector( '#editor' ), {
+        // https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
+        toolbar: {
+            items: [
+                'ckbox', 'uploadImage', '|',
+                'exportPDF','exportWord', '|',
+                'comment', 'trackChanges', 'revisionHistory', '|',
+                'findAndReplace', 'selectAll', '|',
+                'bold', 'italic', 'strikethrough', 'underline', 'removeFormat', '|',
+                'bulletedList', 'numberedList', 'todoList', '|',
+                'outdent', 'indent', '|',
+                'undo', 'redo',
+                '-',
+                'heading', '|',
+                'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'highlight', '|',
+                'alignment', '|',
+                'link', 'blockQuote', 'insertTable', 'mediaEmbed', 'codeBlock', 'htmlEmbed', '|',
+                'specialCharacters', 'horizontalLine', 'pageBreak', '|',
+                // Intentionally skipped buttons to keep the toolbar smaller, feel free to enable them:
+                // 'code', 'subscript', 'superscript', 'textPartLanguage', '|',
+                // ** To use source editing remember to disable real-time collaboration plugins **
+                // 'sourceEditing'
+            ],
+            shouldNotGroupWhenFull: true
+        },
+        // Changing the language of the interface requires loading the language file using the <script> tag.
+        // language: 'es',
+        list: {
+            properties: {
+                styles: true,
+                startIndex: true,
+                reversed: true
+            }
+        },
+        // https://ckeditor.com/docs/ckeditor5/latest/features/headings.html#configuration
+        heading: {
+            options: [
+                { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
+                { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' },
+                { model: 'heading5', view: 'h5', title: 'Heading 5', class: 'ck-heading_heading5' },
+                { model: 'heading6', view: 'h6', title: 'Heading 6', class: 'ck-heading_heading6' }
+            ]
+        },
+        // https://ckeditor.com/docs/ckeditor5/latest/features/font.html#configuring-the-font-family-feature
+        fontFamily: {
+            options: [
+                'default',
+                'Arial, Helvetica, sans-serif',
+                'Courier New, Courier, monospace',
+                'Georgia, serif',
+                'Lucida Sans Unicode, Lucida Grande, sans-serif',
+                'Tahoma, Geneva, sans-serif',
+                'Times New Roman, Times, serif',
+                'Trebuchet MS, Helvetica, sans-serif',
+                'Verdana, Geneva, sans-serif'
+            ],
+            supportAllValues: true
+        },
+        // https://ckeditor.com/docs/ckeditor5/latest/features/font.html#configuring-the-font-size-feature
+        fontSize: {
+            options: [ 10, 12, 14, 'default', 18, 20, 22 ],
+            supportAllValues: true
+        },
+        // Be careful with the setting below. It instructs CKEditor to accept ALL HTML markup.
+        // https://ckeditor.com/docs/ckeditor5/latest/features/general-html-support.html#enabling-all-html-features
+        // htmlSupport: {
+        // 	allow: [
+        // 		{
+        // 			name: /.*/,
+        // 			attributes: true,
+        // 			classes: true,
+        // 			styles: true
+        // 		}
+        // 	]
+        // },
+        // Be careful with enabling previews
+        // https://ckeditor.com/docs/ckeditor5/latest/features/html-embed.html#content-previews
+        htmlEmbed: {
+            showPreviews: true
+        },
+        // https://ckeditor.com/docs/ckeditor5/latest/features/mentions.html#configuration
+        mention: {
+            feeds: [
+                {
+                    marker: '@',
+                    feed: [
+                        '@apple', '@bears', '@brownie', '@cake', '@cake', '@candy', '@canes', '@chocolate', '@cookie', '@cotton', '@cream',
+                        '@cupcake', '@danish', '@donut', '@dragée', '@fruitcake', '@gingerbread', '@gummi', '@ice', '@jelly-o',
+                        '@liquorice', '@macaroon', '@marzipan', '@oat', '@pie', '@plum', '@pudding', '@sesame', '@snaps', '@soufflé',
+                        '@sugar', '@sweet', '@topping', '@wafer'
+                    ],
+                    minimumCharacters: 1
+                }
+            ]
+        },
+        // https://ckeditor.com/docs/ckeditor5/latest/features/editor-placeholder.html#using-the-editor-configuration
+        placeholder: 'Welcome to CKEditor 5!',
+        // Used by real-time collaboration
+        cloudServices: {
+            // Be careful - do not use the development token endpoint on production systems!
+            tokenUrl: 'https://96306.cke-cs.com/token/dev/SPHxGoWfSaNh8dI3tN7ReXwEqGcqTQ5xn2Bb?limit=10',
+            webSocketUrl: 'wss://96306.cke-cs.com/ws'
+        },
+        collaboration: {
+            // Modify the channelId to simulate editing different documents
+            // https://ckeditor.com/docs/ckeditor5/latest/features/collaboration/real-time-collaboration/real-time-collaboration-integration.html#the-channelid-configuration-property
+            channelId: 'document-id-2'
+        },
+        // https://ckeditor.com/docs/ckeditor5/latest/features/collaboration/annotations/annotations-custom-configuration.html#sidebar-configuration
+        sidebar: {
+            container: document.querySelector( '#sidebar' )
+        },
+        // https://ckeditor.com/docs/ckeditor5/latest/features/collaboration/real-time-collaboration/users-in-real-time-collaboration.html#users-presence-list
+        presenceList: {
+            container: document.querySelector( '#presence-list-container' )
+        },
+        // Add configuration for the comments editor if the Comments plugin is added.
+        // https://ckeditor.com/docs/ckeditor5/latest/features/collaboration/annotations/annotations-custom-configuration.html#comment-editor-configuration
+        comments: {
+            editorConfig: {
+                extraPlugins: CKEDITOR.ClassicEditor.builtinPlugins.filter( plugin => {
+                    // Use e.g. Ctrl+B in the comments editor to bold text.
+                    return [ 'Bold', 'Italic', 'Underline', 'List', 'Autoformat', 'Mention' ].includes( plugin.pluginName );
+                } ),
+                // Combine mentions + Webhooks to notify users about new comments
+                // https://ckeditor.com/docs/cs/latest/guides/webhooks/events.html
+                mention: {
+                    feeds: [
+                        {
+                            marker: '@',
+                            feed: [
+                                '@Baby Doe', '@Joe Doe', '@Jane Doe', '@Jane Roe', '@Richard Roe'
+                            ],
+                            minimumCharacters: 1
+                        }
+                    ]
+                },
+            }
+        },
+        // Do not include revision history configuration if you do not want to integrate it.
+        // Remember to remove the 'revisionHistory' button from the toolbar in such a case.
+        revisionHistory: {
+            editorContainer: document.querySelector( '#editor-container' ),
+            viewerContainer: document.querySelector( '#revision-viewer-container' ),
+            viewerEditorElement: document.querySelector( '#revision-viewer-editor' ),
+            viewerSidebarContainer: document.querySelector( '#revision-viewer-sidebar' ),
+        },
+        // https://ckeditor.com/docs/ckeditor5/latest/features/images/image-upload/ckbox.html
+        ckbox: {
+            // Be careful - do not use the development token endpoint on production systems!
+            tokenUrl: 'https://96306.cke-cs.com/token/dev/SPHxGoWfSaNh8dI3tN7ReXwEqGcqTQ5xn2Bb?limit=10'
+        },
+        // License key is required only by the Pagination plugin and non-realtime Comments/Track changes.
+        licenseKey: 'vzY5hX/Gzzl7+ZL7oKYQBTmpVZN/z4yoW3tkERtzPZ2tZecyvp6c6MRPRA==',
+        removePlugins: [
+            // Before enabling Pagination plugin, make sure to provide proper configuration and add relevant buttons to the toolbar
+            // https://ckeditor.com/docs/ckeditor5/latest/features/pagination/pagination.html
+            'Pagination',
+            // Intentionally disabled, file uploads are handled by CKBox
+            'Base64UploadAdapter',
+            // Intentionally disabled, file uploads are handled by CKBox
+            'CKFinder',
+            // Intentionally disabled, file uploads are handled by CKBox
+            'EasyImage',
+            // Requires additional license key
+            'WProofreader',
+            // Incompatible with real-time collaboration
+            'SourceEditing',
+            // Careful, with the Mathtype plugin CKEditor will not load when loading this sample
+            // from a local file system (file://) - load this site via HTTP server if you enable MathType
+            'MathType'
+            // If you would like to adjust enabled collaboration features:
+            // 'RealTimeCollaborativeComments',
+            // 'RealTimeCollaborativeTrackChanges',
+            // 'RealTimeCollaborativeRevisionHistory',
+            // 'PresenceList',
+            // 'Comments',
+            // 'TrackChanges',
+            // 'TrackChangesData',
+            // 'RevisionHistory',
+        ]
+    } )
+        .then( editor => {
+            window.editor = editor;
+
+            // Example implementation to switch between different types of annotations according to the window size.
+            // https://ckeditor.com/docs/ckeditor5/latest/features/collaboration/annotations/annotations-display-mode.html
+            const annotationsUIs = editor.plugins.get( 'AnnotationsUIs' );
+            const sidebarElement = document.querySelector( '.sidebar' );
+            let currentWidth;
+
+            function refreshDisplayMode() {
+                // Check the window width to avoid the UI switching when the mobile keyboard shows up.
+                if ( window.innerWidth === currentWidth ) {
+                    return;
+                }
+                currentWidth = window.innerWidth;
+
+                if ( currentWidth < 1000 ) {
+                    sidebarElement.classList.remove( 'narrow' );
+                    sidebarElement.classList.add( 'hidden' );
+                    annotationsUIs.switchTo( 'inline' );
+                }
+                else if ( currentWidth < 1300 ) {
+                    sidebarElement.classList.remove( 'hidden' );
+                    sidebarElement.classList.add( 'narrow' );
+                    annotationsUIs.switchTo( 'narrowSidebar' );
+                }
+                else {
+                    sidebarElement.classList.remove( 'hidden', 'narrow' );
+                    annotationsUIs.switchTo( 'wideSidebar' );
+                }
+            }
+
+            editor.ui.view.listenTo( window, 'resize', refreshDisplayMode );
+            refreshDisplayMode();
+
+            return editor;
+        } )
+        .catch( error => {
+            console.error( 'There was a problem initializing the editor.', error );
+        } );
+</script>--}}
 
 </body>
 </html>

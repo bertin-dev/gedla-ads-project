@@ -7,6 +7,7 @@ use App\Models\Operation;
 use App\Models\Parapheur;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ParapheurController extends Controller
@@ -181,8 +182,16 @@ class ParapheurController extends Controller
 
 
     public function download(Request $request){
-
         $media = Media::find($request->id);
+
+        Operation::create([
+            'user_id_sender' => auth()->id(),
+            'media_id' => $media->id,
+            'operation_type' => "download",
+            'operation_state' => 'success',
+            'num_operation' => (string) Str::orderedUuid(),
+        ]);
+
         return response()->download($media->getPath(), $media->file_name);
     }
 }

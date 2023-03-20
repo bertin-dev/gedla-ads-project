@@ -38,6 +38,7 @@
     <link href="http://keith-wood.name/css/jquery.signature.css" rel="stylesheet">
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet" />
     @yield('styles')
+    @livewireStyles
 </head>
 
 <body class="c-app">
@@ -387,6 +388,9 @@
     </script>
 
     @yield('scripts')
+
+    @livewireScripts
+    @stack('scripts')
 </body>
 
 </html>
