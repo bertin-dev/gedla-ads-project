@@ -11,8 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class UserAlert extends Model
 {
-    use HasFactory;
-    use Auditable;
+    use HasFactory, Auditable;
 
     public $table = 'user_alerts';
 

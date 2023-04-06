@@ -31,8 +31,37 @@ trait Auditable
         AuditLog::create([
             'description'  => $description,
             'subject_id'   => $model->id ?? null,
-            'subject_type' => sprintf('%s#%s', get_class($model), $model->id) ?? null,
-            'user_id'      => auth()->id() ?? null,
+            'subject_type' => null,
+            'current_user_id'      => auth()->id() ?? null,
+            'properties'   => $model ?? null,
+            'host'         => request()->ip() ?? null,
+        ]);
+    }
+
+
+    protected static function trackOperations(
+        $mediaId = '',
+        $operationType = '',
+        $description = '',
+        $operationState = '',
+        $userIdSender = '',
+        $userIdReceiver = '',
+        $name = '',
+        $message = '',
+        $model = '')
+    {
+        AuditLog::create([
+            'media_id'  => $mediaId,
+            'operation_type'  => $operationType,
+            'description'  => $description,
+            'operation_state'  => $operationState,
+            'user_id_sender'  => $userIdSender,
+            'user_id_receiver'  => $userIdReceiver,
+            'name'  => $name,
+            'message'  => $message,
+            'subject_id'   => $model->id ?? null,
+            'subject_type' => is_object($model) ? sprintf('%s#%s', get_class($model), $model->id) ?? null : null,
+            'current_user_id'      => auth()->id() ?? null,
             'properties'   => $model ?? null,
             'host'         => request()->ip() ?? null,
         ]);

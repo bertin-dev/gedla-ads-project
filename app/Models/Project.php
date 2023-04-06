@@ -15,8 +15,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Project extends Model
 {
-    use SoftDeletes;
-    use Auditable;
+    use SoftDeletes, Auditable;
 
     public $table = 'projects';
 

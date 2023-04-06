@@ -10,8 +10,7 @@ use \DateTimeInterface;
 
 class Permission extends Model
 {
-    use SoftDeletes;
-    use Auditable;
+    use SoftDeletes, Auditable;
 
     public $table = 'permissions';
 

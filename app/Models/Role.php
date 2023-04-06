@@ -11,8 +11,7 @@ use \DateTimeInterface;
 
 class Role extends Model
 {
-    use SoftDeletes;
-    use Auditable;
+    use SoftDeletes, Auditable;
 
     public $table = 'roles';
 

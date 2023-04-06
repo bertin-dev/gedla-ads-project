@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassDestroyFolderRequest;
+use App\Models\AuditLog;
 use App\Models\Folder;
 use App\Models\Operation;
 use App\Models\Parapheur;
@@ -19,9 +20,11 @@ use Notification;
 use setasign\Fpdi\Fpdi;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Controllers\Traits\Auditable;
 
 class WorkflowManagementController extends Controller
 {
+    use Auditable;
     /**
      * Display a listing of the resource.
      *
@@ -296,10 +299,35 @@ class WorkflowManagementController extends Controller
         return response(null, Response::HTTP_NO_CONTENT);
     }
 
+    public function openDocument(Request $request){
+        $getLog = AuditLog::where('media_id', $request->id)->where('operation_type', 'OPEN_DOCUMENT')->get();
+        if(count($getLog) === 0){
+            self::trackOperations($request->id,
+                "OPEN_DOCUMENT",
+                auth()->user()->name .' vient d\'ouvrir le document '. $request->name,
+                'success',
+                null,
+                auth()->id(),
+                auth()->user()->name);
+        }
+        return \response()->json($getLog);
+    }
 
     public function hasReadMedia(Request $request){
 
-        $mediaAndOperation = Operation::where([
+        $getLog = AuditLog::where('media_id', $request->id)->where('operation_type', 'PREVIEW_DOCUMENT')->get();
+        if(count($getLog) === 0){
+            self::trackOperations($request->id,
+                "PREVIEW_DOCUMENT",
+                auth()->user()->name .' vient de voir le document '. $request->name,
+                'success',
+                null,
+                auth()->id(),
+                auth()->user()->name);
+        }
+
+
+        /*$mediaAndOperation = Operation::where([
             ['media_id', $request->id],
             ['user_id_receiver', \Auth::user()->id]
         ])->first();
@@ -311,74 +339,52 @@ class WorkflowManagementController extends Controller
             ]);
         }
 
-        //$infoUser = User::with(['receiveOperations', 'sendOperations', 'multiFolders'])->find(auth()->id());
         $infoMedia = Media::with(['parapheur', 'category', 'createdBy', 'signedBy', 'operations' => function($q){
             $q->orderBy('id', 'DESC');
         }])->find($request->id);
-        /*$infoOperationsAndUsers = [];
-        foreach ($infoMedia->operations as $parapheurItem){
-            //$infoOperationsAndUsers = $parapheurItem->with(['senderUser', 'receiverUser'])->get();
-            $infoOperationsAndUsers = $parapheurItem->senderUser;
-        }*/
-        //dd($infoMedia->toArray());
 
-        //dd($infoMedia->toArray());
         $allUser = User::with(['receiveOperations', 'sendOperations'])->get();
-        $userData = [];
-
-        foreach($allUser as $user){
-
-            $userData = $user;
-            /*foreach($user->receiveOperations as $item){
-                dd($item->toArray());
-            }
-            foreach($user->sendOperations as $item2){
-                dd($item2->toArray());
-            }*/
-        }
-        //dd($infoMedia->toArray());
 
         return response()->json([
             'media' => $infoMedia,
             'user' => $allUser,
             'workflow_validation' => $infoMedia->step_workflow
+        ], Response::HTTP_OK);*/
+
+        $getLog = AuditLog::where('media_id', $request->id)->get();
+        //dd($getLog->toArray());
+        return response()->json([
+            'tracking' => $getLog,
         ], Response::HTTP_OK);
     }
 
 
     public function validateDocument(Request $request){
         $getMediaDocument = Media::with('operations')->find($request->id);
+        $getLog = AuditLog::where('media_id', $getMediaDocument->id);
+        $idNextUser = "";
+        $counterPreviousUser = 0;
+        $oldValue = json_decode($getMediaDocument->step_workflow);
+        for ($i =0; $i<count($oldValue); $i++){
+            //check if all users are pending
+            if($oldValue[$i]->state == "pending"){
+
+                //check if user connected exist in workflow if yes then update state
+                if($oldValue[$i]->user_id == auth()->id()){
+                    $oldValue[$i]->state = "finish";
+                    $counterPreviousUser = $oldValue[$i]->id;
+                }
+                //get id of next user
+                if($counterPreviousUser + 1 == $i){
+                    $idNextUser = $oldValue[$i]->user_id;
+                }
+            }
+        }
+
         switch ($request->validationType){
             case "validation":
-
-                $idNextUser = "";
-                $counterPreviousUser = 0;
-
-                $oldValue = json_decode($getMediaDocument->step_workflow);
-
-                for ($i =0; $i<count($oldValue); $i++){
-
-                    //check if all users are pending
-                    if($oldValue[$i]->state == "pending"){
-
-                        //check if user connected exist in workflow if yes then update state
-                        if($oldValue[$i]->user_id == auth()->id()){
-                            $oldValue[$i]->state = "finish";
-                            $counterPreviousUser = $oldValue[$i]->id;
-                        }
-                        //get id of next user
-                        if($counterPreviousUser + 1 == $i){
-                         $idNextUser = $oldValue[$i]->user_id;
-                        }
-
-                    }
-
-                }
-
                 if($idNextUser != ""){
-                    //$getDataNextUser = User::findOrFail($idNextUser);
                     $getMediaWithOperationDocument = $getMediaDocument->operations->first();
-
                     if($getMediaWithOperationDocument != null){
 
                         if($getMediaWithOperationDocument->status == "public"){
@@ -438,32 +444,232 @@ class WorkflowManagementController extends Controller
                         foreach ($getOperations as $operationList){
                             $operationList->update(['operation_state' => 'success']);
                         }
+
+                        //save data for tracking
+                        $getLog = $getLog->where('operation_type', 'VALIDATE_DOCUMENT')->get();
+                       if(count($getLog) === 0){
+                           //mode receiver
+                            self::trackOperations($getMediaDocument->id,
+                                "VALIDATE_DOCUMENT",
+                                auth()->user()->name .' vient de valider le document '. substr($getMediaDocument->file_name, 14),
+                                'success',
+                                null,
+                                auth()->id(),
+                                auth()->user()->name,
+                                $getMediaWithOperationDocument->message);
+
+                            $getDataNextUser = User::findOrFail($idNextUser);
+                                self::trackOperations($getMediaDocument->id,
+                                    "SEND_DOCUMENT",
+                                    $getDataNextUser->name .' a un document en attente de validation ',
+                                    'pending',
+                                    auth()->id(),
+                                    $idNextUser,
+                                    auth()->user()->name,
+                                    $getMediaWithOperationDocument->message);
+
+                        }
                     }
-
                 }
-
-                //dd($idNextUser);
             break;
             case "validation_signature":
-                //$path = storage_path($getMediaDocument->file_name);
-                $filePath = $getMediaDocument->getPath();
-                //$filePath = asset('uploads/official.pdf');
-                $outputFilePath = $getMediaDocument->getPath();
-                //$outputFilePath = asset('uploads/official.pdf');
-                $this->fillPDFFileSignature($filePath, $outputFilePath);
-                //return response()->file($outputFilePath);
+                if($idNextUser != ""){
+                    $getMediaWithOperationDocument = $getMediaDocument->operations->first();
+                    if($getMediaWithOperationDocument != null){
+
+                        if($getMediaWithOperationDocument->status == "public"){
+                            $user = User::with('multiFolders')->where('id', $idNextUser)->first();
+                            $folder = $user->multiFolders->first();
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->model_id = $folder->id;
+                            $getMediaDocument->step_workflow = $oldValue;
+                            $getMediaDocument->save();
+
+                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
+
+                        }else{
+
+                            $parapheur = Parapheur::where('user_id', $idNextUser)->first();
+                            if($parapheur == null){
+                                $getLastInsertId = Parapheur::all()->max('id');
+                                $parapheur = Parapheur::create([
+                                    'name' => 'parapheur'. $getLastInsertId + 1,
+                                    'project_id' => 1,
+                                    'user_id' => $idNextUser
+                                ]);
+                            }
+
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->parapheur_id = $parapheur->id;
+                            $getMediaDocument->step_workflow = $oldValue;
+                            $getMediaDocument->save();
+
+                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
+
+                        }
+
+                        //store datas operation table
+                        Operation::create([
+                            'deadline' => $getMediaWithOperationDocument->deadline,
+                            'priority' => $getMediaWithOperationDocument->priority,
+                            'status' => $getMediaWithOperationDocument->status,
+                            'user_id_sender' => auth()->id(),
+                            'user_id_receiver' => $idNextUser,
+                            'media_id' => $getMediaDocument->id,
+                            'message' => $getMediaWithOperationDocument->message,
+                            'receive_mail_notification' => $getMediaWithOperationDocument->receive_mail_notification,
+                            'operation_type' => $request->validationType,
+                            'operation_state' => 'pending',
+                            'num_operation' => (string) Str::orderedUuid(),
+                        ]);
+
+                        $getOperations = Operation::where('media_id', $getMediaDocument->id)
+                            ->where('user_id_receiver', auth()->id())
+                            //->orWhere('user_id_sender', auth()->id())
+                            ->get();
+
+                        foreach ($getOperations as $operationList){
+                            $operationList->update(['operation_state' => 'success']);
+                        }
+
+                        //----------------------------------------------------------------------------------------
+                        //save data for tracking
+                        $getLog = $getLog->where('operation_type', 'VALIDATE_DOCUMENT_SIGNATURE')->get();
+                        if(count($getLog) === 0){
+                            self::trackOperations($getMediaDocument->id,
+                                "VALIDATE_DOCUMENT_SIGNATURE",
+                                auth()->user()->name .' vient de signer le document '. substr($getMediaDocument->file_name, 14),
+                                'success',
+                                null,
+                                auth()->id(),
+                                auth()->user()->name,
+                                $getMediaWithOperationDocument->message);
+
+                            $getDataNextUser = User::findOrFail($idNextUser);
+                            self::trackOperations($getMediaDocument->id,
+                                "SEND_DOCUMENT_SIGNATURE",
+                                $getDataNextUser->name .' a envoyé un document en attente de signature ',
+                                'pending',
+                                auth()->id(),
+                                $idNextUser,
+                                auth()->user()->name,
+                                $getMediaWithOperationDocument->message);
+
+                        }
+
+                        $getMedia = Media::with('operations')->find($request->id);
+                        //$path = storage_path($getMediaDocument->file_name);
+                        $filePath = $getMedia->getPath();
+                        //$filePath = asset('uploads/official.pdf');
+                        $outputFilePath = $getMedia->getPath();
+                        //$outputFilePath = asset('uploads/official.pdf');
+                        $this->fillPDFFileSignature($filePath, $outputFilePath);
+                        //return response()->file($outputFilePath);
+                    }
+                }
                 break;
             case "validation_paraphe":
-                $filePath = $getMediaDocument->getPath();
-                $outputFilePath = $getMediaDocument->getPath();
-                $this->fillPDFFileParaphe($filePath, $outputFilePath);
-            break;
+                if($idNextUser != ""){
+                    $getMediaWithOperationDocument = $getMediaDocument->operations->first();
+                    if($getMediaWithOperationDocument != null){
+
+                        if($getMediaWithOperationDocument->status == "public"){
+                            $user = User::with('multiFolders')->where('id', $idNextUser)->first();
+                            $folder = $user->multiFolders->first();
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->model_id = $folder->id;
+                            $getMediaDocument->step_workflow = $oldValue;
+                            $getMediaDocument->save();
+
+                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
+
+                        }else{
+
+                            $parapheur = Parapheur::where('user_id', $idNextUser)->first();
+                            if($parapheur == null){
+                                $getLastInsertId = Parapheur::all()->max('id');
+                                $parapheur = Parapheur::create([
+                                    'name' => 'parapheur'. $getLastInsertId + 1,
+                                    'project_id' => 1,
+                                    'user_id' => $idNextUser
+                                ]);
+                            }
+
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->parapheur_id = $parapheur->id;
+                            $getMediaDocument->step_workflow = $oldValue;
+                            $getMediaDocument->save();
+
+                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
+
+                        }
+
+                        //store datas operation table
+                        Operation::create([
+                            'deadline' => $getMediaWithOperationDocument->deadline,
+                            'priority' => $getMediaWithOperationDocument->priority,
+                            'status' => $getMediaWithOperationDocument->status,
+                            'user_id_sender' => auth()->id(),
+                            'user_id_receiver' => $idNextUser,
+                            'media_id' => $getMediaDocument->id,
+                            'message' => $getMediaWithOperationDocument->message,
+                            'receive_mail_notification' => $getMediaWithOperationDocument->receive_mail_notification,
+                            'operation_type' => $request->validationType,
+                            'operation_state' => 'pending',
+                            'num_operation' => (string) Str::orderedUuid(),
+                        ]);
+
+                        $getOperations = Operation::where('media_id', $getMediaDocument->id)
+                            ->where('user_id_receiver', auth()->id())
+                            //->orWhere('user_id_sender', auth()->id())
+                            ->get();
+
+                        foreach ($getOperations as $operationList){
+                            $operationList->update(['operation_state' => 'success']);
+                        }
+
+
+                        //----------------------------------------------------------------------------------------
+                        //save data for tracking
+                        $getLog = $getLog->where('operation_type', 'VALIDATE_DOCUMENT_PARAPHEUR')->get();
+                        if(count($getLog) === 0){
+                            self::trackOperations($getMediaDocument->id,
+                                "VALIDATE_DOCUMENT_PARAPHEUR",
+                                auth()->user()->name .' vient de parapher le document '. substr($getMediaDocument->file_name, 14),
+                                'success',
+                                auth()->id(),
+                                $idNextUser,
+                                auth()->user()->name,
+                                $getMediaWithOperationDocument->message);
+
+                            $getDataNextUser = User::findOrFail($idNextUser);
+                            self::trackOperations($getMediaDocument->id,
+                                "SEND_DOCUMENT_PARAPHEUR",
+                                $getDataNextUser->name .' a envoyé un document en attente d\'être paraphé ',
+                                'pending',
+                                auth()->id(),
+                                $idNextUser,
+                                auth()->user()->name,
+                                $getMediaWithOperationDocument->message);
+
+                        }
+
+                        $getMedia = Media::with('operations')->find($request->id);
+                        $filePath = $getMedia->getPath();
+                        $outputFilePath = $getMedia->getPath();
+                        $this->fillPDFFileParaphe($filePath, $outputFilePath);
+                    }
+                }
+                break;
 
             case "rejected":
                 $getIdPreviousUser = $getMediaDocument->operations->where('user_id_receiver', auth()->id())->first()->user_id_sender;
                 $oldValue = json_decode($getMediaDocument->step_workflow);
                 for ($i =0; $i<count($oldValue); $i++){
-
                     //check if all users are pending
                     if($oldValue[$i]->state == "finish"){
                         //check if user connected exist in workflow if yes then update state
@@ -475,7 +681,6 @@ class WorkflowManagementController extends Controller
 
                     //$getDataNextUser = User::findOrFail($idNextUser);
                     $getMediaWithOperationDocument = $getMediaDocument->operations->first();
-
                     if($getMediaWithOperationDocument != null){
 
                         if($getMediaWithOperationDocument->status == "public"){
@@ -536,8 +741,22 @@ class WorkflowManagementController extends Controller
                             $operationList->update(['operation_state' => 'rejected']);
                         }
                     }
-
                 //dd($getMediaDocument->operations->where('user_id_receiver', auth()->id())->toArray());
+
+                $getLog = $getLog->where('operation_type', 'VALIDATE_DOCUMENT_REJECTED')->get();
+                if(count($getLog) === 0){
+
+                    $getDataNextUser = User::findOrFail($getIdPreviousUser);
+                    self::trackOperations($getMediaDocument->id,
+                        "VALIDATE_DOCUMENT_REJECTED",
+                        $getDataNextUser->name .' a rejeté un document en attente ',
+                        'pending',
+                        auth()->id(),
+                        $getIdPreviousUser,
+                        auth()->user()->name,
+                        $getMediaWithOperationDocument->message);
+
+                }
             break;
         }
 
@@ -587,6 +806,7 @@ class WorkflowManagementController extends Controller
         return $fpdi->Output($outputFilePath, 'F');
     }
 
+
     public function fillPDFFileParaphe($file, $outputFilePath)
     {
         $fpdi = new FPDI;
@@ -623,7 +843,28 @@ class WorkflowManagementController extends Controller
     }
 
 
-    public function rejectedDocument(Request $request){
+    function get_time_ago( $time )
+    {
+        $time_difference = time() - $time;
 
+        if( $time_difference < 1 ) { return 'less than 1 second ago'; }
+        $condition = array( 12 * 30 * 24 * 60 * 60 =>  'year',
+            30 * 24 * 60 * 60       =>  'month',
+            24 * 60 * 60            =>  'day',
+            60 * 60                 =>  'hour',
+            60                      =>  'minute',
+            1                       =>  'second'
+        );
+
+        foreach( $condition as $secs => $str )
+        {
+            $d = $time_difference / $secs;
+
+            if( $d >= 1 )
+            {
+                $t = round( $d );
+                return 'about ' . $t . ' ' . $str . ( $t > 1 ? 's' : '' ) . ' ago';
+            }
+        }
     }
 }

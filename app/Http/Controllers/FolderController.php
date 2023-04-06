@@ -6,6 +6,7 @@ use App\Models\Folder;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class FolderController extends Controller
@@ -20,19 +21,33 @@ class FolderController extends Controller
             ->with('subChildren')
             ->get();
 
-        return view('front.folders.create', compact('children_level_n'));
+
+        //nous recherchons tous les utilisateurs appartenant au même project
+        $getProjectId = DB::table('project_user')->where('user_id', Auth()->id())->first()->project_id;
+
+        $users = Project::with('users')
+            ->where('id', $getProjectId)
+            ->first()
+            ->users
+            ->pluck('name', 'id')
+            ->prepend(trans('global.pleaseSelect'), '');
+
+        return view('front.folders.create', compact('children_level_n', 'users'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required',
+            'user_access' => 'required',
         ]);
+
+        $usersSelected = $request->input('user_access', []);
 
         $folder = Folder::with('project')
             ->whereHas('project.users', function($query) {
                 $query->where('id', auth()->id());
-            })->findOrFail($request->parent_id);
+            });
 
         $newFolder = Folder::create([
             'parent_id' => $request->parent_id,
@@ -41,6 +56,8 @@ class FolderController extends Controller
             'created_by' => \Auth::user()->id,
         ]);
 
+        $newFolder->multiUsers()->sync($usersSelected);
+
         return redirect()
             ->route('folders.show', [$newFolder])
             ->withStatus('New folder has been created');
@@ -48,9 +65,6 @@ class FolderController extends Controller
 
     public function show(Folder $folder)
     {
-
-
-
             /*$folder = $folder->with('project', 'multiUsers')
                 ->whereHas('project.users', function($query) {
                     $query->where('id', auth()->id());

@@ -12,10 +12,15 @@ class AuditLog extends Model
     public $table = 'audit_logs';
 
     protected $fillable = [
+        'media_id',
+        'operation_type',
         'description',
+        'operation_state',
+        'user_id_sender',
+        'user_id_receiver',
         'subject_id',
         'subject_type',
-        'user_id',
+        'current_user_id',
         'properties',
         'host',
     ];

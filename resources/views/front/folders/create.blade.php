@@ -27,6 +27,26 @@
                                 </span>
                                 @enderror
                             </div>
+
+                            <div class="form-group">
+                                <label class="required" for="user_access">{{ trans('cruds.folder_access.fields.user_access') }}</label>
+                                <div style="padding-bottom: 4px">
+                                    <span class="btn btn-info btn-xs select-all" style="border-radius: 0">{{ trans('global.select_all') }}</span>
+                                    <span class="btn btn-info btn-xs deselect-all" style="border-radius: 0">{{ trans('global.deselect_all') }}</span>
+                                </div>
+                                <select class="form-control select2 {{ $errors->has('user_access') ? 'is-invalid' : '' }}" name="user_access[]" id="user_access" multiple required>
+                                    @foreach($users as $id => $user)
+                                        <option value="{{ $id }}" {{ (in_array($id, old('user_access', [])) || $id==auth()->id()) ? 'selected' : '' }}>{{ $user }}</option>
+                                    @endforeach
+                                </select>
+                                @if($errors->has('user_access'))
+                                    <div class="invalid-feedback">
+                                        {{ $errors->first('user_access') }}
+                                    </div>
+                                @endif
+                                <span class="help-block">{{ trans('cruds.folder_access.fields.user_access_helper') }}</span>
+                            </div>
+
                             <div class="form-group">
                                 <button type="submit" class="btn btn-primary">Submit</button>
                             </div>

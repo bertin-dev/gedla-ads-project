@@ -38,7 +38,7 @@
 
                     <div class="form-group col-6">
                         <label for="files">{{ trans('global.add') }} {{ trans('global.file') }}</label>
-                        <div class="needsclick dropzone {{ $errors->has('files') ? 'is-invalid' : '' }}" id="files-dropzone">
+                        <div class="needsclick dropzone {{ $errors->has('files') ? 'is-invalid' : '' }}" id="files-dropzone" style="display: block;border:2px dashed rgba(0,0,0,0.3);background: url(/images/upload-bg.png) no-repeat center;">
                         </div>
                         @if($errors->has('files'))
                             <div class="invalid-feedback">

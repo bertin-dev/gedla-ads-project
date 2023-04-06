@@ -10,8 +10,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Operation extends Model
 {
-    use HasFactory;
-    use Auditable;
+    use HasFactory, Auditable;
 
     public $table = 'operations';
 

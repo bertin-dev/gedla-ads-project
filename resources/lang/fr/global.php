@@ -394,5 +394,10 @@ return [
     'enable_delegation'              =>  'Activer la délégation de signature?',
     'delegated_user'                 =>  'Utilisateur délégué',
     'shared_file'                    =>  'Dans un dossier partagé le',
+    'file_name'                      =>  'File name',
+    'error_found'                    =>  'Erreur trouvée lorsque l\'utilisateur affiche le document',
+    'error_title'                    =>  'Une Erreur est survenue',
+    'success_title'                  =>  'Opération Réussie',
+    'notification'                  => 'Notification',
 
 ];

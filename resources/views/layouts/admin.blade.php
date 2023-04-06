@@ -174,6 +174,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="http://keith-wood.name/js/jquery.signature.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.6.5/jquery.timeago.min.js"></script>
 
     {{--<script src="{{asset('js/jquery.js')}}"></script>
     <script src="{{asset('js/bootstrap.js')}}"></script>
@@ -197,8 +198,16 @@
     <script src="{{asset('js/select2.full.js')}}"></script>
     <script src="{{asset('js/dropzone.min.js')}}"></script>
     <script src="{{asset('js/jquery-ui.js')}}"></script>
-    <script src="{{asset('js/jquery.signature.js')}}"></script>--}}
+    <script src="{{asset('js/jquery.signature.js')}}"></script>
+    <script src="{{asset('js/jquery.timego.js')}}"></script>--}}
     <script src="{{ asset('js/main.js') }}"></script>
+
+    @if(str_replace('_', '-', app()->getLocale()) === "en")
+        <script src="{{ asset('js/jquery.timeago.en.js') }}"></script>
+    @else
+        <script src="{{ asset('js/jquery.timeago.fr.js') }}"></script>
+    @endif
+
     <script>
         $(function() {
   let copyButtonTrans = '{{ trans('global.datatables.copy') }}'
@@ -315,7 +324,6 @@
 
     </script>
 
-
     <script>
         $(document).ready(function() {
             $('.searchable-field').select2({
@@ -385,6 +393,9 @@
             });
         });
 
+        jQuery(document).ready(function() {
+            $("time.timeago").timeago();
+        });
     </script>
 
     @yield('scripts')

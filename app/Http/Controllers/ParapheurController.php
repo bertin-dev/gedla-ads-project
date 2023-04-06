@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\Auditable;
+use App\Models\AuditLog;
 use App\Models\Folder;
 use App\Models\Operation;
 use App\Models\Parapheur;
@@ -12,6 +14,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ParapheurController extends Controller
 {
+    use Auditable;
     /**
      * Display a listing of the resource.
      *
@@ -182,15 +185,18 @@ class ParapheurController extends Controller
 
 
     public function download(Request $request){
-        $media = Media::find($request->id);
+        $media = Media::findOrFail($request->id);
 
-        Operation::create([
-            'user_id_sender' => auth()->id(),
-            'media_id' => $media->id,
-            'operation_type' => "download",
-            'operation_state' => 'success',
-            'num_operation' => (string) Str::orderedUuid(),
-        ]);
+        $getLog = AuditLog::where('media_id', $media->id)->where('operation_type', 'DOWNLOAD_DOCUMENT')->get();
+        if(count($getLog) === 0){
+            self::trackOperations($media->id,
+                "DOWNLOAD_DOCUMENT",
+                auth()->user()->name .' vient de télécharger le document '. substr($media->file_name, 14),
+                'success',
+                null,
+                auth()->id(),
+                '');
+        }
 
         return response()->download($media->getPath(), $media->file_name);
     }

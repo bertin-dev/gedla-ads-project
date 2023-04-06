@@ -394,4 +394,9 @@ return [
     'enable_delegation'              =>  'Enable signing delegation ?',
     'delegated_user'                 =>  'Delegated user',
     'shared_file'                    =>  'In a shared folder on',
+    'file_name'                      =>  'File name',
+    'error_found'                    =>  'Error founded where user display document',
+    'error_title'                    =>  'An error has occurred',
+    'success_title'                 =>  'Successful operation',
+    'notification'                  => 'Notification',
 ];

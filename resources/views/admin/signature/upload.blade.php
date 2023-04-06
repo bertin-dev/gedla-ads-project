@@ -47,7 +47,7 @@
 
                             <div class="form-group">
                                 <label for="files">Image</label>
-                                <div class="needsclick dropzone {{ $errors->has('files') ? 'is-invalid' : '' }}" id="files-dropzone">
+                                <div class="needsclick dropzone {{ $errors->has('files') ? 'is-invalid' : '' }}" id="files-dropzone" style="display: block;min-height: 250px;border:2px dashed rgba(0,0,0,0.3);border-radius: 20px;background:white;padding:20px 20px;background: url(/images/upload-bg.png) no-repeat center;">
                                 </div>
                                 @if($errors->has('files'))
                                     <div class="invalid-feedback">

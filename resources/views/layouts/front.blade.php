@@ -45,7 +45,7 @@
     @livewireStyles
 </head>
 <body class="c-app">
-
+<div id="cover-spin"></div>
 @include('partials.menu-user')
 
 {{--<div id="app">
@@ -133,16 +133,94 @@
             <div class="container">
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ml-auto">
+
+                        @php
+                            use App\Models\AuditLog;
+                            $getLog = AuditLog::where('current_user_id', auth()->id())
+                            ->orderBy('created_at', 'desc');
+                            $notificationCounter = $getLog->get()->count();
+                        @endphp
+
                         <li class="nav-item dropdown notification-ui show">
                             <a class="nav-link dropdown-toggle notification-ui_icon" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-bell"></i>
-                                <span class="unread-notification"></span>
+                                @if($notificationCounter != 0)
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger opacity-75 text-white">{{$notificationCounter}}</span>
+                                @endif
                             </a>
                             <div class="dropdown-menu notification-ui_dd" aria-labelledby="navbarDropdown">
                                 <div class="notification-ui_dd-header">
-                                    <h3 class="text-center">Notification</h3>
+                                    <h3 class="text-center">{{$notificationCounter<2 ? trans('global.notification') : trans('global.notifications')}}</h3>
                                 </div>
                                 <div class="notification-ui_dd-content">
+
+                                    @foreach($getLog->get()->take(10) as $notification)
+
+                                        @if($notification->read_notification === '0')
+                                            <a href="#!" class="notification-list text-dark">
+                                                <div class="notification-list_img">
+                                                    <img src="{{asset('images/pdf.png')}}" alt="user">
+                                                </div>
+                                                <div class="notification-list_detail">
+                                                    <p><b>{{$notification->name}}</b> <br><span class="text-muted">{{$notification->description}}</span></p>
+                                                    <p class="nt-link text-truncate">{{$notification->message ?? ""}}</p>
+                                                </div>
+                                                <p><small><time class="timeago" datetime="{{$notification->created_at}}"></time></small></p>
+                                            </a><a href="#!" class="notification-list text-dark">
+                                                <div class="notification-list_img">
+                                                    <img src="{{asset('images/pdf.png')}}" alt="user">
+                                                </div>
+                                                <div class="notification-list_detail">
+                                                    <p><b>{{$notification->name}}</b> <br><span class="text-muted">{{$notification->description}}</span></p>
+                                                    <p class="nt-link text-truncate">{{$notification->message ?? ""}}</p>
+                                                </div>
+                                                <p><small><time class="timeago" datetime="{{$notification->created_at}}"></time></small></p>
+                                            </a>
+                                        @else
+                                            <a href="#!" class="notification-list notification-list--unread text-dark">
+                                                <div class="notification-list_img">
+                                                    <img class="img-thumbnail" src="{{asset('images/pdf.png')}}" alt="user">
+                                                </div>
+                                                <div class="notification-list_detail">
+                                                    <p><b>{{$notification->name}}</b> <br><span class="text-muted">{{$notification->description}}</span></p>
+                                                    <p class="nt-link text-truncate">{{$notification->message ?? ""}} </p>
+                                                </div>
+                                                <p><small><time class="timeago" datetime="{{$notification->created_at}}"></time></small></p>
+                                            </a>
+                                        @endif
+
+                                    @endforeach
+
+                                    {{--<a href="#!" class="notification-list notification-list--unread text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user2.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>Richard Miles</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>1 day ago</small></p>
+                                    </a>
+                                    <a href="#!" class="notification-list text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user3.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>Brian Cumin</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>1 day ago</small></p>
+                                    </a>
+                                    <a href="#!" class="notification-list text-dark">
+                                        <div class="notification-list_img">
+                                            <img src="images/users/user4.jpg" alt="user">
+                                        </div>
+                                        <div class="notification-list_detail">
+                                            <p><b>Lance Bogrol</b> <br><span class="text-muted">reacted to your post</span></p>
+                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
+                                        </div>
+                                        <p><small>1 day ago</small></p>
+                                    </a>
                                     <a href="#!" class="notification-list notification-list--unread text-dark">
                                         <div class="notification-list_img">
                                             <img src="images/users/user1.jpg" alt="user">
@@ -182,53 +260,16 @@
                                             <p class="nt-link text-truncate">How to travel long way home from here.</p>
                                         </div>
                                         <p><small>1 day ago</small></p>
-                                    </a>
-                                    <a href="#!" class="notification-list notification-list--unread text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user1.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>John Doe</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>10 mins ago</small></p>
-                                    </a>
-                                    <a href="#!" class="notification-list notification-list--unread text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user2.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>Richard Miles</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>1 day ago</small></p>
-                                    </a>
-                                    <a href="#!" class="notification-list text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user3.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>Brian Cumin</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>1 day ago</small></p>
-                                    </a>
-                                    <a href="#!" class="notification-list text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user4.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>Lance Bogrol</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>1 day ago</small></p>
-                                    </a>
+                                    </a>--}}
                                 </div>
-                                <div class="notification-ui_dd-footer">
-                                    <a href="#!" class="btn btn-success btn-block">View All</a>
-                                </div>
+                                @if($notificationCounter >= 10)
+                                    <div class="notification-ui_dd-footer">
+                                        <a href="#!" class="btn btn-success btn-block">View All</a>
+                                    </div>
+                                @endif
                             </div>
                         </li>
+
                         <div class="topbar-divider d-none d-sm-block"></div>
                         @guest
                             <li class="nav-item">
@@ -337,7 +378,8 @@
 <script src="{{asset('js/moment.js')}}"></script>
 <script src="{{asset('js/bootstrap-datetimepicker.min.js')}}"></script>
 <script src="{{asset('js/select2.full.js')}}"></script>
-<script src="{{asset('js/dropzone.min.js')}}"></script>--}}
+<script src="{{asset('js/dropzone.min.js')}}"></script>
+<script src="{{asset('js/jquery.timego.js')}}"></script>--}}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
@@ -361,9 +403,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.6.5/jquery.timeago.min.js"></script>
 <script src="{{asset('js/mustache.js')}}"></script>
 <script src="{{asset('js/jquery.notif.js')}}"></script>
 <script src="{{ asset('js/main.js') }}"></script>
+
+@if(str_replace('_', '-', app()->getLocale()) === "en")
+    <script src="{{ asset('js/jquery.timeago.en.js') }}"></script>
+@else
+    <script src="{{ asset('js/jquery.timeago.fr.js') }}"></script>
+@endif
+
+
 <script>
     $(function() {
         let copyButtonTrans = '{{ trans('global.datatables.copy') }}'
@@ -500,29 +551,56 @@
 
 
     $(function () {
-        $('#submit').on('click', function () {
+        let submitRequest = $('#submit');
+        submitRequest.on('click', function () {
             const editorData = editor.getData();
-            //alert($('#description1').val());
+            let fullLoading =  $('#cover-spin');
+
+            if(editorData.length === 0 || fullLoading.length === 0){
+                alert("Veuillez remplir tous les champs");
+                return;
+            }
 
             $.ajax({
                 url: "{{ route('upload-document') }}",
                 method: 'POST',
                 data: {
+                    fileName: $('#fileName').val(),
+                    documentFormat: $('#document_format').val(),
                     description1: editorData,
                     folder_id: {{$folderId ?? 0}},
                     parapheur_id: {{$parapheurId ?? 0}},
+                },
+                beforeSend: function (){
+                    submitRequest.text("Enregistrement encours....");
+                    fullLoading.show();
                 },
                 dataType: 'json',
                 success: function (data) {
                     //alert(data.title);
                     /*window.location.href = "{{--{{ route('show-all-prescription')}}--}}";*/
+
+                    $('body').notif({
+                        title: 'Opération Réussie',
+                        content: "Enregistrement effectué avec succès",
+                        img: '{{asset('images/success-notif.jpg')}}',
+                        cls: 'success1'
+                    });
                 },
                 error: function () {
                     alert("une erreur est survenue");
+                },
+                complete: function (){
+                    submitRequest.text("Enregistrer");
+                    fullLoading.hide();
                 }
             });
 
         });
+    });
+
+    jQuery(document).ready(function() {
+        $("time.timeago").timeago();
     });
 </script>
 
@@ -534,9 +612,11 @@
         }
     });
 
+    let docId = 0;
     $(function () {
         $('.bd-example-modal-lg').on('show.bs.modal', function (e) {
             let id = $(e.relatedTarget).data('id');
+            docId = id;
             let url = $(e.relatedTarget).data('url');
             let name = $(e.relatedTarget).data('name');
             let size = $(e.relatedTarget).data('size');
@@ -544,6 +624,7 @@
             let itemType = $(e.relatedTarget).data('item_type');
             let mimeType = $(e.relatedTarget).data('mime_type');
             let loadFile = $('.iframeFile');
+            let mediaId = $('.mediaId');
             //let objects = $('#objectLink').data('name');
 
             switch (mimeType){
@@ -553,13 +634,13 @@
                 case "image/jpeg":
                     loadFile.html("<img class='img-thumbnail' src='"+itemType+"' alt='"+name+"' title='"+name+"' >");
                     break;
-                case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": //Word docx
                     //loadFile.html("<iframe src='https://view.officeapps.live.com/op/view.aspx?src=http%3A%2F%2Fieee802%2Eorg%3A80%2Fsecmail%2FdocIZSEwEqHFr%2Edoc' frameborder='0' style='width:100%;min-height:640px;'></iframe>");
                     //loadFile.html("<iframe src='https://view.officeapps.live.com/op/embed.aspx?src="+encodeURIComponent(url)+"' width='100%' height='623px' frameborder='0'></iframe>");
-                    loadFile.html("<iframe src='https://view.officeapps.live.com/op/embed.aspx?src=http%3A%2F%2Fieee802%2Eorg%3A80%2Fsecmail%2FdocIZSEwEqHFr%2Edoc' width='100%' height='600px' frameborder='0'></iframe>");
+                    loadFile.html("<iframe data-url='"+url+"' src='https://view.officeapps.live.com/op/embed.aspx?src=http%3A%2F%2Fieee802%2Eorg%3A80%2Fsecmail%2FdocIZSEwEqHFr%2Edoc' width='100%' height='600px' frameborder='0'></iframe>");
                     break;
-                case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                    loadFile.html("<iframe src='https://view.officeapps.live.com/op/embed.aspx?src="+encodeURIComponent(url)+"' width='100%' height='623px' frameborder='0'></iframe>");
+                case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": //Excel .xlsx
+                    loadFile.html("<iframe data-url='"+url+"' src='https://view.officeapps.live.com/op/embed.aspx?src="+encodeURIComponent(url)+"' width='100%' height='623px' frameborder='0'></iframe>");
                     break;
                 default:
                     loadFile.html("<img class='img-thumbnail' src='"+itemType+"' alt='"+name+"' title='"+name+"' >");
@@ -576,8 +657,9 @@
             $('.mediaDownload').attr("href", id);
             $('#media_id').attr("value", id);
             $('.document_id').attr("href", id);
+            mediaId.attr("href", mediaId.attr("href") + "&mediaId=" + id);
             console.log(id);
-            updateMediaTable(id);
+            updateMediaTable(id, name);
         });
 
 
@@ -587,7 +669,7 @@
 
 
         //when user as seen Media, media tableupdate
-        function updateMediaTable(id) {
+        function updateMediaTable(id, name) {
             /*let url = "{{ route('admin.workflow-management.hasReadMedia', ":id") }}";
             url = url.replace(':id', id);*/
             let myActivity = $(".myActivity");
@@ -598,7 +680,8 @@
                 url: "{{ route('admin.workflow-management.hasReadMedia') }}",
                 method: 'POST',
                 data: {
-                    id: id
+                    id: id,
+                    name: name
                 },
                 dataType: 'json',
                 beforeSend: function (){
@@ -606,7 +689,19 @@
                 },
                 success: function (data) {
 
-                    if(data.media.parapheur == null){
+
+                    $.each(data.tracking, function(index, item){
+                        myActivity.append('<div class="row schedule-item> <div class="col-md-2">' +
+                            '<time class="timeago" datetime="'+item.created_at+'"></time>' +
+                            '</div> ' +
+                            '<div class="col-md-10"> ' +
+                            '<h4>Registration</h4> ' +
+                            '<p>' +item.description + '</p> ' +
+                            '</div> ' +
+                            '</div>');
+                    });
+
+                    /*if(data.media.parapheur == null){
                         initMyActivity.text("{{trans('global.import')}} {{trans('global.file')}} " + data.media.file_name.substring(14) + " {{trans('global.shared_file')}} " + formatDate(data.media.created_at));
                     }
 
@@ -617,17 +712,18 @@
                         }else{
                             myActivity.append('<li><strong>' + getUser(operationItem.user_id_receiver) + '</strong> a validé le document ' + data.media.file_name.substring(14) + '</li>');
                         }
-                    });
+                    });*/
 
 
                     //let dataURL = $(this).attr('data-id');
-                    if(data.workflow_validation != null){
+                    /*if(data.workflow_validation != null){
                         $('.workflow').hide();
                     }else{
                         $('.workflow').show();
-                    }
+                    }*/
                 },
                 error: function(){
+                    $('.loading').hide();
                     alert("Error founded where user display document");
                     console.log('Error founded where user display document');
                 },
@@ -640,6 +736,24 @@
     });
 
     $(function () {
+
+        $('.open-document').on('click', function (){
+            $.ajax({
+                url: "{{ route('admin.workflow-management.open-document') }}",
+                method: 'POST',
+                data: {
+                    id: docId
+                },
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function(){
+                    console.log('Error founded where user display document');
+                }
+            });
+        });
+
         $('.mediaDownload').on('click', function (e) {
             e.preventDefault();
             let getId = $('.mediaDownload').attr('href');
@@ -681,6 +795,7 @@
             e.preventDefault();
             let getDocumentId = $('.validate_file_access').attr('href');
             let validation = $('.validation').attr('title');
+            let fullLoading =  $('#cover-spin');
 
             $.ajax({
                 url: "{{ route('admin.workflow-management.validateDocument') }}",
@@ -690,15 +805,37 @@
                     validationType: validation
                 },
                 dataType: 'json',
+                beforeSend: function (){
+                    fullLoading.show();
+                },
                 success: function (data) {
-                    alert(data.title);
+                    //alert(data.title);
                     /*window.location.href = "{{--{{ route('show-all-prescription')}}--}}";*/
-                    location.reload();
+                    //location.reload();
+                    $('body').notif({
+                        title: 'Opération Réussie',
+                        content: data.title,
+                        img: '{{asset('images/success-notif.jpg')}}',
+                        cls: 'success1'
+                    });
+
+                    setTimeout(function(){
+                        window.location.reload();
+                    }, 5000);
                 },
                 error: function () {
-                    alert("Error founded where user display document");
+                    //alert("Error founded where user display document");
+                    $('body').notif({
+                        title: 'Une Erreur est survenue',
+                        content: "Error founded where user display document",
+                        img: '{{asset('images/error-notif.png')}}',
+                        cls: 'error1'
+                    });
                     console.log('Error founded where user display document');
-                }
+                },
+                complete: function (){
+                    fullLoading.hide();
+                },
             });
         });
 
@@ -776,14 +913,7 @@
                 }
             });
         });
-
-        $('.mediaEdit').on('click', function (e) {
-            e.preventDefault();
-            alert("dsfsdf");
-        });
-
     });
-
 
     function formatDate(date) {
         var d = new Date(date),
@@ -815,6 +945,7 @@
         });
         return result;
     }
+
 </script>
 
 @livewireScripts
@@ -856,7 +987,6 @@
             console.error( error );
         } );
 </script>--}}
-
 
 
 <!--
@@ -1101,6 +1231,8 @@
             console.error( 'There was a problem initializing the editor.', error );
         } );
 </script>--}}
+
+
 
 </body>
 </html>

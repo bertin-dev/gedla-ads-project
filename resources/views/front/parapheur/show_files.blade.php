@@ -17,7 +17,9 @@
                         <a class="btn btn-success" href="{{ route('create-document') }}?parapheur_id={{ $parapheurWithMedia->id }}">
                             {{ trans('global.create') }} {{trans('global.file')}}
                         </a>
-
+                        {{--<a class="btn btn-success" href="{{ route('folders.create') }}?parent_id={{ $folderItems->id }}">
+                           {{ trans('global.add') }} Create a new folder
+                       </a>--}}
                     </div>
 
                     <div class="col-lg-12" style="margin-top: 20px">
@@ -123,10 +125,10 @@
                                {{--<embed class="iframeFile" id='100' width='100%' height='600px'/>--}}
                                 <div class="text-left">
                                     @can('open_file_access')
-                                        <a class="myUrl col-lg-4" target="_blank">{{trans('global.open')}} </a>
+                                        <a class="myUrl col-lg-4 open-document" target="_blank">{{trans('global.open')}} </a>
                                     @endcan
                                     @can('edit_file_access')
-                                        <a class="col-lg-4 mediaEdit" target="_blank" href="#">{{trans('global.edit_document')}} </a>
+                                        <a class="col-lg-4 mediaId" target="_blank" href="{{ route('edit-document') }}?parapheur_id={{ $parapheurWithMedia->id }}">{{trans('global.edit_document')}}</a>
                                     @endcan
                                     @can('download_access')
                                         <a href="#" class="mediaDownload col-lg-4"> {{trans('global.download')}}</a>

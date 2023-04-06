@@ -122,6 +122,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::resource('workflow-management', WorkflowManagementController::class);
     Route::post('workflow-management/media', [WorkflowManagementController::class, 'storeMedia'])->name('workflow-management.storeMedia');
     Route::post('workflow-management/hasReadMedia', [WorkflowManagementController::class, 'hasReadMedia'])->name('workflow-management.hasReadMedia');
+    Route::post('workflow-management/open-document', [WorkflowManagementController::class, 'openDocument'])->name('workflow-management.open-document');
     Route::post('workflow-management/validateDocument', [WorkflowManagementController::class, 'validateDocument'])->name('workflow-management.validateDocument');
 
     //Signature
@@ -155,6 +156,7 @@ Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 
 Route::get('signature/upload', [SignatureController::class, 'upload'])->name('signature.upload');
 //Create document
 Route::get('create-document', [createDocumentController::class, 'create'])->name('create-document');
+Route::get('edit-document', [createDocumentController::class, 'edit'])->name('edit-document');
 Route::post('upload-document', [createDocumentController::class, 'upload'])->name('upload-document');
 
 
