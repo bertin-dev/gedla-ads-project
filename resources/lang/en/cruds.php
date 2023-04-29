@@ -38,6 +38,7 @@ return [
     ],
     'user' => [
         'title' => 'User',
+        'user_state' => 'User State',
         'title_singular' => 'User',
         'fields'  => [
             'id'                       => 'ID',
@@ -61,6 +62,8 @@ return [
             'deleted_at'               => 'Deleted at',
             'deleted_at_helper'        => ' ',
             'created_by'               => 'User created',
+            'status'                   => 'status',
+            'last_seen'                => 'Last Seen',
         ]
     ],
 

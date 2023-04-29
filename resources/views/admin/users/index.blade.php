@@ -46,14 +46,20 @@
                         <th>
                             {{ trans('cruds.user.fields.email') }}
                         </th>
-                        <th>
+                        {{--<th>
                             {{ trans('cruds.user.fields.email_verified_at') }}
-                        </th>
+                        </th>--}}
                         <th>
                             {{ trans('cruds.user.fields.roles') }}
                         </th>
                         <th>
                             {{ trans('cruds.user.fields.created_by') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.user.fields.status') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.user.fields.last_seen') }}
                         </th>
                         <th>
                             &nbsp;
@@ -75,9 +81,9 @@
                             <td>
                                 {{ $user->email ?? '' }}
                             </td>
-                            <td>
+                            {{--<td>
                                 {{ $user->email_verified_at ?? '' }}
-                            </td>
+                            </td>--}}
                             <td>
                                 @foreach($user->roles as $key => $item)
                                     <span class="badge badge-info">{{ $item->title }}</span>
@@ -88,6 +94,14 @@
                                     <span class="badge badge-secondary">{{ $subUser->name }}</span>
                                 @endforeach
                             </td>
+                            <td>
+                                @if(Cache::has('user-is-online-' . $user->id))
+                                    <span class="text-success">Online</span>
+                                @else
+                                    <span class="text-secondary">Offline</span>
+                                @endif
+                            </td>
+                            <td>{{ \Carbon\Carbon::parse($user->last_login_at)->diffForHumans() }}</td>
                             <td>
                                 @can('user_show')
                                     <a class="btn btn-xs btn-primary" href="{{ route('admin.users.show', $user->id) }}">

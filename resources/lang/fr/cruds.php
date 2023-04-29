@@ -45,6 +45,7 @@ return [
     ],
     'user' => [
         'title'          => 'Utilisateurs',
+        'user_state'     => 'statut utilisateur',
         'title_singular' => 'Utilisateur',
         'fields'  => [
             'id'                       => 'ID',
@@ -68,6 +69,8 @@ return [
             'deleted_at'               => 'Supprimer',
             'deleted_at_helper'        => ' ',
             'created_by'               => 'Utilisateur Créée',
+            'status'                   => 'status',
+            'last_seen'                => 'Dernière Connexion',
         ]
     ],
 
