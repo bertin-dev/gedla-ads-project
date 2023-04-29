@@ -31,6 +31,17 @@ class EventServiceProvider extends ServiceProvider
             UserLoginAt::class,
         ],
 
+        DocumentAdded::class => [
+            SendDocumentAddedNotification::class,
+        ],
+
+        DocumentUpdated::class => [
+            SendDocumentUpdatedNotification::class,
+        ],
+
+        validationStepCompleted::class => [
+            SendValidationStepCompletedNotification::class,
+        ],
     ];
 
     /**

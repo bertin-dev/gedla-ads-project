@@ -7,19 +7,19 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class sendEmailNotification extends Notification
+class sendLocalNotificaion extends Notification
 {
     use Queueable;
 
-    private $details;
+    private $detailsMedia;
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($details)
+    public function __construct($detailsMedia)
     {
-        $this->details = $details;
+        $this->detailsMedia = $detailsMedia;
     }
 
     /**
@@ -30,22 +30,7 @@ class sendEmailNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
-     */
-    public function toMail($notifiable)
-    {
-        return (new MailMessage)
-                    ->greeting($this->details['greeting'])
-                    ->line($this->details['body'])
-                    ->action($this->details['actiontext'], $this->details['actionurl'])
-                    ->line($this->details['lastline']);
+        return ['database'];
     }
 
     /**
@@ -57,7 +42,11 @@ class sendEmailNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            //
+            'subject' => $this->detailsMedia['subject'],
+            'body' => $this->detailsMedia['body'],
+            'media_id' => $this->detailsMedia['media_id'],
+            'media_name' => $this->detailsMedia['media_name'],
+            'validation_step_id' => $this->detailsMedia['validation_step_id'],
         ];
     }
 }

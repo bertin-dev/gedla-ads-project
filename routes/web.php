@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\WorkflowManagementController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\createDocumentController;
 use App\Http\Controllers\ExcelController;
-use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OcrController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\ParapheurController;
@@ -75,6 +75,11 @@ Route::group(['middleware' => ['auth', 'user']], function() {
 
     //Calendar
     Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.home');
+
+    //Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{notification}', [NotificationController::class, 'show'])->name('notifications.show');
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 });
 
 Auth::routes(['register' => false]);
@@ -121,7 +126,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     // Workflow Managemement
     Route::resource('workflow-management', WorkflowManagementController::class);
     Route::post('workflow-management/media', [WorkflowManagementController::class, 'storeMedia'])->name('workflow-management.storeMedia');
-    Route::post('workflow-management/hasReadMedia', [WorkflowManagementController::class, 'hasReadMedia'])->name('workflow-management.hasReadMedia');
+    Route::post('workflow-management/preview-document', [WorkflowManagementController::class, 'previewDocument'])->name('workflow-management.preview-document');
     Route::post('workflow-management/open-document', [WorkflowManagementController::class, 'openDocument'])->name('workflow-management.open-document');
     Route::post('workflow-management/validateDocument', [WorkflowManagementController::class, 'validateDocument'])->name('workflow-management.validateDocument');
 

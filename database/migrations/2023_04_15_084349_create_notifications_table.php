@@ -15,10 +15,20 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('type');
+            $table->string('type')->nullable();
             $table->morphs('notifiable');
-            $table->text('data');
+            $table->text('data')->nullable();
             $table->timestamp('read_at')->nullable();
+
+            /*$table->unsignedInteger('user_id')->nullable();
+            $table->string('subject')->nullable();
+            $table->text('body')->nullable();
+            $table->unsignedInteger('media_id')->nullable();
+            $table->unsignedInteger('validation_step_id')->nullable();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('media_id')->references('id')->on('media')->onDelete('cascade');
+            $table->foreign('validation_step_id')->references('id')->on('validation_steps')->onDelete('cascade');*/
             $table->timestamps();
         });
     }

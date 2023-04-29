@@ -135,46 +135,33 @@
                     <ul class="navbar-nav ml-auto">
 
                         @php
-                            use App\Models\AuditLog;
-                            $getLog = AuditLog::where('current_user_id', auth()->id())
-                            ->orderBy('created_at', 'desc');
-                            $notificationCounter = $getLog->get()->count();
+                            $user = auth()->user();
+                            $notifications = $user->notifications()->paginate(10);
                         @endphp
 
                         <li class="nav-item dropdown notification-ui show">
                             <a class="nav-link dropdown-toggle notification-ui_icon" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-bell"></i>
-                                @if($notificationCounter != 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger opacity-75 text-white">{{$notificationCounter}}</span>
-                                @endif
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger opacity-75 text-white">{{ $user->unreadNotifications()->count() }}</span>
                             </a>
                             <div class="dropdown-menu notification-ui_dd" aria-labelledby="navbarDropdown">
                                 <div class="notification-ui_dd-header">
-                                    <h3 class="text-center">{{$notificationCounter<2 ? trans('global.notification') : trans('global.notifications')}}</h3>
+                                    <h3 class="text-center">{{$user->unreadNotifications()->count()<2 ? trans('global.notification') : trans('global.notifications')}}</h3>
                                 </div>
                                 <div class="notification-ui_dd-content">
 
-                                    @foreach($getLog->get()->take(10) as $notification)
+                                    @foreach($notifications as $notification)
 
-                                        @if($notification->read_notification === '0')
+                                        @if($notification->unread())
                                             <a href="#!" class="notification-list text-dark">
                                                 <div class="notification-list_img">
                                                     <img src="{{asset('images/pdf.png')}}" alt="user">
                                                 </div>
                                                 <div class="notification-list_detail">
-                                                    <p><b>{{$notification->name}}</b> <br><span class="text-muted">{{$notification->description}}</span></p>
-                                                    <p class="nt-link text-truncate">{{$notification->message ?? ""}}</p>
+                                                    <p><b>{{$notification->data['subject'] ?? ""}}</b> <br><span class="text-muted">{{$notification->data['subject'] ?? ''}}</span></p>
+                                                    <p class="nt-link text-truncate">{{$notification->data['body'] ?? ""}}</p>
                                                 </div>
-                                                <p><small><time class="timeago" datetime="{{$notification->created_at}}"></time></small></p>
-                                            </a><a href="#!" class="notification-list text-dark">
-                                                <div class="notification-list_img">
-                                                    <img src="{{asset('images/pdf.png')}}" alt="user">
-                                                </div>
-                                                <div class="notification-list_detail">
-                                                    <p><b>{{$notification->name}}</b> <br><span class="text-muted">{{$notification->description}}</span></p>
-                                                    <p class="nt-link text-truncate">{{$notification->message ?? ""}}</p>
-                                                </div>
-                                                <p><small><time class="timeago" datetime="{{$notification->created_at}}"></time></small></p>
+                                                <p><small>{{--<time class="timeago" datetime="{{$notification->created_at ?? ''}}"></time>--}} {{ $notification->created_at->diffForHumans() }}</small></p>
                                             </a>
                                         @else
                                             <a href="#!" class="notification-list notification-list--unread text-dark">
@@ -182,10 +169,10 @@
                                                     <img class="img-thumbnail" src="{{asset('images/pdf.png')}}" alt="user">
                                                 </div>
                                                 <div class="notification-list_detail">
-                                                    <p><b>{{$notification->name}}</b> <br><span class="text-muted">{{$notification->description}}</span></p>
-                                                    <p class="nt-link text-truncate">{{$notification->message ?? ""}} </p>
+                                                    <p><b>{{$notification->data['subject'] ?? ""}}</b> <br><span class="text-muted">{{$notification->data['subject'] ?? ''}}</span></p>
+                                                    <p class="nt-link text-truncate">{{$notification->data['body'] ?? ""}} </p>
                                                 </div>
-                                                <p><small><time class="timeago" datetime="{{$notification->created_at}}"></time></small></p>
+                                                <p><small>{{--<time class="timeago" datetime="{{$notification->created_at ?? ''}}"></time>--}} {{ $notification->created_at->diffForHumans() }}</small></p>
                                             </a>
                                         @endif
 
@@ -262,9 +249,9 @@
                                         <p><small>1 day ago</small></p>
                                     </a>--}}
                                 </div>
-                                @if($notificationCounter >= 10)
+                                @if($user->unreadNotifications()->count() >= 10)
                                     <div class="notification-ui_dd-footer">
-                                        <a href="#!" class="btn btn-success btn-block">View All</a>
+                                        <a href="{{ route('notifications.index') }}" class="btn btn-success btn-block">View All</a>
                                     </div>
                                 @endif
                             </div>
@@ -670,14 +657,14 @@
 
         //when user as seen Media, media tableupdate
         function updateMediaTable(id, name) {
-            /*let url = "{{ route('admin.workflow-management.hasReadMedia', ":id") }}";
+            /*let url = "{{ route('admin.workflow-management.preview-document', ":id") }}";
             url = url.replace(':id', id);*/
             let myActivity = $(".myActivity");
             let initMyActivity = $('.initMyActivity');
             myActivity.empty();
             initMyActivity.empty();
             $.ajax({
-                url: "{{ route('admin.workflow-management.hasReadMedia') }}",
+                url: "{{ route('admin.workflow-management.preview-document') }}",
                 method: 'POST',
                 data: {
                     id: id,
