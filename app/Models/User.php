@@ -54,8 +54,8 @@ class User extends Authenticatable implements HasMedia
         'created_at',
         'updated_at',
         'deleted_at',
-        'user_access',
-        'parapheur_id'
+        'last_login_at',
+        'last_login_ip_address'
     ];
 
     protected function serializeDate(DateTimeInterface $date): string
@@ -102,13 +102,13 @@ class User extends Authenticatable implements HasMedia
 
 
 
-    //PERMISSION
+    //un utilisateur peut attribuer plusieurs permissions à plusieurs personnes
     public function permissionsBy(): HasMany
     {
         return $this->hasMany(Permission::class);
     }
 
-    //ROLE
+    //un utilisateur peut attribuer plusieurs rôles à plusieurs personnes
     public function rolesBy(): HasMany
     {
         return $this->hasMany(Role::class);
@@ -121,23 +121,23 @@ class User extends Authenticatable implements HasMedia
     }
 
 
-    //FOLDERS
+    //un utilisateur peut être associé à plusieurs dossiers d\'un repertoire
     public function userFoldersBy(): HasMany
     {
         return $this->hasMany(Folder::class);
     }
 
-    //PROJECTS
+    //un utilisateur peut appartenir à plusieurs projets
     public function userProjectsBy(): HasMany
     {
         return $this->hasMany(Project::class);
     }
 
-    //MEDIA
-    public function medias(): HasMany
+    //un utilisateur peut avoir signer plusieurs media
+    /*public function medias(): HasMany
     {
         return $this->hasMany(Media::class);
-    }
+    }*/
 
     //PARENT USER
     public function parentUser(): BelongsTo
@@ -171,8 +171,8 @@ class User extends Authenticatable implements HasMedia
 
 
     //CHAQUE UTILISATEUR PEUT POSSEDER UN OU PLUSIEURS MEDIAS A VALIDER
-    public function mediasSelectedForWorkflowValidations(): BelongsToMany
+    /*public function mediasSelectedForWorkflowValidations(): BelongsToMany
     {
         return $this->belongsToMany(Media::class, 'media_user', 'user_id', 'media_id');
-    }
+    }*/
 }
