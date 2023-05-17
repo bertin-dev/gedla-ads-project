@@ -39,7 +39,9 @@ trait Auditable
     }
 
 
-    protected static function trackOperations(
+    protected static function
+
+    trackOperations(
         $mediaId = '',
         $operationType = '',
         $description = '',
@@ -63,7 +65,7 @@ trait Auditable
             'subject_type' => is_object($model) ? sprintf('%s#%s', get_class($model), $model->id) ?? null : null,
             'current_user_id'      => auth()->id() ?? null,
             'properties'   => $model ?? null,
-            'host'         => request()->ip() ?? null,
+            'host'         => request()->ip() ?? null
         ]);
     }
 }

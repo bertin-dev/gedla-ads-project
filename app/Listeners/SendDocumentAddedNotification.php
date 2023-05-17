@@ -29,9 +29,9 @@ class SendDocumentAddedNotification
     public function handle(DocumentAdded $event)
     {
         $detailsMedia = $event->detailsMedia;
-        \Notification::send(auth()->user(), new sendLocalNotificaion($detailsMedia));
+        \Notification::send($detailsMedia['user'], new sendLocalNotificaion($detailsMedia));
         //or
         //auth()->user()->notify(new sendLocalNotificaion($detailsMedia));
-        Log::info('Document '.$detailsMedia['media_name'].' ajouté avec succès');
+        Log::info($detailsMedia['body']);
     }
 }

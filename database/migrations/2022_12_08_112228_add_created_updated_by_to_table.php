@@ -51,13 +51,23 @@ return new class extends Migration
         Schema::table('media', function (Blueprint $table){
             $table->unsignedInteger('created_by')->nullable();
             $table->unsignedInteger('signed_by')->nullable();
+            $table->unsignedInteger('updated_by')->nullable();
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('signed_by')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade');
         });
 
         Schema::table('users', function (Blueprint $table){
             $table->unsignedInteger('created_by')->nullable();
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
+        });
+
+
+        Schema::table('audit_logs', function (Blueprint $table){
+            $table->foreign('current_user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id_sender')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id_receiver')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('media_id')->references('id')->on('media')->onDelete('cascade');
         });
     }
 

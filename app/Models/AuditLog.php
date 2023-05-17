@@ -6,6 +6,8 @@ namespace App\Models;
 
 use \DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AuditLog extends Model
 {
@@ -23,6 +25,7 @@ class AuditLog extends Model
         'current_user_id',
         'properties',
         'host',
+        'message',
     ];
 
     protected $casts = [
@@ -32,5 +35,28 @@ class AuditLog extends Model
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format('Y-m-d H:i:s');
+    }
+
+    //UN AUDITLOG EST EFFECTUE PAR 1 SEUL UTILISATEUR SENDER.
+    public function senderUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id_sender');
+    }
+
+    //UN AUDITLOG EST EFFECTUE PAR 1 SEUL UTILISATEUR RECEIVER.
+    public function receiverUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id_receiver');
+    }
+
+    public function currentUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'current_user_id');
+    }
+
+    //UN AUDITLOG CONCERNE 1 SEUL MEDIA A LA FOIS
+    public function media(): BelongsTo
+    {
+        return $this->belongsTo(Media::class);
     }
 }

@@ -29,7 +29,7 @@ class SendDocumentUpdatedNotification
     public function handle(DocumentUpdated $event)
     {
         $detailsMedia = $event->detailsMedia;
-        auth()->user()->notify(new sendLocalNotificaion($detailsMedia));
-        Log::info('Document '.$detailsMedia['media_name'].' modifié avec succès');
+        $detailsMedia['user']->notify(new sendLocalNotificaion($detailsMedia));
+        Log::info($detailsMedia['body']);
     }
 }

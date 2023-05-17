@@ -10,17 +10,52 @@
         <div class="container-fluid">
 
             <div class="row">
-                    <div class="col-lg-12">
-                        <a class="btn btn-success" href="{{ route('parapheur.upload') }}?parapheur_id={{ $parapheurWithMedia->id }}">
-                            {{ trans('global.add') }} {{trans('global.upload_file')}}
+
+                <div class="col-lg-12 form-row">
+                    <div class="col-md-7 mb-3">
+                        <a class="btn btn-outline-success" href="{{ route('parapheur.upload') }}?parapheur_id={{ $parapheurWithMedia->id }}">
+                            {{trans('global.upload_file')}}
                         </a>
-                        <a class="btn btn-success" href="{{ route('create-document') }}?parapheur_id={{ $parapheurWithMedia->id }}">
-                            {{ trans('global.create') }} {{trans('global.file')}}
+                        <a class="btn btn-outline-primary" href="{{ route('create-document') }}?parapheur_id={{ $parapheurWithMedia->id }}">
+                            {{ trans('global.create') }} {{trans('global.document')}}
                         </a>
-                        {{--<a class="btn btn-success" href="{{ route('folders.create') }}?parent_id={{ $folderItems->id }}">
-                           {{ trans('global.add') }} Create a new folder
-                       </a>--}}
+                        {{--<a class="btn btn-outline-danger" href="--}}{{--{{ route('folders.create') }}?parent_id={{ $folderItems->id }}--}}{{--">
+                             Create a new folder
+                        </a>--}}
                     </div>
+
+                    <div class="col-md-5 mb-3">
+                        <form action="{{--{{ route('search', $folder) }}--}}" method="GET" class="navbar-search" role="search">
+                            <div class="form-row">
+                                <div class="col-md-5 mb-3 small">
+                                    <select name="type" class="custom-select">
+                                        <option value="">Tous les types</option>
+                                        <option value="application/pdf">PDF</option>
+                                        <option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">Word</option>
+                                        <option value="excel">Excel</option>
+                                        <option value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">Excel</option>
+                                        <option value="application/vnd.openxmlformats-officedocument.presentationml.presentation">PowerPoint</option>
+                                        <option value="application/vnd.ms-visio.drawing.main+xml">Visio</option>
+                                        <option value="text/plain">Text</option>
+                                        <option value="image/jpeg">Image</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-7 mb-3">
+                                    <div class="input-group">
+                                        <input id="search_content" type="text" name="q" class="form-control" placeholder="Search ..." aria-describedby="inputGroupPrepend2" required value="{{ request()->get('q') }}">
+                                        <button class="btn btn-primary" type="submit">
+                                            <i class="fas fa-search fa-sm"></i>
+                                        </button>
+                                        <div id="output_search" class="invalid-feedback">
+                                            Looks good!
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
 
                     <div class="col-lg-12" style="margin-top: 20px">
                         @if (session('status'))
@@ -35,7 +70,7 @@
                         @include('front.parapheur.upload', ['parapheur' => $parapheurWithMedia->medias])
                     @endif
 
-                    @foreach ($parapheurWithMedia->medias as $file)
+                    @foreach ($parapheurWithMedia->medias->sortByDesc('created_at') as $file)
                         @php
                             $result=match($file->mime_type){"application/pdf"=>url('images/pdf.png'),"text/plain"=>url('images/txt.png'),"application/vnd.openxmlformats-officedocument.wordprocessingml.document"=>url('images/docx.png'),"application/x-msaccess"=>url('images/access.png'),"application/vnd.ms-visio.drawing.main+xml"=>url('images/visio.png'),"application/vnd.openxmlformats-officedocument.presentationml.presentation"=>url('images/power_point.png'),"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"=>url('images/xlsx.png'),"image/jpeg"=>url('images/file-thumbnail.png'),default => '',};
                             $realSize = number_format($file->size/1024, 1, '.', '');
@@ -56,7 +91,9 @@
                                         <div class="card-body" style="padding: 5px 5px 0;">
                                             <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 42)) }}</h5>
                                             <div style="margin-top: 13px">
-                                                <span><small style="margin-right: 70px">{{ date('d/m/Y' , strtotime($file->created_at)) }}</small></span>
+                                                <span><small style="margin-right: 70px">
+                                                          {{($file->created_at==$file->updated_at) ? "Créée " . Carbon\Carbon::parse($file->created_at)->diffForHumans() . " par " . ($file->createdBy != null ? ucfirst($file->createdBy->name) : "") : "Modifié " . Carbon\Carbon::parse($file->updated_at)->diffForHumans() . " par" . ($file->updatedBy != null ? ucfirst($file->updatedBy->name) : "") }}
+                                                    </small></span>
                                                 <span> <small class="text-right">{{$realSize}} KO</small></span>
                                             </div>
                                             @php

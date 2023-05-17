@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use \DateTimeInterface;
+use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
@@ -16,7 +17,7 @@ use \Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Folder extends Model implements HasMedia
 {
-    use SoftDeletes, InteractsWithMedia, Auditable;
+    use SoftDeletes, InteractsWithMedia, Auditable, Searchable;
 
     public $table = 'folders';
 
@@ -115,5 +116,32 @@ class Folder extends Model implements HasMedia
     {
         return $this->belongsToMany(User::class, 'folder_user', 'folder_id', 'user_id')
             ->withPivot('user_id');
+    }
+
+   /* public function toSearchableArray()
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'media' => $this->media->toArray(),
+        ];
+    }*/
+
+    public function medias()
+    {
+        return $this->hasMany(Media::class);
+    }
+
+    public function toSearchableArray()
+    {
+        $array = $this->toArray();
+
+        // Ajoutez les données de la relation `media` à l'index de recherche full-text
+        $array['media'] = $this->media->map(function ($media) {
+            return $media->toArray();
+        })->all();
+
+        return $array;
     }
 }

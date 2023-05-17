@@ -56,6 +56,11 @@ return [
             'throw' => false,
         ],
 
+        'ged' => [
+            'driver' => 'local',
+            'root' => storage_path('app/ged'),
+        ],
+
     ],
 
     /*

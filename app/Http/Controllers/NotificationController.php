@@ -109,7 +109,7 @@ class NotificationController extends Controller
 
         $detailsMedia = [
             'subject' => 'Nouveau document ajouté',
-            'body' => 'Le document "' . $media->name . '" a été ajouté à la GED.',
+            'body' => 'Le document "' . strtoupper(substr($media->name, 14)) . '" a été ajouté avec succès dans GEDLA-ADS.',
             'media_id' => $media->id,
             'media_name' => $media->file_name,
             'validation_step_id' => 0,
@@ -132,7 +132,7 @@ class NotificationController extends Controller
 
         $detailsMedia = [
             'subject' => 'Document modifié',
-            'body' => 'Le document "' . $media->name . '" a été modifié.',
+            'body' => 'Le document "' . strtoupper(substr($media->name, 14)) . '" a été modifié.',
             'media_id' => $media->id,
             'media_name' => $media->file_name,
             'validation_step_id' => 0,
@@ -155,7 +155,7 @@ class NotificationController extends Controller
 
         $validationStepDetailsMedia = [
             'subject' => 'Étape du workflow terminée',
-            'body' => 'L\'étape "' . $validationStep->order . '" du document "' . $validationStep->media->name . '" a été terminée.',
+            'body' => 'La dernière étape N°("' . $validationStep->order . '") dans le circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
             'media_id' => $validationStep->media->id,
             'media_name' => $validationStep->media->name,
             'validation_step_id' => $validationStep->id,

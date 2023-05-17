@@ -1,21 +1,5 @@
 @extends('layouts.admin')
 @section('content')
-    @can('user_create')
-        <div style="margin-bottom: 10px;" class="row">
-            <div class="col-lg-12">
-                <a class="btn btn-success" href="{{ route('admin.archive.create') }}">
-                    {{ trans('global.add') }} {{ trans('cruds.archive.title') }}
-                </a>
-
-
-                {{--<a class="btn btn-success" href="{{ route('admin.users.display-view-importation') }}">
-                    {{ trans('global.import') }} {{ trans('cruds.user.title_singular') }}
-                </a>--}}
-
-            </div>
-        </div>
-    @endcan
-
     <div class="card">
         <div class="card-header">
             {{ trans('cruds.archive.title_singular') }} {{ trans('global.list') }}
@@ -69,25 +53,13 @@
                                 @endcan
 
                                 @can('archive_show')
-                                        <form method="POST" action="{{ route('admin.ged.restore', $media) }}"
-                                              onsubmit="return confirm('{{ trans('global.areYouSure') }}');"
-                                              style="display: inline-block;">
-                                            @csrf
-                                            <button type="submit" class="btn btn-xs btn-outline-warning">{{ trans('global.unarchive') }}</button>
-                                        </form>
-                                @endcan
-
-                                {{--@can('archive_delete')
-                                    <form action="#" method="POST"
+                                    <form method="POST" action="{{ route('admin.media.archive', ['id' => $media->id]) }}"
                                           onsubmit="return confirm('{{ trans('global.areYouSure') }}');"
                                           style="display: inline-block;">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <input type="hidden" name="media" value="{{$media}}">
-                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                        <input type="submit" class="btn btn-xs btn-danger"
-                                               value="{{ trans('global.delete') }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-xs btn-outline-warning">{{ trans('global.archive_document') }}</button>
                                     </form>
-                                @endcan--}}
+                                @endcan
 
                             </td>
 

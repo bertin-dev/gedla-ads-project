@@ -32,19 +32,52 @@
                              </div>
                          </div>
                      @endforeach--}}
-                @foreach($foldersUsers->multiFolders->where('id', $folder->id) as $folderItems)
-                    <div class="col-lg-12">
-                        <a class="btn btn-outline-success" href="{{ route('folders.upload') }}?folder_id={{ $folderItems->id }}&functionality={{$folderItems->functionality}}">
-                            {{ trans('global.add') }} {{trans('global.upload_file')}}
-                        </a>
-                        <a class="btn btn-outline-primary" href="{{ route('create-document') }}?folder_id={{ $folderItems->id }}">
-                            {{ trans('global.create') }} {{trans('global.file')}}
-                        </a>
-                        <a class="btn btn-outline-danger" href="{{ route('folders.create') }}?parent_id={{ $folderItems->id }}">
-                            Create new folder
-                        </a>
-                    </div>
+                    <div class="col-lg-12 form-row">
 
+                        <div class="col-md-7 mb-3">
+                            <a class="btn btn-outline-success" href="{{ route('folders.upload') }}?folder_id={{ $folder->id }}">
+                                {{trans('global.upload_file')}}
+                            </a>
+                            <a class="btn btn-outline-primary" href="{{ route('create-document') }}?folder_id={{ $folder->id }}">
+                                {{ trans('global.create') }} {{trans('global.document')}}
+                            </a>
+                            <a class="btn btn-outline-danger" href="{{ route('folders.create') }}?parent_id={{ $folder->id }}&project_id={{$folder->project_id}}">
+                                {{ trans('global.create') }} {{trans('global.folder')}}
+                            </a>
+                        </div>
+
+                        <div class="col-md-5 mb-3">
+                            <form action="{{ route('search', $folder) }}" method="GET" class="navbar-search" role="search">
+                                <div class="form-row">
+                                    <div class="col-md-5 mb-3 small">
+                                        <select name="type" class="custom-select">
+                                            <option value="">Tous les types</option>
+                                            <option value="application/pdf">PDF</option>
+                                            <option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">Word</option>
+                                            <option value="excel">Excel</option>
+                                            <option value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">Excel</option>
+                                            <option value="application/vnd.openxmlformats-officedocument.presentationml.presentation">PowerPoint</option>
+                                            <option value="application/vnd.ms-visio.drawing.main+xml">Visio</option>
+                                            <option value="text/plain">Text</option>
+                                            <option value="image/jpeg">Image</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-7 mb-3">
+                                        <div class="input-group">
+                                            <input id="search_content" type="text" name="q" class="form-control" placeholder="Search ..." aria-describedby="inputGroupPrepend2" required value="{{ request()->get('q') }}">
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="fas fa-search fa-sm"></i>
+                                            </button>
+                                            <div id="output_search" class="invalid-feedback">
+                                                Looks good!
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
 
                     <div class="col-lg-12" style="margin-top: 20px">
                         @if (session('status'))
@@ -55,86 +88,101 @@
                     </div>
 
 
-                    @if($folderItems->files->isEmpty())
-                        @include('front.folders.upload', ['folder' => $folderItems])
-                    @endif
+                    <div id="folder_media_bloc" class="col-lg-12 form-row">
 
-
-
-                    @foreach ($folderItems->files as $file)
-                        @php
-                            $result=match($file->mime_type){"application/pdf"=>url('images/pdf.png'),"text/plain"=>url('images/txt.png'),"application/vnd.openxmlformats-officedocument.wordprocessingml.document"=>url('images/docx.png'),"application/x-msaccess"=>url('images/access.png'),"application/vnd.ms-visio.drawing.main+xml"=>url('images/visio.png'),"application/vnd.openxmlformats-officedocument.presentationml.presentation"=>url('images/power_point.png'),"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"=>url('images/xlsx.png'),"image/jpeg"=>url('images/file-thumbnail.png'),default => '',};
-                            $realSize = number_format($file->size/1024, 1, '.', '');
-                        @endphp
-                        {{--show media file where state is unlocked and file has not validate--}}
-                        @if($file->state=="unlocked" && $file->signing == 0)
-                        <div class="col-lg-4">
-                            <div class="card" data-toggle="modal" data-target=".bd-example-modal-lg"
-                                 data-id="{{$file->id}}" data-name="{{ucfirst(strtolower(Str::substr($file->file_name, 14)))}}" data-size="{{$realSize}}"
-                                 data-item_type="{{$result}}" data-url="{{$file->getUrl()}}" data-version="{{$file->version}}" data-mime_type="{{$file->mime_type}}">
-                                <div class="row no-gutters">
-                                    <div class="col-sm-4">
-                                        <img class="img-thumbnail" src="{{ $result ?? url('images/file-thumbnail.png') }}"
-                                             alt="{{ $file->name }}" title="{{ $file->name }}">
-                                    </div>
-                                    <div class="col-sm-8">
-                                        <div class="card-body" style="padding: 5px 5px 0;">
-                                            <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 42)) }}</h5>
-                                            <div style="margin-top: 13px">
-                                                <span><small style="margin-right: 70px">{{ date('d/m/Y' , strtotime($file->created_at)) }}</small></span>
-                                                <span> <small class="text-right">{{$realSize}} KO</small></span>
-                                            </div>
-
-                                            {{--@dd($foldersUsers->receiveOperations->where('media_id', $file->id)->first()->priority)--}}
-                                            @php
-                                                $mediaAndOperation = $foldersUsers->receiveOperations->where('media_id', $file->id)->first();
-                                            @endphp
-                                            @if($mediaAndOperation != null)
-                                                @if($mediaAndOperation->priority == "high")
-                                                    <span class="badge rounded-pill badge-danger">.</span>
-                                                @elseif($mediaAndOperation->priority == "medium")
-                                                    <span class="badge rounded-pill badge-warning">.</span>
-                                                @else
-                                                    <span class="badge rounded-pill badge-info">.</span>
-                                                @endif
-                                            @endif
-
-
-                                            <span>
-                                                @if($file->step_workflow !=null)
-
-                                                    @php
-                                                        $oldValue = json_decode($file->step_workflow);
-                                                        $counter = 0;
-                                                        for($i=0; $i<count($oldValue); $i++){
-                                                            if($oldValue[$i]->state == "finish"){
-                                                                $counter++;
-                                                            }
-                                                        }
-                                                    @endphp
-
-
-                                                        @if($counter==count($oldValue))
-                                                            <small class="alert-success">validate</small>
-                                                        @else
-                                                            <small class="alert-success">receive</small>
-                                                        @endif
-
-
-                                                    <small class="alert-link" style="font-size: 9px;">{{trans('global.expiry')}}: {{now()->diffForHumans($mediaAndOperation->deadline)}}</small>
-                                                @else
-                                                    <small class="alert-info">import</small>
-                                                @endif
-                                            </span>
+                        @foreach ($folder->children as $folder)
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="row no-gutters">
+                                        <div class="col-sm-4">
+                                            <a href="{{ route('folders.show', [$folder]) }}">
+                                                <img class="img-thumbnail" src="{{ $folder->thumbnail ? $folder->thumbnail->thumbnail : url('images/empty-folder.png') }}"
+                                                     alt="{{ $folder->name }}" title="{{ $folder->name }}">
+                                            </a>
                                         </div>
+                                        <div class="col-sm-8">
+                                            <div class="card-body" style="padding: 5px 5px 0;">
+                                                <h5 class="card-title"> {{ strtoupper($folder->name) }} </h5>
+                                                <div style="margin-top: 13px">
+                                                    <span><small> {{($folder->created_at==$folder->updated_at) ? "Créée " . Carbon\Carbon::parse($folder->created_at)->diffForHumans() . " par " . ($folder->userCreatedFolderBy != null ? ucfirst($folder->userCreatedFolderBy->name) : "") : "Modifié " . Carbon\Carbon::parse($folder->updated_at)->diffForHumans() . " par" . ($folder->userUpdatedFolderBy != null ? ucfirst($folder->userUpdatedFolderBy->name) : "") }}</small></span><br>
+                                                    <small>{{$folder->description ?? "Aucune description"}}</small><br>
+                                                    <small>Aucun Tag</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        @endif
-                    @endforeach
-                @endforeach
+                        @endforeach
 
+
+                        @if($folder->files->isEmpty())
+                            @include('partials.upload', ['folder' => $folder])
+                        @endif
+                        @foreach ($folder->files->sortByDesc('created_at') as $file)
+                            @php
+                                $result=match($file->mime_type){"application/pdf"=>url('images/pdf.png'),"text/plain"=>url('images/txt.png'),"application/vnd.openxmlformats-officedocument.wordprocessingml.document"=>url('images/docx.png'),"application/x-msaccess"=>url('images/access.png'),"application/vnd.ms-visio.drawing.main+xml"=>url('images/visio.png'),"application/vnd.openxmlformats-officedocument.presentationml.presentation"=>url('images/power_point.png'),"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"=>url('images/xlsx.png'),"image/jpeg"=>url('images/file-thumbnail.png'),default => '',};
+                                $realSize = number_format($file->size/1024, 1, '.', '');
+                            @endphp
+                            {{--show media file where state is unlocked and file has not validate--}}
+                            @if($file->state=="unlocked" && $file->signing == 0 && $file->visibility == 'public')
+                                <div class="col-lg-4">
+                                    <div class="card" data-toggle="modal" data-target=".bd-example-modal-lg"
+                                         data-id="{{$file->id}}" data-name="{{ucfirst(strtolower(Str::substr($file->file_name, 14)))}}" data-size="{{$realSize}}"
+                                         data-item_type="{{$result}}" data-url="{{$file->getUrl()}}" data-version="{{$file->version}}" data-mime_type="{{$file->mime_type}}">
+                                        <div class="row no-gutters">
+                                            <div class="col-sm-4">
+                                                <img class="img-thumbnail" src="{{ $result ?? url('images/file-thumbnail.png') }}"
+                                                     alt="{{ $file->name }}" title="{{ $file->name }}">
+                                            </div>
+                                            <div class="col-sm-8">
+                                                <div class="card-body" style="padding: 5px 5px 0;">
+                                                    <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 42)) }}</h5>
+                                                    <div style="margin-top: 13px">
+                                                        <span><small style="margin-right: 70px">
+                                                                {{($file->created_at==$file->updated_at) ? "Créée " . Carbon\Carbon::parse($file->created_at)->diffForHumans() . " par " . ($file->createdBy != null ? ucfirst($file->createdBy->name) : "") : "Modifié " . Carbon\Carbon::parse($file->updated_at)->diffForHumans() . " par" . ($file->updatedBy != null ? ucfirst($file->updatedBy->name) : "") }}
+                                                            </small></span>
+                                                        <span> <small class="text-right">{{$realSize}} KO</small></span>
+                                                    </div>
+
+                                                    @if($file->priority == "high")
+                                                        <span class="badge rounded-pill badge-danger">.</span>
+                                                    @elseif($file->priority == "medium")
+                                                        <span class="badge rounded-pill badge-warning">.</span>
+                                                    @else
+                                                        <span class="badge rounded-pill badge-info">.</span>
+                                                    @endif
+
+
+                                                    <span>
+
+                                                        @php
+                                                            $getValidationData = $getValidationDatas->where('media_id', $file->id)->get();
+                                                        @endphp
+
+                                                        @if(count($getValidationData) != 0)
+                                                        @foreach($getValidationData as $data)
+                                                            @if($data->statut == 0)
+                                                                <small class="alert-success">validate</small>
+                                                            @else
+                                                                <small class="alert-success">receive</small>
+                                                            @endif
+                                                        @endforeach
+                                                            <small class="alert-link" style="font-size: 9px;">{{trans('global.expiry')}}: {{now()->diffForHumans($file->globa_deadline)}}</small>
+                                                        @else
+                                                            <small class="alert-info">import</small>
+                                                        @endif
+
+                                            </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
 
             </div>
 
@@ -167,7 +215,7 @@
                                     <a class="myUrl col-lg-4 open-document" target="_blank">{{trans('global.open')}} </a>
                                     @endcan
                                     @can('edit_file_access')
-                                    <a class="col-lg-4 mediaId" target="_blank" href="{{ route('edit-document') }}?folder_id={{ $folderItems->id ?? '' }}">{{trans('global.edit_document')}}</a>
+                                    <a class="col-lg-4 mediaId" target="_blank" href="{{ route('edit-document') }}?folder_id={{ $folder->id ?? '' }}">{{trans('global.edit_document')}}</a>
                                     @endcan
                                     @can('download_access')
                                     <a href="#" class="mediaDownload col-lg-4"> {{trans('global.download')}}</a>
@@ -188,8 +236,8 @@
                                     <!---------------------------->
                                     <section id="schedule" class="section-with-bg">
                                         <div class="section-header">
-                                            <h2>{{trans('global.my_recent_activity')}}</h2>
-                                            <p class="initMyActivity">Here is our event schedule</p>
+                                            <h4>{{trans('global.my_recent_activity')}}</h4>
+                                            <p class="initMyActivity">{{trans('global.document_history')}}</p>
                                         </div>
                                         <div class="loading">
                                             <center><img src="{{asset('images/loading.gif')}}" alt=""></center>
@@ -361,40 +409,4 @@
         </div>
     </div>
 
-
-
-    {{-- <div class="container">
-         <div class="row justify-content-center">
-             <div class="col-md-10">
-                 <div class="card">
-                     <div class="card-header">My Assigned Projects</div>
-
-                     <div class="card-body">
-                         @if (session('status'))
-                             <div class="alert alert-success" role="alert">
-                                 {{ session('status') }}
-                             </div>
-                         @endif
-
-                         <div class="row">
-                             @foreach ($projects as $project)
-                                 <div class="col-lg-2 col-md-3 col-sm-4 mb-3">
-                                     <div class="card">
-                                         <a href="{{ route('folders.show', $project) }}">
-                                             <img class="card-img-top" src="{{ $project->thumbnail ? $project->thumbnail->thumbnail : url('images/no-image.png') }}" alt="{{ $project->name }}">
-                                         </a>
-                                         <div class="card-footer text-center">
-                                             <a href="{{ route('projects.show', $project) }}">
-                                                 {{ $project->name }}
-                                             </a>
-                                         </div>
-                                     </div>
-                                 </div>
-                             @endforeach
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </div>
-     </div>--}}
 @stop

@@ -378,7 +378,7 @@ input:checked + .slider:before {
 }
 
 #schedule {
-    padding: 60px 0 60px 0;
+    padding: 10px 0 10px 0;
 }
 .section-with-bg {
     background-color: #f6f7fd;
@@ -434,7 +434,7 @@ input:checked + .slider:before {
 }
 
 .section-header {
-    margin-bottom: 60px;
+    margin-bottom: 20px;
     position: relative;
     padding-bottom: 20px;
 }
@@ -450,12 +450,12 @@ input:checked + .slider:before {
     left: calc(50% - 25px);
 }
 
-.section-header h2 {
-    font-size: 36px;
+.section-header h4 {
+    font-size: 26px;
     text-transform: uppercase;
     text-align: center;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: 1px;
 }
 
 .section-header p {

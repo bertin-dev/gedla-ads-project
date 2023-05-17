@@ -2,15 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\DocumentAdded;
+use App\Events\validationStepCompleted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassDestroyFolderRequest;
+use App\Http\Resources\Admin\UserResource;
 use App\Models\AuditLog;
 use App\Models\Folder;
 use App\Models\Operation;
 use App\Models\Parapheur;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\Notification as Notifications;
+use App\Models\ValidationStep;
 use App\Notifications\sendEmailNotification;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -30,38 +36,26 @@ class WorkflowManagementController extends Controller
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
-        $allMedia = Media::with('operations')->whereNotNull('step_workflow')->get();
-
-        /*foreach ($allMedia as $item){
-            dd($item->toArray());
-        }*/
-        //dd($allMedia->toArray());
-        //abort_if(Gate::denies('folder_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        //dd(Media::with('parapheur')->get()->toArray());
-        return view('admin.workflow.index', compact('allMedia'));
+        abort_if(Gate::denies('workflow_validation_management_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $allMediaWithValidationStep = Media::with('validationSteps', 'createdBy', 'updatedBy', 'parapheur')->get();
+        return view('admin.workflow.index', compact('allMediaWithValidationStep'));
     }
 
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        //abort_if(Gate::denies('folder_access_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('workflow_management_access_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $projects = Project::all()
-            ->pluck('name', 'id')
+        $projects = Project::all()->pluck('name', 'id')
             ->prepend(trans('global.pleaseSelect'), '');
 
-        $users = User::where('id', '!=', \Auth::user()->id)
+        $users = User::where('id', '!=', auth()->id())
             ->whereHas('multiFolders')
             ->pluck('name', 'id')
             ->prepend(trans('global.pleaseSelect'), '');
 
-        $folders = Folder::where('functionality', false)
-            ->get()
-            ->pluck('name', 'id')
-            ->prepend(trans('global.pleaseSelect'), '');
-
-        return view('admin.workflow.create', compact('users', 'folders', 'projects'));
+        return view('admin.workflow.create', compact('users', 'projects'));
     }
 
     /**
@@ -70,7 +64,7 @@ class WorkflowManagementController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    /*public function store(Request $request)
     {
         $globalDeadline = Carbon::parse($request->deadline);
         $getUserListForWorkflowValidation = collect();
@@ -200,10 +194,175 @@ class WorkflowManagementController extends Controller
         }
 
         return redirect()->route('admin.workflow-management.index');
+    }*/
+
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        //dd($request->all());
+        $globalDeadline = Carbon::parse($request->global_deadline);
+        $getUserListForWorkflowValidation = collect();
+        $usersId = $request->user_list;
+        //Get ID of first main user or delegate user
+        //si userList[n] est différent de null alors nous avons une délégation de signature
+        $firstUserId = $request->get("user_list".$usersId[0]) != null ? $request->get("user_list".$usersId[0]) : $usersId[0];
+        //dd($request->get("user_list4"));
+        for($i=0; $i<count($usersId); $i++){
+
+            $smallDeadline = Carbon::parse($request->get("deadline".$usersId[$i]));
+
+            if($globalDeadline->lessThan($smallDeadline)){
+                //deadline global inférieur
+                return back()->withInput($request->input())->withErrors(['errors' => 'Le deadline d\'un ou plusieurs utilisateurs est supérieur au deadline global du circuit de validation' ]);
+            }
+        }
+
+        //dd($getUserListForWorkflowValidation->all());
+
+
+        //step 1: check visibility of file
+        if($request->visibility == 'private') {
+            //parapheur
+            $parapheur = Parapheur::where('user_id', $firstUserId)->first();
+            if($parapheur == null){
+                $getLastInsertId = Parapheur::all()->max('id');
+                $parapheur = Parapheur::create([
+                    'name' => 'parapheur'. $getLastInsertId + 1,
+                    'project_id' => 1,
+                    'user_id' => $firstUserId
+                ]);
+            }
+
+            foreach ($request->input('files', []) as $file) {
+                $media = $parapheur->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
+                $media->created_by = \Auth::user()->id;
+                $media->parapheur_id = $parapheur->id;
+                $media->model_id = 0;
+                $media->version = $media->version + 1;
+                $media->global_deadline = $request->global_deadline;
+                $media->visibility = $request->visibility;
+                $media->save();
+
+                foreach ($usersId as $key => $userId) {
+                    $validationStep = new ValidationStep([
+                        'media_id' => $media->id,
+                        'user_id' => $userId,
+                        'deadline' => $request->get("deadline". $userId),
+                        'order' => $key,
+                    ]);
+                    $validationStep->save();
+                }
+
+                $getLog = AuditLog::where('media_id', $media->id)
+                    ->where('operation_type', 'START_VALIDATION')
+                    ->where('current_user_id', auth()->id())
+                    ->get();
+                if(count($getLog) === 0){
+                    self::trackOperations($media->id,
+                        "START_VALIDATION",
+                        $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de démarrer le circuit de validation.'),
+                        'success',
+                        auth()->id(),
+                        $firstUserId,
+                        auth()->user()->name,
+                        $request->message
+                    );
+                }
+
+                //SEND NOTIFICATION NEXT USER
+                $details = [
+                    'user' => User::findOrFail($firstUserId),
+                    'subject' => 'Attente de validation',
+                    'body' => 'Vous avez le document "' . strtoupper(substr($media->file_name, 14)) . '" en attente de validation.',
+                    'media_id' => $media->id,
+                    'media_name' => $media->file_name,
+                    'validation_step_id' => 0,
+                ];
+                event(new DocumentAdded($details));
+
+            }
+
+            //if checkbox of email checked, then email is send at receiver
+            if($request->boolean('flexCheckChecked')){
+                $getUser = User::findOrFail($firstUserId);
+                $details = [
+                    'greeting' => 'Bonjour '. $getUser->name,
+                    'body' => 'Vous avez réçu un message de '. ucfirst(auth()->user()->name) . ': ' .$request->message,
+                    'actiontext' => 'Subscribe this channel',
+                    'actionurl' => '/',
+                    'lastline' => 'Nous vous remercions pour votre bonne comprehension.'
+                ];
+                Notification::send($getUser, new sendEmailNotification($details));
+            }
+
+        } else {
+
+            //Get Folder
+            $user = User::with('multiFolders')->findOrFail($firstUserId);
+            $folder = $user->multiFolders->first();
+
+            foreach ($request->input('files', []) as $file) {
+                //Create Media table with new datas for receiver user
+                $media = $folder->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
+                $media->version = $media->version + 1;
+                $media->created_by = \Auth::user()->id;
+                $media->global_deadline = $request->global_deadline;
+                $media->visibility = $request->visibility;
+                $media->save();
+
+                foreach ($usersId as $key => $userId) {
+                    $validationStep = new ValidationStep([
+                        'media_id' => $media->id,
+                        'user_id' => $userId,
+                        'deadline' => $request->get("deadline". $userId),
+                        'order' => $key,
+                    ]);
+                    $validationStep->save();
+                }
+                $getLog = AuditLog::where('media_id', $media->id)
+                    ->where('operation_type', 'START_VALIDATION')
+                    ->where('current_user_id', auth()->id())
+                    ->get();
+                if(count($getLog) === 0){
+                    self::trackOperations($media->id,
+                        "START_VALIDATION",
+                        $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de démarrer le circuit de validation.'),
+                        'success',
+                        auth()->id(),
+                        $firstUserId,
+                        auth()->user()->name,
+                        $request->message);
+                }
+
+                //SEND NOTIFICATION NEXT USER
+                $details = [
+                    'user' => User::findOrFail($firstUserId),
+                    'subject' => 'Attente de validation',
+                    'body' => 'Vous avez le document "' . strtoupper(substr($media->file_name, 14)) . '" en attente de validation.',
+                    'media_id' => $media->id,
+                    'media_name' => $media->file_name,
+                    'validation_step_id' => 0,
+                ];
+                event(new DocumentAdded($details));
+            }
+            //if checkbox of email checked, then email is send at receiver
+            if($request->boolean('flexCheckChecked')){
+                $getUser = User::findOrFail($firstUserId);
+                $details = [
+                    'greeting' => 'Bonjour '. $getUser->name,
+                    'body' => 'Vous avez réçu un message de '. auth()->user()->name . ': ' .$request->message,
+                    'actiontext' => 'Subscribe this channel',
+                    'actionurl' => '/',
+                    'lastline' => 'Nous vous remercions pour votre bonne comprehension.'
+                ];
+                Notification::send($getUser, new sendEmailNotification($details));
+            }
+        }
+
+        return redirect()->route('admin.workflow-management.index');
     }
 
 
-    public function storeMedia(Request $request)
+    public function storeMedia(Request $request): \Illuminate\Http\JsonResponse
     {
         // Validates file size
         if (request()->has('size')) {
@@ -250,20 +409,26 @@ class WorkflowManagementController extends Controller
      * @param  int  $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function show($id)
+    public function show($id): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\Foundation\Application
     {
-        /*$user = User::where('id', $id)->get();
-        return response()->json($user);*/
-
         abort_if(Gate::denies('workflow_management_access_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $media = Media::with('operations')
-            ->whereNotNull('step_workflow')
+        $getMediaAndUser = ValidationStep::with('media', 'user')
             ->findOrFail($id);
-
-        return view('admin.workflow.show', compact('media'));
+        return view('admin.workflow.show', compact('getMediaAndUser'));
     }
 
+    public function showUsers($id): UserResource
+    {
+        abort_if(Gate::denies('workflow_management_access_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $getUsersInProject = Project::with('users')
+            ->findOrFail($id)
+            ->users
+            ->pluck('name', 'id')
+            ->prepend(trans('global.pleaseSelect'), '');
+        return new UserResource($getUsersInProject);
+    }
     /**
      * Update the specified resource in storage.
      *
@@ -271,9 +436,9 @@ class WorkflowManagementController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): \Illuminate\Http\Response
     {
-        //
+        abort_if(Gate::denies('workflow_management_access_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
     }
 
     /**
@@ -282,7 +447,7 @@ class WorkflowManagementController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy($id)
+    public function destroy($id): \Illuminate\Http\RedirectResponse
     {
         abort_if(Gate::denies('workflow_management_access_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
@@ -292,74 +457,420 @@ class WorkflowManagementController extends Controller
         return back();
     }
 
-    public function massDestroy(MassDestroyFolderRequest $request)
+    public function massDestroy(MassDestroyFolderRequest $request): \Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory
     {
         Operation::whereIn('id', request('ids'))->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }
 
-    public function openDocument(Request $request){
-        $getLog = AuditLog::where('media_id', $request->id)->where('operation_type', 'OPEN_DOCUMENT')->get();
+    public function openDocument(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $getLog = AuditLog::where('media_id', $request->id)
+            ->where('operation_type', 'OPEN_DOCUMENT')
+            ->where('current_user_id', auth()->id())
+            ->get();
+
         if(count($getLog) === 0){
             self::trackOperations($request->id,
                 "OPEN_DOCUMENT",
-                auth()->user()->name .' vient d\'ouvrir le document '. $request->name,
+                $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .'</strong> a ouvert le document '. strtoupper($request->name)),
                 'success',
                 null,
                 auth()->id(),
-                auth()->user()->name);
+                auth()->user()->name,
+                ucfirst(auth()->user()->name) .' vient d\'ouvrir le document '. strtoupper($request->name),);
         }
         return \response()->json($getLog);
     }
 
-    public function hasReadMedia(Request $request){
-
-        $getLog = AuditLog::where('media_id', $request->id)->where('operation_type', 'PREVIEW_DOCUMENT')->get();
-        if(count($getLog) === 0){
-            self::trackOperations($request->id,
-                "PREVIEW_DOCUMENT",
-                auth()->user()->name .' vient de voir le document '. $request->name,
-                'success',
-                null,
-                auth()->id(),
-                auth()->user()->name);
-        }
+    public function previewDocument(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $operationTypes = ["SEND_DOCUMENT", "VALIDATE_DOCUMENT", "VALIDATE_DOCUMENT_SIGNATURE",
+            "SEND_DOCUMENT_SIGNATURE", "VALIDATE_DOCUMENT_PARAPHEUR", "SEND_DOCUMENT_PARAPHEUR", "OPEN_DOCUMENT", "PREVIEW_DOCUMENT",
+            "START_VALIDATION", "REJECTED_DOCUMENT", "EDIT_DOCUMENT", "SAVE_DOCUMENT", "DOWNLOAD_DOCUMENT", "ARCHIVE_DOCUMENT"];
 
 
-        /*$mediaAndOperation = Operation::where([
-            ['media_id', $request->id],
-            ['user_id_receiver', \Auth::user()->id]
-        ])->first();
+            //GET ALL LOGS OF MEDIA SPECIFIED AND AUTH USER
+            $getCountLog = AuditLog::where('media_id', $request->id)
+                ->where('current_user_id', auth()->id())
+                ->where('operation_type', "PREVIEW_DOCUMENT")
+                ->get();
 
-        if($mediaAndOperation != null){
-            $mediaAndOperation->update([
-                'receiver_read_doc' => true,
-                'receiver_read_doc_at' => date('Y-m-d H:i:s', time())
-            ]);
-        }
+            if(count($getCountLog) === 0){
 
-        $infoMedia = Media::with(['parapheur', 'category', 'createdBy', 'signedBy', 'operations' => function($q){
-            $q->orderBy('id', 'DESC');
-        }])->find($request->id);
+                self::trackOperations($request->id,
+                    "PREVIEW_DOCUMENT",
+                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .'</strong> a prévisualisé le document '. strtoupper($request->name)),
+                    'success',
+                    null,
+                    auth()->id(),
+                    auth()->user()->name,
+                    '<strong>' .ucfirst(auth()->user()->name) .' </strong> a prévisualisé le document '. strtoupper($request->name),
+                    '',
+                    date('Y-m-d H:i:s', time()),
+                );
+            }
 
-        $allUser = User::with(['receiveOperations', 'sendOperations'])->get();
+
+        $getAllLog = AuditLog::where('media_id', $request->id)
+            ->whereIn('operation_type', $operationTypes)
+            ->orderByDesc('created_at')
+            ->get();
 
         return response()->json([
-            'media' => $infoMedia,
-            'user' => $allUser,
-            'workflow_validation' => $infoMedia->step_workflow
-        ], Response::HTTP_OK);*/
-
-        $getLog = AuditLog::where('media_id', $request->id)->get();
-        //dd($getLog->toArray());
-        return response()->json([
-            'tracking' => $getLog,
+            'tracking' => $getAllLog,
         ], Response::HTTP_OK);
     }
 
+    public function validateDocument(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $getMediaDocument = Media::findOrFail($request->id);
+        $success = "";
+        $error = "";
 
-    public function validateDocument(Request $request){
+        $validationStep = $getMediaDocument
+            ->validationSteps()
+            ->where('user_id', auth()->id())
+            ->where('statut', 0)
+            ->first();
+
+        switch ($request->validationType){
+            case "validation":
+
+                if($getMediaDocument->visibility == "public") {
+                    if ($validationStep) {
+
+                        $nextStepValidation = $getMediaDocument
+                            ->validationSteps()
+                            ->where('order', '>', $validationStep->order)
+                            ->where('statut', 0)
+                            ->first();
+
+                        $validationStep->statut = 1;
+                        $validationStep->save();
+
+                        if ($nextStepValidation) {
+                            $nextUser = $nextStepValidation->user;
+                            /*
+                            // Vérifier s'il y a des erreurs lors de l'enregistrement
+                            if ($nextStepValidation->save() === false) {
+                                var_dump($nextStepValidation->getErrors()); // Afficher les erreurs
+                            }*/
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $nextUser,
+                                'subject' => 'Attente de validation',
+                                'body' => 'Vous avez le document "' . strtoupper(substr($getMediaDocument->file_name, 14)) . '" en attente de validation.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => $getMediaDocument->file_name,
+                                'validation_step_id' => $nextStepValidation->order,
+                            ];
+                            event(new DocumentAdded($detailsMedia));
+
+                            //GET FOLDER AND UPDATE MEDIA TABLE
+                            $user = User::with('multiFolders')->where('id', $nextUser->id)->first();
+                            $folder = $user->multiFolders->first();
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->model_id = $folder->id;
+                            $getMediaDocument->save();
+
+                            //SAVE OPERATION IN LOG
+                            $getLog = AuditLog::where('media_id', $getMediaDocument->id)
+                                ->where('operation_type', 'VALIDATE_DOCUMENT')
+                                ->where('current_user_id', auth()->id())
+                                ->get();
+                            if(count($getLog) === 0){
+                                self::trackOperations($request->id,
+                                    "VALIDATE_DOCUMENT",
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    'success',
+                                    null,
+                                    auth()->id(),
+                                    auth()->user()->name,
+                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                );
+                            }
+
+                            //CHECK AGAIN IF NEXT USER EXIST
+                            $checkNextStepValidation = $getMediaDocument
+                                ->validationSteps()
+                                ->where('order', '>', $validationStep->order)
+                                ->where('statut', 0)
+                                ->first();
+                            if(!$checkNextStepValidation){
+                                $getMediaDocument->statut = 1;
+                                $getMediaDocument->save();
+
+                                $creator_user = $getMediaDocument->createdBy;
+
+                                //SEND NOTIFICATION NEXT USER
+                                $detailsMedia = [
+                                    'user' => $creator_user,
+                                    'subject' => 'Circuit de validation terminé',
+                                    'body' => 'La dernière étape du circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
+                                    'media_id' => $getMediaDocument->id,
+                                    'media_name' => strtoupper(substr($getMediaDocument->file_name, 14)),
+                                    'validation_step_id' => $validationStep->order ?? 0,
+                                ];
+                                event(new validationStepCompleted($detailsMedia));
+                            }
+
+                            $success = 'la validation du document '.strtoupper(substr($getMediaDocument->file_name, 14)).' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+                        }
+                        else{
+                            $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+                        }
+
+                    }
+                    else {
+                        $error = "Vous ne pouvez plus valider le document " . strtoupper(substr($getMediaDocument->file_name, 14));
+                    }
+                }
+                else{
+                    if ($validationStep) {
+
+                        $nextStepValidation = $getMediaDocument
+                            ->validationSteps()
+                            ->where('order', '>', $validationStep->order)
+                            ->where('statut', 0)
+                            ->first();
+
+                        $validationStep->statut = 1;
+                        $validationStep->save();
+
+                        //dd($nextStepValidation->toArray());
+                        if ($nextStepValidation) {
+                            $nextUser = $nextStepValidation->user;
+                            /*
+                            // Vérifier s'il y a des erreurs lors de l'enregistrement
+                            if ($nextStepValidation->save() === false) {
+                                var_dump($nextStepValidation->getErrors()); // Afficher les erreurs
+                            }*/
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $nextUser,
+                                'subject' => 'Attente de validation',
+                                'body' => 'Vous avez le document "' . strtoupper(substr($getMediaDocument->file_name, 14)) . '" en attente de validation.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => $getMediaDocument->file_name,
+                                'validation_step_id' => $nextStepValidation->order,
+                            ];
+                            event(new DocumentAdded($detailsMedia));
+
+                            $parapheur = Parapheur::where('user_id', $nextUser->id)->first();
+                            if($parapheur == null){
+                                $getLastInsertId = Parapheur::all()->max('id');
+                                $parapheur = Parapheur::create([
+                                    'name' => 'parapheur'. $getLastInsertId + 1,
+                                    'project_id' => 1,
+                                    'user_id' => $nextUser->id
+                                ]);
+                            }
+
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->parapheur_id = $parapheur->id;
+                            $getMediaDocument->save();
+
+
+                            //SAVE OPERATION IN LOG
+                            $getLog = AuditLog::where('media_id', $getMediaDocument->id)
+                                ->where('operation_type', 'VALIDATE_DOCUMENT')
+                                ->where('current_user_id', auth()->id())
+                                ->get();
+                            if(count($getLog) === 0){
+                                self::trackOperations($request->id,
+                                    "VALIDATE_DOCUMENT",
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    'success',
+                                    null,
+                                    auth()->id(),
+                                    auth()->user()->name,
+                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                );
+                            }
+
+                            //CHECK AGAIN IF NEXT USER EXIST
+                            $checkNextStepValidation = $getMediaDocument
+                                ->validationSteps()
+                                ->where('order', '>', $validationStep->order)
+                                ->where('statut', 0)
+                                ->first();
+                            if(!$checkNextStepValidation){
+                                $getMediaDocument->statut = 1;
+                                $getMediaDocument->save();
+
+                                $creator_user = $getMediaDocument->createdBy;
+
+                                //SEND NOTIFICATION NEXT USER
+                                $detailsMedia = [
+                                    'user' => $creator_user,
+                                    'subject' => 'Circuit de validation terminé',
+                                    'body' => 'La dernière étape du circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
+                                    'media_id' => $getMediaDocument->id,
+                                    'media_name' => strtoupper(substr($getMediaDocument->file_name, 14)),
+                                    'validation_step_id' => $validationStep->order ?? 0,
+                                ];
+                                event(new validationStepCompleted($detailsMedia));
+                            }
+
+                            $success = 'La validation du document ' .strtoupper(substr($getMediaDocument->file_name, 14)). ' a été effectué avec succès et une notification a été envoyé à '. ucfirst($nextUser->name);
+                        }
+                        else{
+                            $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+                        }
+
+                    } else {
+                        $error = "Vous ne pouvez plus valider le document " .strtoupper(substr($getMediaDocument->file_name, 14));
+                    }
+                }
+                break;
+
+            case "rejected":
+
+                if($getMediaDocument->visibility == "public"){
+                    if ($validationStep) {
+                        $validationStep->statut = -1;
+                        $validationStep->save();
+
+                        $getMediaDocument->statut = -1;
+                        $getMediaDocument->save();
+
+                        $previousStepValidation = $getMediaDocument
+                            ->validationSteps()
+                            ->where('order', '=', ($validationStep->order - 1))
+                            ->where('statut', 1)
+                            ->first();
+
+                        if ($previousStepValidation) {
+                            $previousUser = $previousStepValidation->user;
+                            $user = User::with('multiFolders')->where('id', $previousUser->id)->first();
+                            $folder = $user->multiFolders->first();
+
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $previousUser,
+                                'subject' => 'validation rejeté',
+                                'body' => 'Vous avez le document "' . strtoupper(substr($getMediaDocument->file_name, 14)) . '" qui a été rejecté par ' . ucfirst($previousUser->name),
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => $getMediaDocument->file_name,
+                                'validation_step_id' => $validationStep->order,
+                            ];
+                            event(new DocumentAdded($detailsMedia));
+
+
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->model_id = $folder->id;
+                            $getMediaDocument->save();
+
+                            //SAVE OPERATION IN LOG
+                            $getLog = AuditLog::where('media_id', $getMediaDocument->id)
+                                ->where('operation_type', 'REJECTED_DOCUMENT')
+                                ->where('current_user_id', auth()->id())
+                                ->get();
+                            if(count($getLog) === 0){
+                                self::trackOperations($request->id,
+                                    "REJECTED_DOCUMENT",
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de rejeter le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    'success',
+                                    null,
+                                    auth()->id(),
+                                    auth()->user()->name,
+                                    ucfirst(auth()->user()->name) .' vient de rejeter le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                );
+                            }
+                        }
+
+                        $success = "Le document ".strtoupper(substr($getMediaDocument->file_name, 14))." a été rejeté avec succès";
+                    }
+                    else {
+                        $error = "Vous ne pouvez plus Rejeter le document " . strtoupper(substr($getMediaDocument->file_name, 14));
+                    }
+                }
+                else{
+                    if ($validationStep) {
+                        $validationStep->statut = -1;
+                        $validationStep->save();
+
+                        $getMediaDocument->statut = -1;
+                        $getMediaDocument->save();
+
+                        $previousStepValidation = $getMediaDocument
+                            ->validationSteps()
+                            ->where('order', '=', ($validationStep->order - 1))
+                            ->where('statut', 1)
+                            ->first();
+
+                        if ($previousStepValidation) {
+                            $previousUser = $previousStepValidation->user;
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $previousUser,
+                                'subject' => 'validation rejeté',
+                                'body' => 'Vous avez le document "' . strtoupper(substr($getMediaDocument->file_name, 14)) . '" qui a été rejecté par ' . ucfirst($previousUser->name),
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => $getMediaDocument->file_name,
+                                'validation_step_id' => $validationStep->order,
+                            ];
+                            event(new DocumentAdded($detailsMedia));
+
+                            $parapheur = Parapheur::where('user_id', $previousUser->id)->first();
+                            if($parapheur == null){
+                                $getLastInsertId = Parapheur::all()->max('id');
+                                $parapheur = Parapheur::create([
+                                    'name' => 'parapheur'. $getLastInsertId + 1,
+                                    'project_id' => 1,
+                                    'user_id' => $previousUser->id
+                                ]);
+                            }
+
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->parapheur_id = $parapheur->id;
+                            $getMediaDocument->save();
+
+                            //SAVE OPERATION IN LOG
+                            $getLog = AuditLog::where('media_id', $getMediaDocument->id)
+                                ->where('operation_type', 'REJECTED_DOCUMENT')
+                                ->where('current_user_id', auth()->id())
+                                ->get();
+                            if(count($getLog) === 0){
+                                self::trackOperations($request->id,
+                                    "REJECTED_DOCUMENT",
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de rejeter le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    'success',
+                                    null,
+                                    auth()->id(),
+                                    auth()->user()->name,
+                                    ucfirst(auth()->user()->name) .' vient de rejeter le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                );
+                            }
+                        }
+
+                        $success = "Le document ".strtoupper(substr($getMediaDocument->file_name, 14))." a été rejeté avec succès";
+                    }
+                    else {
+                        $error = "Vous ne pouvez plus Rejeter le document " . strtoupper(substr($getMediaDocument->file_name, 14));
+                    }
+                }
+                break;
+        }
+
+        return response()->json([
+            'success' => $success,
+            'error' => $error
+        ]);
+
+    }
+
+    /*public function validateDocument(Request $request){
         $getMediaDocument = Media::with('operations')->find($request->id);
         $getLog = AuditLog::where('media_id', $getMediaDocument->id);
         $idNextUser = "";
@@ -764,14 +1275,14 @@ class WorkflowManagementController extends Controller
             'title' => 'Votre validation a été effectué avec succès'
         ]);
 
-    }
+    }*/
 
     /**
      * Write code on Method
      *
      * @return string()
      */
-    public function fillPDFFileSignature($file, $outputFilePath)
+    public function fillPDFFileSignature($file, $outputFilePath): string
     {
         $fpdi = new FPDI;
 
@@ -807,7 +1318,7 @@ class WorkflowManagementController extends Controller
     }
 
 
-    public function fillPDFFileParaphe($file, $outputFilePath)
+    public function fillPDFFileParaphe($file, $outputFilePath): string
     {
         $fpdi = new FPDI;
 
@@ -843,7 +1354,7 @@ class WorkflowManagementController extends Controller
     }
 
 
-    function get_time_ago( $time )
+    function get_time_ago( $time ): string
     {
         $time_difference = time() - $time;
 
@@ -866,5 +1377,16 @@ class WorkflowManagementController extends Controller
                 return 'about ' . $t . ' ' . $str . ( $t > 1 ? 's' : '' ) . ' ago';
             }
         }
+    }
+
+    private function templateForDocumentHistoric($params = ''){
+        return '<div class="row schedule-item>
+                <div class="col-md-2">
+                <time class="timeago">Le '.date('d-m-Y à H:i:s', time()).'</time>
+                </div>
+                <div class="col-md-12">
+                <p><strong>' .$params . '</p>
+                </div>
+                </div>';
     }
 }

@@ -29,7 +29,7 @@ class SendValidationStepCompletedNotification
     public function handle(validationStepCompleted $event)
     {
         $validationStepDetailsMedia = $event->validationStepDetailsMedia;
-        //\Notification::send(auth()->user(), new sendLocalNotificaion($validationStepDetailsMedia));
-        Log::info('Étape du workflow terminée');
+        \Notification::send($validationStepDetailsMedia['user'], new sendLocalNotificaion($validationStepDetailsMedia));
+        Log::info($validationStepDetailsMedia['body']);
     }
 }

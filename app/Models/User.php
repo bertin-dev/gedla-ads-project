@@ -133,12 +133,6 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(Project::class);
     }
 
-    //un utilisateur peut avoir signer plusieurs media
-    /*public function medias(): HasMany
-    {
-        return $this->hasMany(Media::class);
-    }*/
-
     //PARENT USER
     public function parentUser(): BelongsTo
     {
@@ -151,16 +145,28 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(User::class, 'created_by');
     }
 
-    //UN UTILISATEUR PEUT EFFECTUER PLUSIEURS OPERATIONS
-    public function sendOperations(): HasMany
+    //UN UTILISATEUR PEUT EFFECTUER PLUSIEURS LOG
+    public function sendLog(): HasMany
     {
-        return $this->hasMany(Operation::class, 'user_id_sender');
+        return $this->hasMany(AuditLog::class, 'user_id_sender');
     }
 
-    //UN UTILISATEUR PEUT RECEPTIONNER UN OU PLUSIEURS OPERATIONS
-    public function receiveOperations(): HasMany
+    //UN UTILISATEUR PEUT RECEPTIONNER UN OU PLUSIEURS LOG
+    public function receiveLog(): HasMany
     {
-        return $this->hasMany(Operation::class, 'user_id_receiver');
+        return $this->hasMany(AuditLog::class, 'user_id_receiver');
+    }
+
+    //UN UTILISATEUR PEUT SAUVEGARDER UN OU PLUSIEURS LOG
+    public function saveLog(): HasMany
+    {
+        return $this->hasMany(AuditLog::class, 'current_user_id');
+    }
+
+    //un utilisateur peut avoir signer plusieurs media
+    public function medias(): HasMany
+    {
+        return $this->hasMany(Media::class);
     }
 
     //UN UTILISATEUR APPARTIENT A PLUSIEURS DOSSIERS
@@ -169,10 +175,4 @@ class User extends Authenticatable implements HasMedia
         return $this->belongsToMany(Folder::class, 'folder_user', 'user_id', 'folder_id');
     }
 
-
-    //CHAQUE UTILISATEUR PEUT POSSEDER UN OU PLUSIEURS MEDIAS A VALIDER
-    /*public function mediasSelectedForWorkflowValidations(): BelongsToMany
-    {
-        return $this->belongsToMany(Media::class, 'media_user', 'user_id', 'media_id');
-    }*/
 }

@@ -11,17 +11,33 @@
             @csrf
             <div class="container">
                 <div class="row">
+
                     <div class="form-group col">
-                        <label for="deadline">{{trans('global.term')}} *</label>
-                        <input type="datetime-local" id="deadline" value="{{ old('deadline') }}" name="deadline" class="form-control" required>
+                        <label class="required" for="project_list">{{ trans('global.add') }} {{ trans('cruds.project.title') }}</label>
+                        <select class="form-control {{ $errors->has('project') ? 'is-invalid' : '' }}" name="project" id="project" required>
+                            @foreach($projects as $id => $project)
+                                <option value="{{ $id }}" {{ in_array($id, old('project', [])) ? 'selected' : '' }}>{{ $project }}</option>
+                            @endforeach
+                        </select>
+                        @if($errors->has('project'))
+                            <div class="invalid-feedback">
+                                {{ $errors->first('project') }}
+                            </div>
+                        @endif
+                        <span class="help-block">{{ trans('cruds.project.fields.name_helper') }}</span>
                     </div>
 
                     <div class="form-group col">
-                        <label for="priority">{{trans('global.priority')}} *</label>
+                        <label class="required" for="global_deadline">{{trans('global.term')}}</label>
+                        <input type="datetime-local" id="global_deadline" value="{{ old('global_deadline') }}" name="global_deadline" class="form-control" required>
+                    </div>
+
+                    <div class="form-group col">
+                        <label for="priority" class="required">{{trans('global.priority')}}</label>
                         <select name="priority" id="priority" class="form-control" required>
-                            <option value="low">{{trans('global.low')}}</option>
-                            <option value="medium">{{trans('global.means')}}</option>
-                            <option value="high">{{trans('global.important')}}</option>
+                            <option value="low">{{trans('global.normal')}}</option>
+                            <option value="medium">{{trans('global.urgent')}}</option>
+                            <option value="high">{{trans('global.very_urgent')}}</option>
                         </select>
                     </div>
 
@@ -67,11 +83,7 @@
                             <span class="btn btn-info btn-xs select-all" style="border-radius: 0">{{ trans('global.select_all') }}</span>
                             <span class="btn btn-info btn-xs deselect-all" style="border-radius: 0">{{ trans('global.deselect_all') }}</span>
                         </div>
-                        <select class="form-control select2 {{ $errors->has('user_list') ? 'is-invalid' : '' }}" name="user_list[]" id="user_list" multiple required>
-                            @foreach($users as $id => $user)
-                                <option value="{{ $id }}" {{ in_array($id, old('user_list', [])) ? 'selected' : '' }}>{{ $user }}</option>
-                            @endforeach
-                        </select>
+                        <select class="form-control select2 {{ $errors->has('user_list') ? 'is-invalid' : '' }}" name="user_list[]" id="user_list" multiple required></select>
                         @if($errors->has('user_list'))
                             <div class="invalid-feedback">
                                 {{ $errors->first('user_list') }}
@@ -276,5 +288,40 @@
 
 
 
+    </script>
+
+
+    <script>
+        $(function () {
+
+            $('#project').on('change', function() {
+                //alert( this.value );
+                load_users(this.value);
+            });
+
+
+            function load_users(id = '') {
+                let userList = $("#user_list");
+                userList.empty();
+                $.ajax({
+                    headers: {'x-csrf-token': _token},
+                    url:"{{ route('admin.workflow-management.load-users', '') }}"+"/"+id,
+                    method: 'GET',
+                    //data: {view: id},
+                    dataType: 'json',
+                    success: function (data) {
+                        $.each(data.data, function(index, item){
+                            userList.append('<option value="'+index+'" "selected">'+item+'</option>');
+                        });
+
+                    },
+                    error: function(data){
+                        alert("Erreur de chargement des utilisateurs. Veuillez Sélectionner à nouveau l'entité")
+                        console.log('Erreur de chargement des utilisateurs');
+                    }
+                });
+            }
+
+        });
     </script>
 @endsection

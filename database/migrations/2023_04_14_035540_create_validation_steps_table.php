@@ -13,15 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        /*Schema::create('media_user', function (Blueprint $table) {
+        Schema::create('validation_steps', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('media_id')->unsigned()->index();
             $table->integer('user_id')->unsigned()->index();
-            //$table->string('state');
+            $table->integer('statut')->default(0);
+            $table->integer('order');
+            $table->dateTime('date_validation')->nullable();
+            $table->dateTime('deadline')->nullable();
             $table->foreign('media_id')->references('id')->on('media')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            //$table->timestamps();
-        });*/
+            $table->timestamps();
+        });
     }
 
     /**
@@ -31,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('validation_steps');
     }
 };

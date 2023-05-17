@@ -278,6 +278,10 @@ class PermissionsTableSeeder extends Seeder
                 'id'    => 65,
                 'title' => 'calendar_access',
             ],
+            [
+                'id'    => 66,
+                'title' => 'archive_add_access',
+            ],
         ];
 
 

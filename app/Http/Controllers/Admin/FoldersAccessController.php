@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\MassDestroyFolderRequest;
+use App\Http\Resources\Admin\FolderResource;
 use App\Models\Folder;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
@@ -33,9 +34,7 @@ class FoldersAccessController extends Controller
         $users = User::where('id', '!=', \Auth::user()->id)
             ->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        $folders = Folder::where('functionality', false)->get()->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
-
-        return view('admin.folders_access.create', compact('users', 'folders', 'projects'));
+        return view('admin.folders_access.create', compact('users', 'projects'));
     }
 
     public function store(Request $request)
@@ -62,7 +61,22 @@ class FoldersAccessController extends Controller
         //return response()->json($folder, Response::HTTP_CREATED);
     }
 
-    public function edit($id)
+    public function showFolders($id): FolderResource
+    {
+        abort_if(Gate::denies('folder_access_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $getProjectWithFolder = Project::with('folders')
+            ->findOrFail($id)
+            ->folders
+            ->pluck('name', 'id')
+            ->prepend(trans('global.pleaseSelect'), '');
+
+        return new FolderResource($getProjectWithFolder);
+
+        //return response()->json($folder, Response::HTTP_CREATED);
+    }
+
+    public function edit($id): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         abort_if(Gate::denies('folder_access_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 

@@ -27,11 +27,13 @@ return new class extends Migration
             $table->unsignedInteger('order_column')->nullable()->index();
 
             $table->unsignedInteger('version')->default(0)->index();
-            $table->enum('status', ['public', 'private'])->default('public');
+            $table->enum('visibility', ['public', 'private'])->default('public');
+            $table->enum('priority', ['low', 'medium', 'high'])->default('low');
             $table->enum('state', ['unlocked', 'locked'])->default('unlocked')->comment('unlocked=0, locked=1');
-            $table->boolean('signing')->default(false)->comment('false=not signed, true=signed');
+            //$table->boolean('signing')->default(false)->comment('false=not signed, true=signed');
             $table->boolean('archived')->default(false)->comment('false=unarchived, true=archived');
-            $table->json('step_workflow')->nullable();
+            $table->integer('statut')->default(0)->comment('En attente de validation');
+            $table->dateTime('global_deadline')->nullable();
             $table->nullableTimestamps();
         });
     }

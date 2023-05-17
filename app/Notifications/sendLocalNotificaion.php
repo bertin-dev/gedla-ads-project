@@ -42,6 +42,7 @@ class sendLocalNotificaion extends Notification
     public function toArray($notifiable)
     {
         return [
+            'user' => $this->detailsMedia['user'],
             'subject' => $this->detailsMedia['subject'],
             'body' => $this->detailsMedia['body'],
             'media_id' => $this->detailsMedia['media_id'],

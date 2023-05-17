@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Folder;
 use App\Models\Parapheur;
 use App\Models\Project;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
@@ -46,8 +51,24 @@ class ProjectController extends Controller
             ]);
         }
         $parapheur = Parapheur::with('medias')->where('user_id', auth()->id())->first();
+        //dd($parapheur->medias->where('state', 'unlocked')->sortByDesc('updated_at')->first()->updated_at);
 
-        return view('front.projects.index', compact('children_level_n', 'functionality', 'parapheur'));
+        $getProjects = Project::all();
+        //dd($getProjects->toArray());
+
+        $getFolders = User::with('multiFolders')->findOrFail(auth()->id())->multiFolders;
+        //dd($getFolders->toArray());
+
+        $getActivity = AuditLog::where('current_user_id', auth()->id())
+            ->orWhere('user_id_sender', auth()->id())
+            ->orWhere('user_id_receiver', auth()->id())
+            ->get()
+            ->sortByDesc('created_at')
+            ->take(5);
+        //dd($getActivity->toArray());
+
+
+        return view('front.projects.index', compact('children_level_n', 'functionality', 'parapheur', 'getFolders', 'getProjects', 'getActivity'));
     }
 
     public function show($id)

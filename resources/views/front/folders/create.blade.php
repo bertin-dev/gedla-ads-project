@@ -17,11 +17,22 @@
                         <form method="POST" action="{{ route('folders.store') }}">
                             @csrf
                             <input type="hidden" name="parent_id" value="{{ request('parent_id') }}" />
+                            <input type="hidden" name="project_id" value="{{ request('project_id') }}" />
 
                             <div class="form-group">
-                                <label for="name">Name</label>
+                                <label for="name" class="required">{{trans('global.name')}}</label>
                                 <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
                                 @error('name')
+                                <span class="invalid-feedback">
+                                    {{ $message }}
+                                </span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="desc">{{trans('global.description')}}</label>
+                                <textarea name="desc" id="desc" cols="30" rows="10" class="form-control @error('desc') is-invalid @enderror">{{ old('desc') }}</textarea>
+                                @error('desc')
                                 <span class="invalid-feedback">
                                     {{ $message }}
                                 </span>

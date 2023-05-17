@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Folder;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\ValidationStep;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -44,40 +45,29 @@ class FolderController extends Controller
 
         $usersSelected = $request->input('user_access', []);
 
-        $folder = Folder::with('project')
-            ->whereHas('project.users', function($query) {
-                $query->where('id', auth()->id());
-            });
-
         $newFolder = Folder::create([
             'parent_id' => $request->parent_id,
             'name' => $request->input('name'),
-            'project_id' => $folder->project_id,
+            'description' => nl2br(htmlentities($request->desc)),
+            'project_id' => $request->project_id,
             'created_by' => \Auth::user()->id,
         ]);
 
         $newFolder->multiUsers()->sync($usersSelected);
 
         return redirect()
-            ->route('folders.show', [$newFolder])
+            ->route('folders.show', [$newFolder->parent])
             ->withStatus('New folder has been created');
     }
 
     public function show(Folder $folder)
     {
-            /*$folder = $folder->with('project', 'multiUsers')
+            $folder = $folder->with('project', 'multiUsers', 'userCreatedFolderBy', 'userUpdatedFolderBy')
                 ->whereHas('project.users', function($query) {
                     $query->where('id', auth()->id());
                 })
-                ->findOrFail($folder->id);*/
-
-            $foldersUsers = User::with('multiFolders', 'receiveOperations')->findOrFail(auth()->id());
-
-           //dd($foldersUsers->multiFolders->where('id', 11)->toArray());
-            /*foreach ($foldersUsers->multiFolders->where('id', $folder->id) as $dev):
-                dd($dev->toArray());
-                dd($dev->findOrFail($folder->id)->toArray());
-            endforeach;*/
+                ->findOrFail($folder->id);
+            //dd($folder->children->toArray());
 
             /*$folder = \DB::table('folder_user')
                 ->join('folders', 'folder_user.folder_id', 'folders.id')
@@ -88,7 +78,7 @@ class FolderController extends Controller
                 ->get();*/
 
 
-        $children_level_n = Folder::with('project')
+        $children_level_n = $folder->with('project')
             ->whereHas('project.users', function($query) {
                 $query->where('id', auth()->id());
             })
@@ -96,13 +86,24 @@ class FolderController extends Controller
             ->with('subChildren')
             ->get();
 
+        //dd($children_level_n->project);
+
+       /* dd($folder->with('project') ->whereHas('project.users', function($query) {
+            $query->where('id', auth()->id());
+        })  ->whereNull('parent_id')
+            ->with('subChildren')
+            ->get()
+            ->toArray());*/
 
         $users = User::where('id', '!=', \Auth::user()->id)
             ->whereHas('multiFolders')
             ->pluck('name', 'id')
             ->prepend(trans('global.pleaseSelect'), '');
 
-        return view('front.folders.show_files', compact('folder', 'children_level_n', 'foldersUsers', 'users'));
+        $getValidationDatas = ValidationStep::where('user_id', auth()->id());
+
+        //dd($folder->children->toArray());
+        return view('front.folders.show_files', compact('folder', 'children_level_n', 'users', 'getValidationDatas'));
         //return view('front.folders.show', compact('folder','projects'));
     }
 
@@ -162,14 +163,7 @@ class FolderController extends Controller
 
     public function postUpload(Request $request)
     {
-        if(!$request->functionality){
-            $folder = Folder::with('project')
-                ->whereHas('project.users', function($query) {
-                    $query->where('id', auth()->id());
-                })->findOrFail($request->folder_id);
-        } else{
-            $folder = Folder::findOrFail($request->folder_id);
-        }
+        $folder = Folder::findOrFail($request->folder_id);
 
         foreach ($request->input('files', []) as $file) {
             $folder->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');

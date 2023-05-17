@@ -27,11 +27,7 @@
 
             <div class="form-group">
                 <label class="required" for="folder_access">{{ trans('cruds.folder_access.fields.folder_access') }}</label>
-                <select class="form-control select2 {{ $errors->has('folder_access') ? 'is-invalid' : '' }}" name="folder_access" id="folder_access" required>
-                    @foreach($folders as $id => $folder)
-                        <option value="{{ $id }}" {{ old('folder_access') == $id ? 'selected' : '' }}>{{ $folder }}</option>
-                    @endforeach
-                </select>
+                <select class="form-control select2 {{ $errors->has('folder_access') ? 'is-invalid' : '' }}" name="folder_access" id="folder_access" required></select>
                 @if($errors->has('folder_access'))
                     <div class="invalid-feedback">
                         {{ $errors->first('folder_access') }}
@@ -81,24 +77,23 @@
         });
 
 
-        function load_folder(id = '2') {
+        function load_folder(id = '') {
+            let folders = $("#folder_access");
+            folders.empty();
             $.ajax({
                 headers: {'x-csrf-token': _token},
-                url: '{{ route('admin.folders_access.show', 1) }}',
+                url:"{{ route('admin.load-folders', '') }}"+"/"+id,
                 method: 'GET',
                 //data: {view: id},
                 dataType: 'json',
                 success: function (data) {
-                    alert(data.id);
-                    /*$('.menu').html(data.notification);
-
-                    if (data.unseen_notification > 0) {
-                        $('.count').html(data.unseen_notification);
-                    }*/
+                    $.each(data.data, function(index, item){
+                        folders.append('<option value="'+index+'" "">'+item+'</option>');
+                    });
 
                 },
                 error: function(data){
-                    console.log('Erreur de chargement des Notifications');
+                    console.log('Erreur de chargement des folders');
                 }
             });
         }

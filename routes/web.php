@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OcrController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\ParapheurController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\ProjectController;
@@ -80,6 +81,10 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}', [NotificationController::class, 'show'])->name('notifications.show');
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+    //Search
+    Route::get('search/{folder}', [SearchController::class, 'search'])->name('search');
+    //Route::get('search/{folder}/{q}', [SearchController::class, 'search'])->name('ajax-search');
 });
 
 Auth::routes(['register' => false]);
@@ -109,6 +114,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('folders/ckmedia', [FoldersController::class, 'storeCKEditorImages'])->name('folders.storeCKEditorImages');
     Route::resource('folders', FoldersController::class);
     Route::resource('folders_access', FoldersAccessController::class);
+    Route::get('load_folders/{id}', [FoldersAccessController::class, 'showFolders'])->name('load-folders');
     Route::delete('folders_access/destroy', [FoldersAccessController::class, 'massDestroy'])->name('folders_access.massDestroy');
 
 
@@ -129,6 +135,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('workflow-management/preview-document', [WorkflowManagementController::class, 'previewDocument'])->name('workflow-management.preview-document');
     Route::post('workflow-management/open-document', [WorkflowManagementController::class, 'openDocument'])->name('workflow-management.open-document');
     Route::post('workflow-management/validateDocument', [WorkflowManagementController::class, 'validateDocument'])->name('workflow-management.validateDocument');
+    Route::get('load_users/{id}', [WorkflowManagementController::class, 'showUsers'])->name('workflow-management.load-users');
 
     //Signature
     Route::resource('signature', SignatureController::class);
@@ -143,6 +150,17 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     //Archive document
     Route::resource('archive', ArchiveController::class);
+    Route::post('/ged/restore/{fileName}', function ($fileName) {
+        $gedFilePath = storage_path("app/ged");
+
+        $fileContents = Storage::disk('ged')->get($gedFilePath);
+        Storage::disk('local')->put($fileName, $fileContents);
+
+        Storage::disk('ged')->delete($gedFilePath);
+
+        return redirect()->back();
+    })->name('ged.restore');
+    Route::post('media/{id}/archive', [ArchiveController::class, 'archive'])->name('media.archive');
 
     //Calendar admin
     Route::get('calendar-admin', [CalendarAdminController::class, 'index'])->name('calendar.admin');

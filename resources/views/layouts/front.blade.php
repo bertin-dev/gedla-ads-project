@@ -385,7 +385,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/select/1.3.0/js/dataTables.select.min.js"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/23.0.0/classic/ckeditor.js"></script>
-{{--<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/super-build/ckeditor.js"></script>--}}
+<script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/super-build/ckeditor.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script>
@@ -662,7 +662,7 @@
             let myActivity = $(".myActivity");
             let initMyActivity = $('.initMyActivity');
             myActivity.empty();
-            initMyActivity.empty();
+           // initMyActivity.empty();
             $.ajax({
                 url: "{{ route('admin.workflow-management.preview-document') }}",
                 method: 'POST',
@@ -678,14 +678,7 @@
 
 
                     $.each(data.tracking, function(index, item){
-                        myActivity.append('<div class="row schedule-item> <div class="col-md-2">' +
-                            '<time class="timeago" datetime="'+item.created_at+'"></time>' +
-                            '</div> ' +
-                            '<div class="col-md-10"> ' +
-                            '<h4>Registration</h4> ' +
-                            '<p>' +item.description + '</p> ' +
-                            '</div> ' +
-                            '</div>');
+                        myActivity.append(item.description);
                     });
 
                     /*if(data.media.parapheur == null){
@@ -799,22 +792,34 @@
                     //alert(data.title);
                     /*window.location.href = "{{--{{ route('show-all-prescription')}}--}}";*/
                     //location.reload();
-                    $('body').notif({
-                        title: 'Opération Réussie',
-                        content: data.title,
-                        img: '{{asset('images/success-notif.jpg')}}',
-                        cls: 'success1'
-                    });
 
-                    setTimeout(function(){
-                        window.location.reload();
-                    }, 5000);
+                    if(data.error !== ""){
+                        $('body').notif({
+                            title: 'Une Erreur est survenue',
+                            content: data.error,
+                            img: '{{asset('images/error-notif.png')}}',
+                            cls: 'error1'
+                        });
+                    }
+
+                    if(data.success !== ""){
+                        $('body').notif({
+                            title: 'Opération Réussie',
+                            content: data.success,
+                            img: '{{asset('images/success-notif.jpg')}}',
+                            cls: 'success1'
+                        });
+
+                        setTimeout(function(){
+                            window.location.reload();
+                        }, 5000);
+                    }
                 },
                 error: function () {
                     //alert("Error founded where user display document");
                     $('body').notif({
                         title: 'Une Erreur est survenue',
-                        content: "Error founded where user display document",
+                        content: "Une erreur a été trouvé pendant le processus",
                         img: '{{asset('images/error-notif.png')}}',
                         cls: 'error1'
                     });
@@ -890,12 +895,34 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    alert(data.title);
-                    /*window.location.href = "{{--{{ route('show-all-prescription')}}--}}";*/
-                    location.reload();
+
+                    if(data.error !== ""){
+                        $('body').notif({
+                            title: 'Une Erreur est survenue',
+                            content: data.error,
+                            img: '{{asset('images/error-notif.png')}}',
+                            cls: 'error1'
+                        });
+                    }
+
+                    if(data.success !== ""){
+                        $('body').notif({
+                            title: 'Opération Réussie',
+                            content: data.success,
+                            img: '{{asset('images/success-notif.jpg')}}',
+                            cls: 'success1'
+                        });
+                        location.reload();
+                    }
+
                 },
                 error: function () {
-                    alert("Error founded where user display document");
+                    $('body').notif({
+                        title: 'Une Erreur est survenue',
+                        content: "Une erreur a été trouvé pendant le processus",
+                        img: '{{asset('images/error-notif.png')}}',
+                        cls: 'error1'
+                    });
                     console.log('Error founded where user display document');
                 }
             });
@@ -932,6 +959,52 @@
         });
         return result;
     }
+
+
+    //Recherche Ajax
+    /*$(function () {
+        $('#search_content').keyup(function () {
+            search();
+        });
+        //fonction de verification du Nom en ajax
+        function search() {
+            let folderMediaBloc = $('#folder_media_bloc');
+            let q =  $('#search_content').val();
+            var retour = '';
+            $.ajax({
+                type: 'GET',
+                url: "{{--{{ route('search', $folder) }}--}}"+"/" + q,
+                dataType: 'json',
+                success: function (data) {
+                    if(data.resultat=='Aucun'){
+                        $('#output_search').css({
+                            'font-weight': 'bold',
+                            'margin': 'initial',
+                            'padding': 'initial',
+                            'font-size': '65%'
+                        }).html('Aucun résultat trouvé');
+                        folderMediaBloc.empty();
+                        /!*setTimeout(function () {
+                            $('#output_search').hide();
+                        }, 7000);*!/
+                    } else {
+                        if(data.compteur <= 1)
+                            retour += data.compteur + ' résultat trouvé';
+                        else
+                            retour += data.compteur + ' résultats trouvés';
+
+                        folderMediaBloc.html(data.resultat);
+                        $('#output_search').css({
+                            'font-weight': 'bold',
+                            'margin': 'initial',
+                            'padding': 'initial',
+                            'font-size': '65%'
+                        }).html(retour);
+                    }
+                }
+            });
+        }
+    });*/
 
 </script>
 

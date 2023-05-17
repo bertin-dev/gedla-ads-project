@@ -50,9 +50,6 @@
                             {{ trans('cruds.workflow_management.view_file') }}
                         </th>
                         <th>
-                            {{ trans('cruds.workflow_management.message') }}
-                        </th>
-                        <th>
                             {{ trans('cruds.workflow_management.workflow_users') }}
                         </th>
                         <th>
@@ -62,9 +59,9 @@
                     </thead>
                     <tbody>
 
-                    @foreach($allMedia as $key => $media)
+                    @foreach($allMediaWithValidationStep as $key => $media)
 
-                        @foreach($media->operations as $key => $operation)
+                        @foreach($media->validationSteps as $key => $validationStep)
                             <tr data-entry-id="{{ $media->id }}">
                                 <td>
 
@@ -78,38 +75,32 @@
                                 </td>
 
                                 <td>
-                                    <span class="badge badge-success">{{ \App\Models\User::findOrFail($operation->user_id_sender)->name ?? '' }}</span>
+                                    <span class="badge badge-success">{{ \App\Models\User::findOrFail($validationStep->user_id)->name ?? '' }}</span>
                                 </td>
 
                                 <td>
-                                    <span class="badge badge-primary">{{ \App\Models\User::findOrFail($operation->user_id_receiver)->name ?? '' }}</span>
+                                    {{--<span class="badge badge-primary">{{ \App\Models\User::findOrFail($operation->user_id_receiver)->name ?? '' }}</span>--}}
                                 </td>
 
                                 <td>
-                                    {{ $operation->operation_state ?? '' }}
+                                    {{ $validationStep->statut==0 ? trans('global.waiting') : trans('global.validate') }}
                                 </td>
 
                                 <td>
-                                    {{ now()->diffForHumans($operation->deadline) ?? '' }}
+                                    {{ now()->diffForHumans($validationStep->deadline) ?? '' }}
                                 </td>
                                 <td>
-                                    {{ $operation->priority ?? '' }}
+                                    {{ $media->priority ?? '' }}
                                 </td>
                                 <td>
-                                    {{ $operation->status ?? '' }}
+                                    {{ $media->visibility ?? '' }}
                                 </td>
                                 <td>
                                     <embed src="{{ $media->getUrl() }}" frameborder="1">
                                 </td>
                                 <td>
-                                    {{ $operation->message ?? '' }}
-                                </td>
-                                <td>
-                                    @php
-                                        $step = json_decode($media->step_workflow);
-                                    @endphp
-                                    @foreach($step as $key => $jsonItem)
-                                            <span class="badge {{ $jsonItem->state=="finish" ? "badge-success" : ($jsonItem->state=="pending" ? "badge-info" : "badge-warning")  }}">
+                                    @foreach($media->validationSteps as $key => $jsonItem)
+                                            <span class="badge {{ $jsonItem->statut==1 ? "badge-success" : ($jsonItem->state==0 ? "badge-info" : "badge-warning")  }}">
                                                 {{ \App\Models\User::findOrFail($jsonItem->user_id)->name ?? '' }}
                                             </span>
                                     @endforeach
@@ -117,19 +108,19 @@
 
                                 <td>
                                     @can('workflow_management_access_show')
-                                        <a class="btn btn-xs btn-primary" href="{{ route('admin.workflow-management.show', $media->id) }}">
+                                        <a class="btn btn-xs btn-primary" href="{{ route('admin.workflow-management.show', $validationStep->id) }}">
                                             {{ trans('global.view') }}
                                         </a>
                                     @endcan
 
-                                    @can('workflow_management_access_edit')
-                                        <a class="btn btn-xs btn-info" href="{{ route('admin.folders_access.edit', $media->id) }}">
+                                    {{--@can('workflow_management_access_edit')
+                                        <a class="btn btn-xs btn-info" href="{{ route('admin.workflow-management.edit', $validationStep->id) }}">
                                             {{ trans('global.edit') }}
                                         </a>
-                                    @endcan
+                                    @endcan--}}
 
                                     @can('workflow_management_access_delete')
-                                        <form action="{{ route('admin.workflow-management.destroy', $operation->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                        <form action="{{ route('admin.workflow-management.destroy', $validationStep->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                             <input type="hidden" name="_method" value="DELETE">
                                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                             <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">

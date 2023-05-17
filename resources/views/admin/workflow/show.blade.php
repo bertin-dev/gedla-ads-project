@@ -13,31 +13,22 @@
                         {{ trans('global.back_to_list') }}
                     </a>
                 </div>
-                @foreach($media->operations as $key => $operation)
-                    <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped">
                         <tbody>
                         <tr>
                             <th>
                                 {{ trans('cruds.workflow_management.fields.id') }}
                             </th>
                             <td>
-                                {{ $media->id }}
+                                {{ $getMediaAndUser->id }}
                             </td>
                         </tr>
                         <tr>
                             <th>
-                                {{ trans('cruds.workflow_management.sender') }}
+                                {{ trans('cruds.workflow_management.fields.users') }}
                             </th>
                             <td>
-                                <span class="badge badge-info">{{ \App\Models\User::findOrFail($operation->user_id_sender)->name ?? '' }}</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                {{ trans('cruds.workflow_management.receiver') }}
-                            </th>
-                            <td>
-                                <span class="badge badge-info">{{ \App\Models\User::findOrFail($operation->user_id_receiver)->name ?? '' }}</span>
+                                <span class="badge badge-info">{{ \App\Models\User::findOrFail($getMediaAndUser->user_id)->name ?? '' }}</span>
                             </td>
                         </tr>
                         <tr>
@@ -45,7 +36,7 @@
                                 {{ trans('cruds.workflow_management.operation_state') }}
                             </th>
                             <td>
-                                {{ $operation->operation_state }}
+                                {{ $getMediaAndUser->statut==0 ? trans('global.waiting') : trans('global.validate') }}
                             </td>
                         </tr>
                         <tr>
@@ -53,7 +44,7 @@
                                 {{ trans('cruds.workflow_management.term') }}
                             </th>
                             <td>
-                                {{ now()->diffForHumans($operation->deadline) ?? '' }}
+                                {{ now()->diffForHumans($getMediaAndUser->deadline) ?? '' }}
                             </td>
                         </tr>
                         <tr>
@@ -61,7 +52,7 @@
                                 {{ trans('cruds.workflow_management.priority') }}
                             </th>
                             <td>
-                                {{ $operation->priority ?? '' }}
+                                {{ $getMediaAndUser->media->priority ?? '' }}
                             </td>
                         </tr>
                         <tr>
@@ -69,7 +60,7 @@
                                 {{ trans('cruds.workflow_management.visibility') }}
                             </th>
                             <td>
-                                {{ $operation->status ?? '' }}
+                                {{ $getMediaAndUser->media->visibility ?? '' }}
                             </td>
                         </tr>
                         <tr>
@@ -77,15 +68,7 @@
                                 {{ trans('cruds.workflow_management.view_file') }}
                             </th>
                             <td>
-                                <iframe src="{{ $media->getUrl() }}" frameborder="1"></iframe>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                {{ trans('cruds.workflow_management.message') }}
-                            </th>
-                            <td>
-                                {{ $operation->message ?? '' }}
+                                <iframe src="{{ $getMediaAndUser->media->getUrl() }}" frameborder="1"></iframe>
                             </td>
                         </tr>
                         <tr>
@@ -93,15 +76,11 @@
                                 {{ trans('cruds.workflow_management.workflow_users') }}
                             </th>
                             <td>
-                                @foreach(json_decode($media->step_workflow) as $key => $id)
-                                    <span class="badge badge-info"> {{ \App\Models\User::findOrFail($id->user_id)->name ?? '' }} </span>
-                                @endforeach
+                                <span class="badge badge-info"> {{ \App\Models\User::findOrFail($getMediaAndUser->user_id)->name ?? '' }} </span>
                             </td>
                         </tr>
                         </tbody>
                     </table>
-                @endforeach
-
                 <div class="form-group">
                     <a class="btn btn-default" href="{{ route('admin.workflow-management.index') }}">
                         {{ trans('global.back_to_list') }}
