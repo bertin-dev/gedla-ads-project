@@ -59,9 +59,14 @@ class ProjectController extends Controller
         $getFolders = User::with('multiFolders')->findOrFail(auth()->id())->multiFolders;
         //dd($getFolders->toArray());
 
-        $getActivity = AuditLog::where('current_user_id', auth()->id())
-            ->orWhere('user_id_sender', auth()->id())
+        $operationTypes = ["SEND_DOCUMENT", "VALIDATE_DOCUMENT", "VALIDATE_DOCUMENT_SIGNATURE",
+            "SEND_DOCUMENT_SIGNATURE", "VALIDATE_DOCUMENT_PARAPHEUR", "SEND_DOCUMENT_PARAPHEUR", "OPEN_DOCUMENT", "PREVIEW_DOCUMENT",
+            "START_VALIDATION", "REJECTED_DOCUMENT", "EDIT_DOCUMENT", "SAVE_DOCUMENT", "DOWNLOAD_DOCUMENT", "ARCHIVE_DOCUMENT"];
+
+
+        $getActivity = AuditLog::where('user_id_sender', auth()->id())
             ->orWhere('user_id_receiver', auth()->id())
+            ->whereIn('operation_type', $operationTypes)
             ->get()
             ->sortByDesc('created_at')
             ->take(5);

@@ -310,7 +310,7 @@
                                     <img class="mr-3 rounded-circle" width="50" src="{{asset('images/profil.png')}}" alt="Generic placeholder image">
                                     <div class="media-body">
                                         <h5 class="mt-0">{{$activityList->name ?? ''}}</h5>
-                                        {{$activityList->message ?? $activityList->description ?? ''}}
+                                        { !!$activityList->message ?? $activityList->description ?? '' !!}
                                         <small class="float-right">{{ Carbon\Carbon::parse($activityList->created_at)->diffForHumans() }}</small>
                                     </div>
                                 </div>
