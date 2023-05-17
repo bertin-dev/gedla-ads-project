@@ -594,33 +594,24 @@ class WorkflowManagementController extends Controller
                                 );
                             }
 
-                            //CHECK AGAIN IF NEXT USER EXIST
-                            $checkNextStepValidation = $getMediaDocument
-                                ->validationSteps()
-                                ->where('order', '>', $validationStep->order)
-                                ->where('statut', 0)
-                                ->first();
-                            if(!$checkNextStepValidation){
-                                $getMediaDocument->statut = 1;
-                                $getMediaDocument->save();
-
-                                $creator_user = $getMediaDocument->createdBy;
-
-                                //SEND NOTIFICATION NEXT USER
-                                $detailsMedia = [
-                                    'user' => $creator_user,
-                                    'subject' => 'Circuit de validation terminé',
-                                    'body' => 'La dernière étape du circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
-                                    'media_id' => $getMediaDocument->id,
-                                    'media_name' => strtoupper(substr($getMediaDocument->file_name, 14)),
-                                    'validation_step_id' => $validationStep->order ?? 0,
-                                ];
-                                event(new validationStepCompleted($detailsMedia));
-                            }
-
                             $success = 'la validation du document '.strtoupper(substr($getMediaDocument->file_name, 14)).' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
                         }
                         else{
+                            $getMediaDocument->statut = 1;
+                            $getMediaDocument->save();
+
+                            $creator_user = $getMediaDocument->createdBy;
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $creator_user,
+                                'subject' => 'Circuit de validation terminé',
+                                'body' => 'La dernière étape du circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => strtoupper(substr($getMediaDocument->file_name, 14)),
+                                'validation_step_id' => $validationStep->order ?? 0,
+                            ];
+                            event(new validationStepCompleted($detailsMedia));
                             $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
                         }
 
@@ -693,34 +684,24 @@ class WorkflowManagementController extends Controller
                                     ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
-
-                            //CHECK AGAIN IF NEXT USER EXIST
-                            $checkNextStepValidation = $getMediaDocument
-                                ->validationSteps()
-                                ->where('order', '>', $validationStep->order)
-                                ->where('statut', 0)
-                                ->first();
-                            if(!$checkNextStepValidation){
-                                $getMediaDocument->statut = 1;
-                                $getMediaDocument->save();
-
-                                $creator_user = $getMediaDocument->createdBy;
-
-                                //SEND NOTIFICATION NEXT USER
-                                $detailsMedia = [
-                                    'user' => $creator_user,
-                                    'subject' => 'Circuit de validation terminé',
-                                    'body' => 'La dernière étape du circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
-                                    'media_id' => $getMediaDocument->id,
-                                    'media_name' => strtoupper(substr($getMediaDocument->file_name, 14)),
-                                    'validation_step_id' => $validationStep->order ?? 0,
-                                ];
-                                event(new validationStepCompleted($detailsMedia));
-                            }
-
                             $success = 'La validation du document ' .strtoupper(substr($getMediaDocument->file_name, 14)). ' a été effectué avec succès et une notification a été envoyé à '. ucfirst($nextUser->name);
                         }
                         else{
+                            $getMediaDocument->statut = 1;
+                            $getMediaDocument->save();
+
+                            $creator_user = $getMediaDocument->createdBy;
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $creator_user,
+                                'subject' => 'Circuit de validation terminé',
+                                'body' => 'La dernière étape du circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => strtoupper(substr($getMediaDocument->file_name, 14)),
+                                'validation_step_id' => $validationStep->order ?? 0,
+                            ];
+                            event(new validationStepCompleted($detailsMedia));
                             $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
                         }
 
@@ -861,6 +842,385 @@ class WorkflowManagementController extends Controller
                     }
                 }
                 break;
+
+
+            case "validation_signature":
+                if($getMediaDocument->visibility == "public") {
+                    if ($validationStep) {
+
+                        $nextStepValidation = $getMediaDocument
+                            ->validationSteps()
+                            ->where('order', '>', $validationStep->order)
+                            ->where('statut', 0)
+                            ->first();
+
+                        $validationStep->statut = 1;
+                        $validationStep->save();
+
+                        if ($nextStepValidation) {
+                            $nextUser = $nextStepValidation->user;
+                            /*
+                            // Vérifier s'il y a des erreurs lors de l'enregistrement
+                            if ($nextStepValidation->save() === false) {
+                                var_dump($nextStepValidation->getErrors()); // Afficher les erreurs
+                            }*/
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $nextUser,
+                                'subject' => 'Attente de validation',
+                                'body' => 'Vous avez le document "' . strtoupper(substr($getMediaDocument->file_name, 14)) . '" en attente de validation.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => $getMediaDocument->file_name,
+                                'validation_step_id' => $nextStepValidation->order,
+                            ];
+                            event(new DocumentAdded($detailsMedia));
+
+                            //GET FOLDER AND UPDATE MEDIA TABLE
+                            $user = User::with('multiFolders')->where('id', $nextUser->id)->first();
+                            $folder = $user->multiFolders->first();
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->model_id = $folder->id;
+                            $getMediaDocument->save();
+
+                            //SAVE OPERATION IN LOG
+                            $getLog = AuditLog::where('media_id', $getMediaDocument->id)
+                                ->where('operation_type', 'VALIDATE_DOCUMENT')
+                                ->where('current_user_id', auth()->id())
+                                ->get();
+                            if(count($getLog) === 0){
+                                self::trackOperations($request->id,
+                                    "VALIDATE_DOCUMENT",
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    'success',
+                                    null,
+                                    auth()->id(),
+                                    auth()->user()->name,
+                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                );
+                            }
+
+                            //SIGN DOCUMENT
+                            //$path = storage_path($getMediaDocument->file_name);
+                            $filePath = $getMediaDocument->getPath();
+                            //$filePath = asset('uploads/official.pdf');
+                            $outputFilePath = $getMediaDocument->getPath();
+                            //$outputFilePath = asset('uploads/official.pdf');
+                            $this->fillPDFFileSignature($filePath, $outputFilePath);
+                            //return response()->file($outputFilePath);
+
+                            $success = 'la validation du document '.strtoupper(substr($getMediaDocument->file_name, 14)).' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+                        }
+                        else{
+                            $getMediaDocument->statut = 1;
+                            $getMediaDocument->save();
+
+                            $creator_user = $getMediaDocument->createdBy;
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $creator_user,
+                                'subject' => 'Circuit de validation terminé',
+                                'body' => 'La dernière étape du circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => strtoupper(substr($getMediaDocument->file_name, 14)),
+                                'validation_step_id' => $validationStep->order ?? 0,
+                            ];
+                            event(new validationStepCompleted($detailsMedia));
+                            $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+                        }
+
+                    }
+                    else {
+                        $error = "Vous ne pouvez plus valider le document " . strtoupper(substr($getMediaDocument->file_name, 14));
+                    }
+                }
+                else{
+                    if ($validationStep) {
+
+                        $nextStepValidation = $getMediaDocument
+                            ->validationSteps()
+                            ->where('order', '>', $validationStep->order)
+                            ->where('statut', 0)
+                            ->first();
+
+                        $validationStep->statut = 1;
+                        $validationStep->save();
+
+                        //dd($nextStepValidation->toArray());
+                        if ($nextStepValidation) {
+                            $nextUser = $nextStepValidation->user;
+                            /*
+                            // Vérifier s'il y a des erreurs lors de l'enregistrement
+                            if ($nextStepValidation->save() === false) {
+                                var_dump($nextStepValidation->getErrors()); // Afficher les erreurs
+                            }*/
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $nextUser,
+                                'subject' => 'Attente de validation',
+                                'body' => 'Vous avez le document "' . strtoupper(substr($getMediaDocument->file_name, 14)) . '" en attente de validation.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => $getMediaDocument->file_name,
+                                'validation_step_id' => $nextStepValidation->order,
+                            ];
+                            event(new DocumentAdded($detailsMedia));
+
+                            $parapheur = Parapheur::where('user_id', $nextUser->id)->first();
+                            if($parapheur == null){
+                                $getLastInsertId = Parapheur::all()->max('id');
+                                $parapheur = Parapheur::create([
+                                    'name' => 'parapheur'. $getLastInsertId + 1,
+                                    'project_id' => 1,
+                                    'user_id' => $nextUser->id
+                                ]);
+                            }
+
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->parapheur_id = $parapheur->id;
+                            $getMediaDocument->save();
+
+
+                            //SAVE OPERATION IN LOG
+                            $getLog = AuditLog::where('media_id', $getMediaDocument->id)
+                                ->where('operation_type', 'VALIDATE_DOCUMENT')
+                                ->where('current_user_id', auth()->id())
+                                ->get();
+                            if(count($getLog) === 0){
+                                self::trackOperations($request->id,
+                                    "VALIDATE_DOCUMENT",
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    'success',
+                                    null,
+                                    auth()->id(),
+                                    auth()->user()->name,
+                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                );
+                            }
+
+                            //SIGN DOCUMENT
+                            //$path = storage_path($getMediaDocument->file_name);
+                            $filePath = $getMediaDocument->getPath();
+                            //$filePath = asset('uploads/official.pdf');
+                            $outputFilePath = $getMediaDocument->getPath();
+                            //$outputFilePath = asset('uploads/official.pdf');
+                            $this->fillPDFFileSignature($filePath, $outputFilePath);
+                            //return response()->file($outputFilePath);
+
+                            $success = 'La validation du document ' .strtoupper(substr($getMediaDocument->file_name, 14)). ' a été effectué avec succès et une notification a été envoyé à '. ucfirst($nextUser->name);
+                        }
+                        else{
+                            $getMediaDocument->statut = 1;
+                            $getMediaDocument->save();
+
+                            $creator_user = $getMediaDocument->createdBy;
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $creator_user,
+                                'subject' => 'Circuit de validation terminé',
+                                'body' => 'La dernière étape du circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => strtoupper(substr($getMediaDocument->file_name, 14)),
+                                'validation_step_id' => $validationStep->order ?? 0,
+                            ];
+                            event(new validationStepCompleted($detailsMedia));
+                            $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+                        }
+
+                    } else {
+                        $error = "Vous ne pouvez plus valider le document " .strtoupper(substr($getMediaDocument->file_name, 14));
+                    }
+                }
+                break;
+
+            case "validation_paraphe":
+                if($getMediaDocument->visibility == "public") {
+                    if ($validationStep) {
+
+                        $nextStepValidation = $getMediaDocument
+                            ->validationSteps()
+                            ->where('order', '>', $validationStep->order)
+                            ->where('statut', 0)
+                            ->first();
+
+                        $validationStep->statut = 1;
+                        $validationStep->save();
+
+                        if ($nextStepValidation) {
+                            $nextUser = $nextStepValidation->user;
+                            /*
+                            // Vérifier s'il y a des erreurs lors de l'enregistrement
+                            if ($nextStepValidation->save() === false) {
+                                var_dump($nextStepValidation->getErrors()); // Afficher les erreurs
+                            }*/
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $nextUser,
+                                'subject' => 'Attente de validation',
+                                'body' => 'Vous avez le document "' . strtoupper(substr($getMediaDocument->file_name, 14)) . '" en attente de validation.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => $getMediaDocument->file_name,
+                                'validation_step_id' => $nextStepValidation->order,
+                            ];
+                            event(new DocumentAdded($detailsMedia));
+
+                            //GET FOLDER AND UPDATE MEDIA TABLE
+                            $user = User::with('multiFolders')->where('id', $nextUser->id)->first();
+                            $folder = $user->multiFolders->first();
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->model_id = $folder->id;
+                            $getMediaDocument->save();
+
+                            //SAVE OPERATION IN LOG
+                            $getLog = AuditLog::where('media_id', $getMediaDocument->id)
+                                ->where('operation_type', 'VALIDATE_DOCUMENT')
+                                ->where('current_user_id', auth()->id())
+                                ->get();
+                            if(count($getLog) === 0){
+                                self::trackOperations($request->id,
+                                    "VALIDATE_DOCUMENT",
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    'success',
+                                    null,
+                                    auth()->id(),
+                                    auth()->user()->name,
+                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                );
+                            }
+
+                            //SIGN PARAPH
+                            $filePath = $getMediaDocument->getPath();
+                            $outputFilePath = $getMediaDocument->getPath();
+                            $this->fillPDFFileParaphe($filePath, $outputFilePath);
+
+                            $success = 'la validation du document '.strtoupper(substr($getMediaDocument->file_name, 14)).' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+                        }
+                        else{
+                            $getMediaDocument->statut = 1;
+                            $getMediaDocument->save();
+
+                            $creator_user = $getMediaDocument->createdBy;
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $creator_user,
+                                'subject' => 'Circuit de validation terminé',
+                                'body' => 'La dernière étape du circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => strtoupper(substr($getMediaDocument->file_name, 14)),
+                                'validation_step_id' => $validationStep->order ?? 0,
+                            ];
+                            event(new validationStepCompleted($detailsMedia));
+                            $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+                        }
+
+                    }
+                    else {
+                        $error = "Vous ne pouvez plus valider le document " . strtoupper(substr($getMediaDocument->file_name, 14));
+                    }
+                }
+                else{
+                    if ($validationStep) {
+
+                        $nextStepValidation = $getMediaDocument
+                            ->validationSteps()
+                            ->where('order', '>', $validationStep->order)
+                            ->where('statut', 0)
+                            ->first();
+
+                        $validationStep->statut = 1;
+                        $validationStep->save();
+
+                        //dd($nextStepValidation->toArray());
+                        if ($nextStepValidation) {
+                            $nextUser = $nextStepValidation->user;
+                            /*
+                            // Vérifier s'il y a des erreurs lors de l'enregistrement
+                            if ($nextStepValidation->save() === false) {
+                                var_dump($nextStepValidation->getErrors()); // Afficher les erreurs
+                            }*/
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $nextUser,
+                                'subject' => 'Attente de validation',
+                                'body' => 'Vous avez le document "' . strtoupper(substr($getMediaDocument->file_name, 14)) . '" en attente de validation.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => $getMediaDocument->file_name,
+                                'validation_step_id' => $nextStepValidation->order,
+                            ];
+                            event(new DocumentAdded($detailsMedia));
+
+                            $parapheur = Parapheur::where('user_id', $nextUser->id)->first();
+                            if($parapheur == null){
+                                $getLastInsertId = Parapheur::all()->max('id');
+                                $parapheur = Parapheur::create([
+                                    'name' => 'parapheur'. $getLastInsertId + 1,
+                                    'project_id' => 1,
+                                    'user_id' => $nextUser->id
+                                ]);
+                            }
+
+                            //update media table
+                            $getMediaDocument->version = $getMediaDocument->version + 1;
+                            $getMediaDocument->parapheur_id = $parapheur->id;
+                            $getMediaDocument->save();
+
+
+                            //SAVE OPERATION IN LOG
+                            $getLog = AuditLog::where('media_id', $getMediaDocument->id)
+                                ->where('operation_type', 'VALIDATE_DOCUMENT')
+                                ->where('current_user_id', auth()->id())
+                                ->get();
+                            if(count($getLog) === 0){
+                                self::trackOperations($request->id,
+                                    "VALIDATE_DOCUMENT",
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    'success',
+                                    null,
+                                    auth()->id(),
+                                    auth()->user()->name,
+                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                );
+                            }
+
+                            //SIGN PARAPH
+                            $filePath = $getMediaDocument->getPath();
+                            $outputFilePath = $getMediaDocument->getPath();
+                            $this->fillPDFFileParaphe($filePath, $outputFilePath);
+
+                            $success = 'La validation du document ' .strtoupper(substr($getMediaDocument->file_name, 14)). ' a été effectué avec succès et une notification a été envoyé à '. ucfirst($nextUser->name);
+                        }
+                        else{
+                            $getMediaDocument->statut = 1;
+                            $getMediaDocument->save();
+
+                            $creator_user = $getMediaDocument->createdBy;
+
+                            //SEND NOTIFICATION NEXT USER
+                            $detailsMedia = [
+                                'user' => $creator_user,
+                                'subject' => 'Circuit de validation terminé',
+                                'body' => 'La dernière étape du circuit de validation du document "' . strtoupper(substr($validationStep->media->name, 14)) . '" est terminé.',
+                                'media_id' => $getMediaDocument->id,
+                                'media_name' => strtoupper(substr($getMediaDocument->file_name, 14)),
+                                'validation_step_id' => $validationStep->order ?? 0,
+                            ];
+                            event(new validationStepCompleted($detailsMedia));
+                            $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+                        }
+
+                    } else {
+                        $error = "Vous ne pouvez plus valider le document " .strtoupper(substr($getMediaDocument->file_name, 14));
+                    }
+                }
+                break;
         }
 
         return response()->json([
@@ -893,290 +1253,6 @@ class WorkflowManagementController extends Controller
         }
 
         switch ($request->validationType){
-            case "validation":
-                if($idNextUser != ""){
-                    $getMediaWithOperationDocument = $getMediaDocument->operations->first();
-                    if($getMediaWithOperationDocument != null){
-
-                        if($getMediaWithOperationDocument->status == "public"){
-
-                            $user = User::with('multiFolders')->where('id', $idNextUser)->first();
-                            $folder = $user->multiFolders->first();
-                            //update media table
-                            $getMediaDocument->version = $getMediaDocument->version + 1;
-                            $getMediaDocument->model_id = $folder->id;
-                            $getMediaDocument->step_workflow = $oldValue;
-                            $getMediaDocument->save();
-
-                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
-
-                        }else{
-
-                            $parapheur = Parapheur::where('user_id', $idNextUser)->first();
-                            if($parapheur == null){
-                                $getLastInsertId = Parapheur::all()->max('id');
-                                $parapheur = Parapheur::create([
-                                    'name' => 'parapheur'. $getLastInsertId + 1,
-                                    'project_id' => 1,
-                                    'user_id' => $idNextUser
-                                ]);
-                            }
-
-                            //update media table
-                            $getMediaDocument->version = $getMediaDocument->version + 1;
-                            $getMediaDocument->parapheur_id = $parapheur->id;
-                            $getMediaDocument->step_workflow = $oldValue;
-                            $getMediaDocument->save();
-
-                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
-
-                        }
-
-                        //store datas operation table
-                        Operation::create([
-                            'deadline' => $getMediaWithOperationDocument->deadline,
-                            'priority' => $getMediaWithOperationDocument->priority,
-                            'status' => $getMediaWithOperationDocument->status,
-                            'user_id_sender' => auth()->id(),
-                            'user_id_receiver' => $idNextUser,
-                            'media_id' => $getMediaDocument->id,
-                            'message' => $getMediaWithOperationDocument->message,
-                            'receive_mail_notification' => $getMediaWithOperationDocument->receive_mail_notification,
-                            'operation_type' => $request->validationType,
-                            'operation_state' => 'pending',
-                            'num_operation' => (string) Str::orderedUuid(),
-                        ]);
-
-                        $getOperations = Operation::where('media_id', $getMediaDocument->id)
-                            ->where('user_id_receiver', auth()->id())
-                            //->orWhere('user_id_sender', auth()->id())
-                            ->get();
-
-                        foreach ($getOperations as $operationList){
-                            $operationList->update(['operation_state' => 'success']);
-                        }
-
-                        //save data for tracking
-                        $getLog = $getLog->where('operation_type', 'VALIDATE_DOCUMENT')->get();
-                       if(count($getLog) === 0){
-                           //mode receiver
-                            self::trackOperations($getMediaDocument->id,
-                                "VALIDATE_DOCUMENT",
-                                auth()->user()->name .' vient de valider le document '. substr($getMediaDocument->file_name, 14),
-                                'success',
-                                null,
-                                auth()->id(),
-                                auth()->user()->name,
-                                $getMediaWithOperationDocument->message);
-
-                            $getDataNextUser = User::findOrFail($idNextUser);
-                                self::trackOperations($getMediaDocument->id,
-                                    "SEND_DOCUMENT",
-                                    $getDataNextUser->name .' a un document en attente de validation ',
-                                    'pending',
-                                    auth()->id(),
-                                    $idNextUser,
-                                    auth()->user()->name,
-                                    $getMediaWithOperationDocument->message);
-
-                        }
-                    }
-                }
-            break;
-            case "validation_signature":
-                if($idNextUser != ""){
-                    $getMediaWithOperationDocument = $getMediaDocument->operations->first();
-                    if($getMediaWithOperationDocument != null){
-
-                        if($getMediaWithOperationDocument->status == "public"){
-                            $user = User::with('multiFolders')->where('id', $idNextUser)->first();
-                            $folder = $user->multiFolders->first();
-                            //update media table
-                            $getMediaDocument->version = $getMediaDocument->version + 1;
-                            $getMediaDocument->model_id = $folder->id;
-                            $getMediaDocument->step_workflow = $oldValue;
-                            $getMediaDocument->save();
-
-                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
-
-                        }else{
-
-                            $parapheur = Parapheur::where('user_id', $idNextUser)->first();
-                            if($parapheur == null){
-                                $getLastInsertId = Parapheur::all()->max('id');
-                                $parapheur = Parapheur::create([
-                                    'name' => 'parapheur'. $getLastInsertId + 1,
-                                    'project_id' => 1,
-                                    'user_id' => $idNextUser
-                                ]);
-                            }
-
-                            //update media table
-                            $getMediaDocument->version = $getMediaDocument->version + 1;
-                            $getMediaDocument->parapheur_id = $parapheur->id;
-                            $getMediaDocument->step_workflow = $oldValue;
-                            $getMediaDocument->save();
-
-                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
-
-                        }
-
-                        //store datas operation table
-                        Operation::create([
-                            'deadline' => $getMediaWithOperationDocument->deadline,
-                            'priority' => $getMediaWithOperationDocument->priority,
-                            'status' => $getMediaWithOperationDocument->status,
-                            'user_id_sender' => auth()->id(),
-                            'user_id_receiver' => $idNextUser,
-                            'media_id' => $getMediaDocument->id,
-                            'message' => $getMediaWithOperationDocument->message,
-                            'receive_mail_notification' => $getMediaWithOperationDocument->receive_mail_notification,
-                            'operation_type' => $request->validationType,
-                            'operation_state' => 'pending',
-                            'num_operation' => (string) Str::orderedUuid(),
-                        ]);
-
-                        $getOperations = Operation::where('media_id', $getMediaDocument->id)
-                            ->where('user_id_receiver', auth()->id())
-                            //->orWhere('user_id_sender', auth()->id())
-                            ->get();
-
-                        foreach ($getOperations as $operationList){
-                            $operationList->update(['operation_state' => 'success']);
-                        }
-
-                        //----------------------------------------------------------------------------------------
-                        //save data for tracking
-                        $getLog = $getLog->where('operation_type', 'VALIDATE_DOCUMENT_SIGNATURE')->get();
-                        if(count($getLog) === 0){
-                            self::trackOperations($getMediaDocument->id,
-                                "VALIDATE_DOCUMENT_SIGNATURE",
-                                auth()->user()->name .' vient de signer le document '. substr($getMediaDocument->file_name, 14),
-                                'success',
-                                null,
-                                auth()->id(),
-                                auth()->user()->name,
-                                $getMediaWithOperationDocument->message);
-
-                            $getDataNextUser = User::findOrFail($idNextUser);
-                            self::trackOperations($getMediaDocument->id,
-                                "SEND_DOCUMENT_SIGNATURE",
-                                $getDataNextUser->name .' a envoyé un document en attente de signature ',
-                                'pending',
-                                auth()->id(),
-                                $idNextUser,
-                                auth()->user()->name,
-                                $getMediaWithOperationDocument->message);
-
-                        }
-
-                        $getMedia = Media::with('operations')->find($request->id);
-                        //$path = storage_path($getMediaDocument->file_name);
-                        $filePath = $getMedia->getPath();
-                        //$filePath = asset('uploads/official.pdf');
-                        $outputFilePath = $getMedia->getPath();
-                        //$outputFilePath = asset('uploads/official.pdf');
-                        $this->fillPDFFileSignature($filePath, $outputFilePath);
-                        //return response()->file($outputFilePath);
-                    }
-                }
-                break;
-            case "validation_paraphe":
-                if($idNextUser != ""){
-                    $getMediaWithOperationDocument = $getMediaDocument->operations->first();
-                    if($getMediaWithOperationDocument != null){
-
-                        if($getMediaWithOperationDocument->status == "public"){
-                            $user = User::with('multiFolders')->where('id', $idNextUser)->first();
-                            $folder = $user->multiFolders->first();
-                            //update media table
-                            $getMediaDocument->version = $getMediaDocument->version + 1;
-                            $getMediaDocument->model_id = $folder->id;
-                            $getMediaDocument->step_workflow = $oldValue;
-                            $getMediaDocument->save();
-
-                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
-
-                        }else{
-
-                            $parapheur = Parapheur::where('user_id', $idNextUser)->first();
-                            if($parapheur == null){
-                                $getLastInsertId = Parapheur::all()->max('id');
-                                $parapheur = Parapheur::create([
-                                    'name' => 'parapheur'. $getLastInsertId + 1,
-                                    'project_id' => 1,
-                                    'user_id' => $idNextUser
-                                ]);
-                            }
-
-                            //update media table
-                            $getMediaDocument->version = $getMediaDocument->version + 1;
-                            $getMediaDocument->parapheur_id = $parapheur->id;
-                            $getMediaDocument->step_workflow = $oldValue;
-                            $getMediaDocument->save();
-
-                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$idNextUser]);
-
-                        }
-
-                        //store datas operation table
-                        Operation::create([
-                            'deadline' => $getMediaWithOperationDocument->deadline,
-                            'priority' => $getMediaWithOperationDocument->priority,
-                            'status' => $getMediaWithOperationDocument->status,
-                            'user_id_sender' => auth()->id(),
-                            'user_id_receiver' => $idNextUser,
-                            'media_id' => $getMediaDocument->id,
-                            'message' => $getMediaWithOperationDocument->message,
-                            'receive_mail_notification' => $getMediaWithOperationDocument->receive_mail_notification,
-                            'operation_type' => $request->validationType,
-                            'operation_state' => 'pending',
-                            'num_operation' => (string) Str::orderedUuid(),
-                        ]);
-
-                        $getOperations = Operation::where('media_id', $getMediaDocument->id)
-                            ->where('user_id_receiver', auth()->id())
-                            //->orWhere('user_id_sender', auth()->id())
-                            ->get();
-
-                        foreach ($getOperations as $operationList){
-                            $operationList->update(['operation_state' => 'success']);
-                        }
-
-
-                        //----------------------------------------------------------------------------------------
-                        //save data for tracking
-                        $getLog = $getLog->where('operation_type', 'VALIDATE_DOCUMENT_PARAPHEUR')->get();
-                        if(count($getLog) === 0){
-                            self::trackOperations($getMediaDocument->id,
-                                "VALIDATE_DOCUMENT_PARAPHEUR",
-                                auth()->user()->name .' vient de parapher le document '. substr($getMediaDocument->file_name, 14),
-                                'success',
-                                auth()->id(),
-                                $idNextUser,
-                                auth()->user()->name,
-                                $getMediaWithOperationDocument->message);
-
-                            $getDataNextUser = User::findOrFail($idNextUser);
-                            self::trackOperations($getMediaDocument->id,
-                                "SEND_DOCUMENT_PARAPHEUR",
-                                $getDataNextUser->name .' a envoyé un document en attente d\'être paraphé ',
-                                'pending',
-                                auth()->id(),
-                                $idNextUser,
-                                auth()->user()->name,
-                                $getMediaWithOperationDocument->message);
-
-                        }
-
-                        $getMedia = Media::with('operations')->find($request->id);
-                        $filePath = $getMedia->getPath();
-                        $outputFilePath = $getMedia->getPath();
-                        $this->fillPDFFileParaphe($filePath, $outputFilePath);
-                    }
-                }
-                break;
-
             case "rejected":
                 $getIdPreviousUser = $getMediaDocument->operations->where('user_id_receiver', auth()->id())->first()->user_id_sender;
                 $oldValue = json_decode($getMediaDocument->step_workflow);
@@ -1270,7 +1346,6 @@ class WorkflowManagementController extends Controller
                 }
             break;
         }
-
         return response()->json([
             'title' => 'Votre validation a été effectué avec succès'
         ]);

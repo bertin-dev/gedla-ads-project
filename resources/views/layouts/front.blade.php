@@ -845,12 +845,32 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    alert(data.title);
-                    /*window.location.href = "{{--{{ route('show-all-prescription')}}--}}";*/
-                    location.reload();
+                    if(data.error !== ""){
+                        $('body').notif({
+                            title: 'Une Erreur est survenue',
+                            content: data.error,
+                            img: '{{asset('images/error-notif.png')}}',
+                            cls: 'error1'
+                        });
+                    }
+
+                    if(data.success !== ""){
+                        $('body').notif({
+                            title: 'Opération Réussie',
+                            content: data.success,
+                            img: '{{asset('images/success-notif.jpg')}}',
+                            cls: 'success1'
+                        });
+                        location.reload();
+                    }
                 },
                 error: function () {
-                    alert("Error founded where user display document");
+                    $('body').notif({
+                        title: 'Une Erreur est survenue',
+                        content: "Une erreur a été trouvé pendant le processus",
+                        img: '{{asset('images/error-notif.png')}}',
+                        cls: 'error1'
+                    });
                     console.log('Error founded where user display document');
                 }
             });
@@ -870,12 +890,32 @@
                 },
                 dataType: 'json',
                 success: function (data) {
-                    alert(data.title);
-                    /*window.location.href = "{{--{{ route('show-all-prescription')}}--}}";*/
-                    location.reload();
+                    if(data.error !== ""){
+                        $('body').notif({
+                            title: 'Une Erreur est survenue',
+                            content: data.error,
+                            img: '{{asset('images/error-notif.png')}}',
+                            cls: 'error1'
+                        });
+                    }
+
+                    if(data.success !== ""){
+                        $('body').notif({
+                            title: 'Opération Réussie',
+                            content: data.success,
+                            img: '{{asset('images/success-notif.jpg')}}',
+                            cls: 'success1'
+                        });
+                        location.reload();
+                    }
                 },
                 error: function () {
-                    alert("Error founded where user display document");
+                    $('body').notif({
+                        title: 'Une Erreur est survenue',
+                        content: "Une erreur a été trouvé pendant le processus",
+                        img: '{{asset('images/error-notif.png')}}',
+                        cls: 'error1'
+                    });
                     console.log('Error founded where user display document');
                 }
             });
