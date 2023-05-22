@@ -1,8 +1,15 @@
 @extends('layouts.admin')
 @section('content')
+    <div style="margin-bottom: 10px;" class="row">
+        <div class="col-lg-12">
+            <a class="btn btn-success" href="{{ route('admin.archive.index') }}">
+                {{ trans('global.back_to_list') }}
+            </a>
+        </div>
+    </div>
     <div class="card">
         <div class="card-header">
-            {{ trans('cruds.archive.title_singular') }} {{ trans('global.list') }}
+            {{ trans('cruds.archive.fields.document') }} {{ trans('global.list') }}
         </div>
 
         <div class="card-body">
@@ -28,12 +35,24 @@
                         </th>
 
                         <th>
+                            {{ trans('cruds.archive.fields.size') }}
+                        </th>
+
+                        <th>
+                            {{ trans('cruds.archive.fields.created_at') }}
+                        </th>
+
+                        <th>
                             &nbsp;
+                        </th>
+
+                        <th>
+                            {{ trans('cruds.archive.fields.document') }}
                         </th>
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach($gedFiles as $key => $media)
+                    @foreach($medias as $key => $media)
                         <tr data-entry-id="{{ $key }}">
                             <td>
 
@@ -43,17 +62,26 @@
                             </td>
 
                             <td>
-                                {{ $media ?? '' }}
+                                {{ strtoupper(substr($media->file_name, 14)) ?? '' }}
                             </td>
+
+                            <td>
+                                {{ $media->size ?? '' }}
+                            </td>
+
+                            <td>
+                                {{ \Carbon\Carbon::parse($media->created_at)->diffForHumans() ?? '' }}
+                            </td>
+
                             <td>
                                 @can('archive_show')
-                                    <a class="btn btn-xs btn-primary" href="http://localhost:8000/storage/{{$media}}" target="_blank">
+                                    <a class="btn btn-xs btn-primary" href="{{$media->getUrl()}}" target="_blank">
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan
 
-                                @can('archive_show')
-                                    <form method="POST" action="{{ route('admin.media.archive', ['id' => $media->id]) }}"
+                                @can('archive_store_access')
+                                    <form method="POST" action="{{ route('admin.archive.store', ['id' => $media->id, 'user' => 'admin']) }}"
                                           onsubmit="return confirm('{{ trans('global.areYouSure') }}');"
                                           style="display: inline-block;">
                                         @csrf
@@ -61,6 +89,10 @@
                                     </form>
                                 @endcan
 
+                            </td>
+
+                            <td>
+                                <embed src="{{ $media->getUrl() }}" frameborder="1">
                             </td>
 
                         </tr>
@@ -79,11 +111,11 @@
     <script>
         $(function () {
             let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
-            @can('user_delete')
+            @can('archive_delete')
             let deleteButtonTrans = '{{ trans('global.datatables.delete') }}'
             let deleteButton = {
                 text: deleteButtonTrans,
-                url: "{{ route('admin.users.massDestroy') }}",
+                url: "{{ route('admin.archive.destroy', 1) }}",
                 className: 'btn-danger',
                 action: function (e, dt, node, config) {
                     var ids = $.map(dt.rows({selected: true}).nodes(), function (entry) {

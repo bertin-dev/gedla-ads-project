@@ -31,6 +31,16 @@ use App\Http\Controllers\Traits\Auditable;
 class WorkflowManagementController extends Controller
 {
     use Auditable;
+
+    private $operationTypes = ["SEND_DOCUMENT", "VALIDATE_DOCUMENT", "VALIDATE_DOCUMENT_SIGNATURE",
+        "SEND_DOCUMENT_SIGNATURE", "VALIDATE_DOCUMENT_PARAPHEUR", "SEND_DOCUMENT_PARAPHEUR", "OPEN_DOCUMENT", "PREVIEW_DOCUMENT",
+        "START_VALIDATION", "REJECTED_DOCUMENT", "EDIT_DOCUMENT", "SAVE_DOCUMENT", "DOWNLOAD_DOCUMENT", "ARCHIVE_DOCUMENT", "IMPORT_DOCUMENT",
+        "RESTORE_ARCHIVE_DOCUMENT"];
+
+    public function __construct(){
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -466,29 +476,28 @@ class WorkflowManagementController extends Controller
 
     public function openDocument(Request $request): \Illuminate\Http\JsonResponse
     {
+        $media = Media::findOrFail($request->id);
+
         $getLog = AuditLog::where('media_id', $request->id)
-            ->where('operation_type', 'OPEN_DOCUMENT')
             ->where('current_user_id', auth()->id())
+            ->where('operation_type', 'OPEN_DOCUMENT')
             ->get();
 
         if(count($getLog) === 0){
             self::trackOperations($request->id,
                 "OPEN_DOCUMENT",
-                $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .'</strong> a ouvert le document '. strtoupper($request->name)),
+                $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a ouvert le document '. strtoupper($media->name)),
                 'success',
                 null,
                 auth()->id(),
                 auth()->user()->name,
-                ucfirst(auth()->user()->name) .' vient d\'ouvrir le document '. strtoupper($request->name),);
+                ucfirst(auth()->user()->name) .' a ouvert le document '. strtoupper($media->name));
         }
         return \response()->json($getLog);
     }
 
     public function previewDocument(Request $request): \Illuminate\Http\JsonResponse
     {
-        $operationTypes = ["SEND_DOCUMENT", "VALIDATE_DOCUMENT", "VALIDATE_DOCUMENT_SIGNATURE",
-            "SEND_DOCUMENT_SIGNATURE", "VALIDATE_DOCUMENT_PARAPHEUR", "SEND_DOCUMENT_PARAPHEUR", "OPEN_DOCUMENT", "PREVIEW_DOCUMENT",
-            "START_VALIDATION", "REJECTED_DOCUMENT", "EDIT_DOCUMENT", "SAVE_DOCUMENT", "DOWNLOAD_DOCUMENT", "ARCHIVE_DOCUMENT"];
 
 
             //GET ALL LOGS OF MEDIA SPECIFIED AND AUTH USER
@@ -514,7 +523,7 @@ class WorkflowManagementController extends Controller
 
 
         $getAllLog = AuditLog::where('media_id', $request->id)
-            ->whereIn('operation_type', $operationTypes)
+            ->whereIn('operation_type', $this->operationTypes)
             ->orderByDesc('created_at')
             ->get();
 
@@ -1230,6 +1239,27 @@ class WorkflowManagementController extends Controller
 
     }
 
+    public function downloadDocument(Request $request){
+        $media = Media::findOrFail($request->id);
+
+        $getLog = AuditLog::where('media_id', $media->id)
+            ->where('current_user_id', auth()->id())
+            ->where('operation_type', 'DOWNLOAD_DOCUMENT')
+            ->get();
+        if(count($getLog) === 0){
+            self::trackOperations($media->id,
+                "DOWNLOAD_DOCUMENT",
+                $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de télécharger le document '. strtoupper(substr($media->file_name, 14))),
+                'success',
+                null,
+                auth()->id(),
+                '',
+                ucfirst(auth()->user()->name) .' vient de télécharger le document '. strtoupper(substr($media->file_name, 14)));
+        }
+
+        return response()->download($media->getPath(), $media->file_name);
+    }
+
     /*public function validateDocument(Request $request){
         $getMediaDocument = Media::with('operations')->find($request->id);
         $getLog = AuditLog::where('media_id', $getMediaDocument->id);
@@ -1460,7 +1490,7 @@ class WorkflowManagementController extends Controller
                 <time class="timeago">Le '.date('d-m-Y à H:i:s', time()).'</time>
                 </div>
                 <div class="col-md-12">
-                <p><strong>' .$params . '</p>
+                <p>' .$params . '</p>
                 </div>
                 </div>';
     }

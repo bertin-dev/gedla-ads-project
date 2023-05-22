@@ -47,6 +47,8 @@ Route::get('/home', function () {
 
 Route::group(['middleware' => ['auth', 'user']], function() {
     Route::resource('projects', ProjectController::class)->only(['index', 'show']);
+    Route::get('filter/{params}', [ProjectController::class, 'filterActivityByDate'])->name('filter-activity-by-date');
+    Route::get('filter-document/{params}', [ProjectController::class, 'filterDocumentByDate'])->name('filter-document-by-date');
 
     Route::get('folders/upload', [FolderController::class, 'upload'])->name('folders.upload');
     Route::post('folders/media', [FolderController::class, 'storeMedia'])->name('folders.storeMedia');
@@ -66,7 +68,6 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     //PARAPHEUR
     Route::get('parapheur/index', [ParapheurController::class, 'index'])->name('parapheur.index');
     Route::get('parapheur/show', [ParapheurController::class, 'show'])->name('parapheur.show');
-    Route::post('parapheur/download', [ParapheurController::class, 'download'])->name('parapheur.download');
     Route::get('parapheur/upload', [ParapheurController::class, 'upload'])->name('parapheur.upload');
     Route::post('parapheur/upload', [ParapheurController::class, 'postUpload'])->name('parapheur.postUpload');
     Route::post('parapheur/media', [ParapheurController::class, 'storeMedia'])->name('parapheur.storeMedia');
@@ -135,6 +136,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('workflow-management/preview-document', [WorkflowManagementController::class, 'previewDocument'])->name('workflow-management.preview-document');
     Route::post('workflow-management/open-document', [WorkflowManagementController::class, 'openDocument'])->name('workflow-management.open-document');
     Route::post('workflow-management/validateDocument', [WorkflowManagementController::class, 'validateDocument'])->name('workflow-management.validateDocument');
+    Route::post('workflow-management/download', [WorkflowManagementController::class, 'downloadDocument'])->name('workflow-management.download');
     Route::get('load_users/{id}', [WorkflowManagementController::class, 'showUsers'])->name('workflow-management.load-users');
 
     //Signature
@@ -150,17 +152,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     //Archive document
     Route::resource('archive', ArchiveController::class);
-    Route::post('/ged/restore/{fileName}', function ($fileName) {
-        $gedFilePath = storage_path("app/ged");
-
-        $fileContents = Storage::disk('ged')->get($gedFilePath);
-        Storage::disk('local')->put($fileName, $fileContents);
-
-        Storage::disk('ged')->delete($gedFilePath);
-
-        return redirect()->back();
-    })->name('ged.restore');
-    Route::post('media/{id}/archive', [ArchiveController::class, 'archive'])->name('media.archive');
+    Route::post('archive/restore', [ArchiveController::class, 'restore'])->name('archive.restore');
 
     //Calendar admin
     Route::get('calendar-admin', [CalendarAdminController::class, 'index'])->name('calendar.admin');

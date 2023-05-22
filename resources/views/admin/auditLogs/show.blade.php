@@ -30,7 +30,7 @@
                                         {{ trans('cruds.auditLog.fields.description') }}
                                     </th>
                                     <td>
-                                        {{ $auditLog->description }}
+                                        {!! $auditLog->description !!}
                                     </td>
                                 </tr>
                                 <tr>

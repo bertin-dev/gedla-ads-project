@@ -40,6 +40,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.5.0/css/perfect-scrollbar.min.css" rel="stylesheet" />
 
+    <link href="{{ asset('bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet" />
     @yield('styles')
     @livewireStyles
@@ -133,18 +134,17 @@
             <div class="container">
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ml-auto">
-
                         @php
                             $user = auth()->user();
                             $notifications = $user->notifications()->paginate(10);
                         @endphp
 
                         <li class="nav-item dropdown notification-ui show">
-                            <a class="nav-link dropdown-toggle notification-ui_icon" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle notification-ui_icon" href="#" id="navbarDropdownNotifications" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-bell"></i>
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger opacity-75 text-white">{{ $user->unreadNotifications()->count() }}</span>
                             </a>
-                            <div class="dropdown-menu notification-ui_dd" aria-labelledby="navbarDropdown">
+                            <div class="dropdown-menu notification-ui_dd" aria-labelledby="navbarDropdownNotifications">
                                 <div class="notification-ui_dd-header">
                                     <h3 class="text-center">{{$user->unreadNotifications()->count()<2 ? trans('global.notification') : trans('global.notifications')}}</h3>
                                 </div>
@@ -159,7 +159,7 @@
                                                 </div>
                                                 <div class="notification-list_detail">
                                                     <p><b>{{$notification->data['subject'] ?? ""}}</b> <br><span class="text-muted">{{$notification->data['subject'] ?? ''}}</span></p>
-                                                    <p class="nt-link text-truncate">{{$notification->data['body'] ?? ""}}</p>
+                                                    <p class="nt-link text-body">{{$notification->data['body'] ?? ""}}</p>
                                                 </div>
                                                 <p><small>{{--<time class="timeago" datetime="{{$notification->created_at ?? ''}}"></time>--}} {{ $notification->created_at->diffForHumans() }}</small></p>
                                             </a>
@@ -170,88 +170,17 @@
                                                 </div>
                                                 <div class="notification-list_detail">
                                                     <p><b>{{$notification->data['subject'] ?? ""}}</b> <br><span class="text-muted">{{$notification->data['subject'] ?? ''}}</span></p>
-                                                    <p class="nt-link text-truncate">{{$notification->data['body'] ?? ""}} </p>
+                                                    <p class="nt-link text-body">{{$notification->data['body'] ?? ""}} </p>
                                                 </div>
                                                 <p><small>{{--<time class="timeago" datetime="{{$notification->created_at ?? ''}}"></time>--}} {{ $notification->created_at->diffForHumans() }}</small></p>
                                             </a>
                                         @endif
 
                                     @endforeach
-
-                                    {{--<a href="#!" class="notification-list notification-list--unread text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user2.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>Richard Miles</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>1 day ago</small></p>
-                                    </a>
-                                    <a href="#!" class="notification-list text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user3.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>Brian Cumin</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>1 day ago</small></p>
-                                    </a>
-                                    <a href="#!" class="notification-list text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user4.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>Lance Bogrol</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>1 day ago</small></p>
-                                    </a>
-                                    <a href="#!" class="notification-list notification-list--unread text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user1.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>John Doe</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>10 mins ago</small></p>
-                                    </a>
-                                    <a href="#!" class="notification-list notification-list--unread text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user2.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>Richard Miles</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>1 day ago</small></p>
-                                    </a>
-                                    <a href="#!" class="notification-list text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user3.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>Brian Cumin</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>1 day ago</small></p>
-                                    </a>
-                                    <a href="#!" class="notification-list text-dark">
-                                        <div class="notification-list_img">
-                                            <img src="images/users/user4.jpg" alt="user">
-                                        </div>
-                                        <div class="notification-list_detail">
-                                            <p><b>Lance Bogrol</b> <br><span class="text-muted">reacted to your post</span></p>
-                                            <p class="nt-link text-truncate">How to travel long way home from here.</p>
-                                        </div>
-                                        <p><small>1 day ago</small></p>
-                                    </a>--}}
                                 </div>
                                 @if($user->unreadNotifications()->count() >= 10)
                                     <div class="notification-ui_dd-footer">
-                                        <a href="{{ route('notifications.index') }}" class="btn btn-success btn-block">View All</a>
+                                        <a href="{{ route('notifications.index') }}" class="btn btn-success btn-block"> {{ trans('global.view') }} {{ trans('global.all') }}</a>
                                     </div>
                                 @endif
                             </div>
@@ -290,21 +219,24 @@
     <div class="c-body">
         <main class="c-main">
 
-            {{--<div class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0">Dashboard</h1>
-                        </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                                <li class="breadcrumb-item active">Dashboard v1</li>
-                            </ol>
+            @isset($title)
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="row mb-2" style="padding-left: 15px; padding-right: 15px;">
+                            <div class="col-sm-6">
+                                <h1 class="m-0">{{ $title }}</h1>
+                            </div>
+                            <div class="col-sm-6">
+                                <ol class="breadcrumb float-sm-right">
+                                    <li class="breadcrumb-item"><a href="{{ route('projects.index') }}">{{trans('global.home')}}</a></li>
+                                    <li class="breadcrumb-item active">{{trans('global.dashboard')}}</li>
+                                    <li class="breadcrumb-item">{{ trans('global.last_connexion') }} : {{ Carbon\Carbon::parse(auth()->user()->last_login_at)->diffForHumans() }}</li>
+                                </ol>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>--}}
+            @endisset
 
             <div class="container-fluid">
                 @if(session('message'))
@@ -394,6 +326,7 @@
 <script src="{{asset('js/mustache.js')}}"></script>
 <script src="{{asset('js/jquery.notif.js')}}"></script>
 <script src="{{ asset('js/main.js') }}"></script>
+<script src="{{ asset('js/bootstrap.bundle.js') }}"></script>
 
 @if(str_replace('_', '-', app()->getLocale()) === "en")
     <script src="{{ asset('js/jquery.timeago.en.js') }}"></script>
@@ -645,6 +578,7 @@
             $('#media_id').attr("value", id);
             $('.document_id').attr("href", id);
             mediaId.attr("href", mediaId.attr("href") + "&mediaId=" + id);
+            $('.mediaArchive').attr("href", id);
             console.log(id);
             updateMediaTable(id, name);
         });
@@ -738,7 +672,7 @@
             e.preventDefault();
             let getId = $('.mediaDownload').attr('href');
             //alert(link);
-            let url = "{{ route('parapheur.download') }}";
+            let url = "{{ route('admin.workflow-management.download') }}";
             //url = url.replace(':link', link);
             //alert(url);
             $.ajax({
@@ -967,6 +901,49 @@
                 }
             });
         });
+
+        $('.mediaArchive').on('click', function (e) {
+            let fullLoading =  $('#cover-spin');
+            e.preventDefault();
+            let getId = $('.mediaDownload').attr('href');
+            let url = "{{ route('admin.archive.store') }}";
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    id: getId
+                },
+                dataType: 'json',
+                beforeSend: function (){
+                    fullLoading.show();
+                },
+                success: function (data) {
+                    $('body').notif({
+                        title: 'Opération Réussie',
+                        content: data.result,
+                        img: '{{asset('images/success-notif.jpg')}}',
+                        cls: 'success1'
+                    });
+
+                    setTimeout(function(){
+                        window.location.reload();
+                    }, 5000);
+                },
+                error: function () {
+                    fullLoading.hide();
+                    $('body').notif({
+                        title: 'Une Erreur est survenue',
+                        content: "Link not found",
+                        img: '{{asset('images/error-notif.png')}}',
+                        cls: 'error1'
+                    });
+                    console.log('Link not found');
+                },
+                complete: function (){
+                    fullLoading.hide();
+                }
+            });
+        });
     });
 
     function formatDate(date) {
@@ -1000,6 +977,101 @@
         return result;
     }
 
+
+    $(function () {
+        let dateType = $('.dateType');
+        let filterActivity = $('#filter_activity');
+        let detailDocumentUpdate = $('.table-full-width');
+
+        //filter activity of user connected
+        $('#filter_day, #filter_month, #filter_year').on('click', function (e) {
+
+            let getParams;
+            // Determine which filter was clicked based on its ID
+            if ($(this).attr('id') === 'filter_day') {
+                 getParams = $(this).attr('id');
+                // Day filter clicked
+                // Do something with the day value
+            } else if ($(this).attr('id') === 'filter_month') {
+                getParams = $(this).attr('id');
+                // Month filter clicked
+                // Do something with the month value
+            } else if ($(this).attr('id') === 'filter_year') {
+                getParams = $(this).attr('id');
+                // Year filter clicked
+                // Do something with the year value
+            }
+            e.preventDefault();
+            dateType.empty();
+            filterActivity.empty();
+            $.ajax({
+                url:"{{ route('filter-activity-by-date', '') }}"+"/"+getParams,
+                method: 'GET',
+                dataType: 'json',
+                beforeSend: function (){
+                    dateType.text("Encours...");
+                    //fullLoading.show();
+                },
+                success: function (data) {
+                    dateType.text(data.$date_type);
+                    filterActivity.html(data.result);
+                },
+                error: function () {
+                    console.log('Error founded where user display document');
+                },
+                complete: function (){
+                },
+            });
+        });
+
+        //filter activity of documents
+        $('#filter_doc_day, #filter_doc_month, #filter_doc_year').on('click', function (e) {
+
+            let getParams;
+            if ($(this).attr('id') === 'filter_doc_day') {
+                getParams = $(this).attr('id');
+            } else if ($(this).attr('id') === 'filter_doc_month') {
+                getParams = $(this).attr('id');
+            } else if ($(this).attr('id') === 'filter_doc_year') {
+                getParams = $(this).attr('id');
+            }
+            e.preventDefault();
+            detailDocumentUpdate.empty();
+            $.ajax({
+                url:"{{ route('filter-document-by-date', '') }}"+"/"+getParams,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    if(data.result !== ""){
+                        detailDocumentUpdate.html(data.result);
+                    }
+                },
+                error: function () {
+                    console.log('Error founded where user display document');
+                },
+            });
+        });
+
+        //update notifications after have opened
+        /*$('#navbarDropdownNotifications').on('click', function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            alert("dsfsdf");
+            $.ajax({
+                url:"",
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    if(data.result !== ""){
+                        //detailDocumentUpdate.html(data.result);
+                    }
+                },
+                error: function () {
+                    console.log('Error founded where user display document');
+                },
+            });
+        });*/
+    });
 
     //Recherche Ajax
     /*$(function () {

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\Auditable;
+use App\Models\AuditLog;
 use App\Models\Folder;
 use App\Models\Project;
 use App\Models\User;
@@ -12,6 +14,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class FolderController extends Controller
 {
+    use Auditable;
     public function create()
     {
         $children_level_n = Folder::with('project')
@@ -67,7 +70,7 @@ class FolderController extends Controller
                     $query->where('id', auth()->id());
                 })
                 ->findOrFail($folder->id);
-            //dd($folder->children->toArray());
+            //dd($folder->files->where('archived', 0)->where('state', 'unlocked')->where('visibility', 'public')->toArray());
 
             /*$folder = \DB::table('folder_user')
                 ->join('folders', 'folder_user.folder_id', 'folders.id')
@@ -166,12 +169,37 @@ class FolderController extends Controller
         $folder = Folder::findOrFail($request->folder_id);
 
         foreach ($request->input('files', []) as $file) {
-            $folder->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
+            $media = $folder->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
             Media::where('model_id', $folder->id)->update([
                 'created_by' => \Auth::user()->id
             ]);
+            $getLog = AuditLog::where('media_id', $media->id)
+                ->where('current_user_id', auth()->id())
+                ->where('operation_type', 'IMPORT_DOCUMENT')
+                ->get();
+            if(count($getLog) === 0){
+                self::trackOperations($media->id,
+                    "IMPORT_DOCUMENT",
+                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient d\'importer le document '. strtoupper(substr($media->file_name, 14))),
+                    'success',
+                    null,
+                    auth()->id(),
+                    '',
+                    ucfirst(auth()->user()->name) .' vient d\'importer le document '. strtoupper(substr($media->file_name, 14)));
+            }
         }
 
         return redirect()->route('folders.show', $folder)->withStatus('Files has been uploaded');
+    }
+
+    private function templateForDocumentHistoric($params = ''){
+        return '<div class="row schedule-item>
+                <div class="col-md-2">
+                <time class="timeago">Le '.date('d-m-Y à H:i:s', time()).'</time>
+                </div>
+                <div class="col-md-12">
+                <p>' .$params . '</p>
+                </div>
+                </div>';
     }
 }

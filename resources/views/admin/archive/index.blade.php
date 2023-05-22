@@ -1,17 +1,11 @@
 @extends('layouts.admin')
 @section('content')
-    @can('user_create')
+    @can('archive_add_access')
         <div style="margin-bottom: 10px;" class="row">
             <div class="col-lg-12">
                 <a class="btn btn-success" href="{{ route('admin.archive.create') }}">
                     {{ trans('global.add') }} {{ trans('cruds.archive.title') }}
                 </a>
-
-
-                {{--<a class="btn btn-success" href="{{ route('admin.users.display-view-importation') }}">
-                    {{ trans('global.import') }} {{ trans('cruds.user.title_singular') }}
-                </a>--}}
-
             </div>
         </div>
     @endcan
@@ -42,6 +36,9 @@
                         <th>
                             {{ trans('cruds.archive.fields.archive_text') }}
                         </th>
+                        <th>
+                            {{ trans('cruds.archive.fields.document') }}
+                        </th>
 
                         <th>
                             &nbsp;
@@ -62,14 +59,17 @@
                                 {{ $media ?? '' }}
                             </td>
                             <td>
+                                <embed src="{{ asset('storage/archives/'.$media) }}" frameborder="1">
+                            </td>
+                            <td>
                                 @can('archive_show')
-                                    <a class="btn btn-xs btn-primary" href="http://localhost:8000/storage/{{$media}}" target="_blank">
+                                    <a class="btn btn-xs btn-primary" href="{{ asset('storage/archives/'.$media) }}" target="_blank">
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan
 
-                                @can('archive_show')
-                                        <form method="POST" action="{{ route('admin.ged.restore', $media) }}"
+                                @can('unarchive_document_access')
+                                        <form method="POST" action="{{ route('admin.archive.restore', ['file_name' => $media]) }}"
                                               onsubmit="return confirm('{{ trans('global.areYouSure') }}');"
                                               style="display: inline-block;">
                                             @csrf

@@ -8,6 +8,7 @@ use App\Models\Folder;
 use App\Models\Operation;
 use App\Models\Parapheur;
 use App\Models\User;
+use App\Models\ValidationStep;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -71,6 +72,21 @@ class ParapheurController extends Controller
             $media->parapheur_id = $parapheur->id;
             $media->model_id = 0;
             $media->save();
+
+            $getLog = AuditLog::where('media_id', $media->id)
+                ->where('current_user_id', auth()->id())
+                ->where('operation_type', 'IMPORT_DOCUMENT')
+                ->get();
+            if(count($getLog) === 0){
+                self::trackOperations($media->id,
+                    "IMPORT_DOCUMENT",
+                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient d\'importer le document '. strtoupper(substr($media->file_name, 14))),
+                    'success',
+                    null,
+                    auth()->id(),
+                    '',
+                    ucfirst(auth()->user()->name) .' vient d\'importer le document '. strtoupper(substr($media->file_name, 14)));
+            }
         }
 
         return redirect()->route('parapheur.show', $parapheur)->withStatus('Files has been uploaded');
@@ -157,7 +173,9 @@ class ParapheurController extends Controller
             ->where('user_id', auth()->id())
             ->first();
 
-        return view('front.parapheur.show_files', compact('children_level_n', 'parapheurWithMedia'));
+        $getValidationDatas = ValidationStep::where('user_id', auth()->id());
+
+        return view('front.parapheur.show_files', compact('children_level_n', 'parapheurWithMedia', 'getValidationDatas'));
     }
 
     /**
@@ -183,21 +201,14 @@ class ParapheurController extends Controller
         //
     }
 
-
-    public function download(Request $request){
-        $media = Media::findOrFail($request->id);
-
-        $getLog = AuditLog::where('media_id', $media->id)->where('operation_type', 'DOWNLOAD_DOCUMENT')->get();
-        if(count($getLog) === 0){
-            self::trackOperations($media->id,
-                "DOWNLOAD_DOCUMENT",
-                auth()->user()->name .' vient de télécharger le document '. substr($media->file_name, 14),
-                'success',
-                null,
-                auth()->id(),
-                '');
-        }
-
-        return response()->download($media->getPath(), $media->file_name);
+    private function templateForDocumentHistoric($params = ''){
+        return '<div class="row schedule-item>
+                <div class="col-md-2">
+                <time class="timeago">Le '.date('d-m-Y à H:i:s', time()).'</time>
+                </div>
+                <div class="col-md-12">
+                <p>' .$params . '</p>
+                </div>
+                </div>';
     }
 }

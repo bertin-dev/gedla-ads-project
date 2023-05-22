@@ -56,9 +56,11 @@ return [
             'throw' => false,
         ],
 
-        'ged' => [
+        'archives' => [
             'driver' => 'local',
-            'root' => storage_path('app/ged'),
+            'root' => storage_path('app/public/archives'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
         ],
 
     ],

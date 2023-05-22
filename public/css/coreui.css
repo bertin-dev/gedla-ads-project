@@ -5740,7 +5740,7 @@ html:not([dir="rtl"]) .was-validated .custom-select:invalid, html:not([dir="rtl"
   }
 }
 
-.container-fluid, .container-sm, .container-md, .container-lg, .container-xl {
+.container-fluid, .container-sm, .container-md, .container-lg, .container-xl, .content-header {
   width: 100%;
   padding-right: 15px;
   padding-left: 15px;

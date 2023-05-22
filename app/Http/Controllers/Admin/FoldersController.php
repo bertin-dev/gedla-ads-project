@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Traits\Auditable;
+use App\Models\AuditLog;
 use App\Models\Folder;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\MediaUploadingTrait;
@@ -16,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class FoldersController extends Controller
 {
-    use MediaUploadingTrait;
+    use MediaUploadingTrait, Auditable;
 
     public function index()
     {
@@ -50,10 +52,25 @@ class FoldersController extends Controller
         ]);
 
         foreach ($request->input('files', []) as $file) {
-            $folder->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
+            $media = $folder->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
             Media::where('model_id', $folder->id)->update([
                 'created_by' => \Auth::user()->id
             ]);
+
+            $getLog = AuditLog::where('media_id', $media->id)
+                ->where('current_user_id', auth()->id())
+                ->where('operation_type', 'IMPORT_DOCUMENT')
+                ->get();
+            if(count($getLog) === 0){
+                self::trackOperations($media->id,
+                    "IMPORT_DOCUMENT",
+                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient d\'importer le document '. strtoupper(substr($media->file_name, 14))),
+                    'success',
+                    null,
+                    auth()->id(),
+                    '',
+                    ucfirst(auth()->user()->name) .' vient d\'importer le document '. strtoupper(substr($media->file_name, 14)));
+            }
         }
 
         if ($media = $request->input('ck-media', false)) {
@@ -144,5 +161,16 @@ class FoldersController extends Controller
         $media         = $model->addMediaFromRequest('upload')->toMediaCollection('ck-media');
 
         return response()->json(['id' => $media->id, 'url' => $media->getUrl()], Response::HTTP_CREATED);
+    }
+
+    private function templateForDocumentHistoric($params = ''){
+        return '<div class="row schedule-item>
+                <div class="col-md-2">
+                <time class="timeago">Le '.date('d-m-Y à H:i:s', time()).'</time>
+                </div>
+                <div class="col-md-12">
+                <p>' .$params . '</p>
+                </div>
+                </div>';
     }
 }

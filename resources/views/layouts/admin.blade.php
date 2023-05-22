@@ -36,6 +36,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/1.5.0/css/perfect-scrollbar.min.css" rel="stylesheet" />
      <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/south-street/jquery-ui.css" rel="stylesheet">
     <link href="http://keith-wood.name/css/jquery.signature.css" rel="stylesheet">
+
+    <link href="{{ asset('bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet" />
     @yield('styles')
     @livewireStyles
@@ -200,6 +202,7 @@
     <script src="{{asset('js/jquery-ui.js')}}"></script>
     <script src="{{asset('js/jquery.signature.js')}}"></script>
     <script src="{{asset('js/jquery.timego.js')}}"></script>--}}
+    <script src="{{ asset('js/bootstrap.bundle.js') }}"></script>
     <script src="{{ asset('js/main.js') }}"></script>
 
     @if(str_replace('_', '-', app()->getLocale()) === "en")

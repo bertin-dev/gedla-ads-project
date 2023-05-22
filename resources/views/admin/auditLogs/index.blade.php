@@ -52,7 +52,7 @@
                                             {{ $auditLog->id ?? '' }}
                                         </td>
                                         <td>
-                                            {{ $auditLog->description ?? '' }}
+                                            {!! $auditLog->description ?? '' !!}
                                         </td>
                                         <td>
                                             {{ $auditLog->subject_id ?? '' }}
