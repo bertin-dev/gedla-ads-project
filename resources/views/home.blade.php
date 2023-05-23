@@ -140,12 +140,12 @@
                                             <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                                             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                                 <li class="dropdown-header text-start">
-                                                    <h6>Filter</h6>
+                                                    <h6>{{trans('global.filter')}}</h6>
                                                 </li>
 
-                                                <li><a class="dropdown-item" href="#">Today</a></li>
-                                                <li><a class="dropdown-item" href="#">This Month</a></li>
-                                                <li><a class="dropdown-item" href="#">This Year</a></li>
+                                                <li><a class="dropdown-item" href="#">{{trans('global.today')}}</a></li>
+                                                <li><a class="dropdown-item" href="#">{{trans('global.this')}} {{trans('global.month')}}</a></li>
+                                                <li><a class="dropdown-item" href="#">{{trans('global.this')}} {{trans('global.year')}}</a></li>
                                             </ul>
                                         </div>
 
@@ -211,12 +211,12 @@
                                             <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                                             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                                 <li class="dropdown-header text-start">
-                                                    <h6>Filter</h6>
+                                                    <h6>{{trans('global.filter')}}</h6>
                                                 </li>
 
-                                                <li><a class="dropdown-item" href="#">Today</a></li>
-                                                <li><a class="dropdown-item" href="#">This Month</a></li>
-                                                <li><a class="dropdown-item" href="#">This Year</a></li>
+                                                <li><a class="dropdown-item" href="#">{{trans('global.today')}}</a></li>
+                                                <li><a class="dropdown-item" href="#">{{trans('global.this')}} {{trans('global.month')}}</a></li>
+                                                <li><a class="dropdown-item" href="#">{{trans('global.this')}} {{trans('global.year')}}</a></li>
                                             </ul>
                                         </div>
 
@@ -250,12 +250,12 @@
                                     <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                         <li class="dropdown-header text-start">
-                                            <h6>Filter</h6>
+                                            <h6>{{trans('global.filter')}}</h6>
                                         </li>
 
-                                        <li><a class="dropdown-item" href="#">Today</a></li>
-                                        <li><a class="dropdown-item" href="#">This Month</a></li>
-                                        <li><a class="dropdown-item" href="#">This Year</a></li>
+                                        <li><a class="dropdown-item" href="#">{{trans('global.today')}}</a></li>
+                                        <li><a class="dropdown-item" href="#">{{trans('global.this')}} {{trans('global.month')}}</a></li>
+                                        <li><a class="dropdown-item" href="#">{{trans('global.this')}} {{trans('global.year')}}</a></li>
                                     </ul>
                                 </div>
 
@@ -331,7 +331,7 @@
 
                         <div class="col-xxl-8 col-md-8">
                             <div class="card">
-                                <div class="card-header">Dashboard</div>
+                                <div class="card-header">{{ trans('global.dashboard') }} {{ trans('global.document_created_by_day') }}</div>
                                 <div class="card-body">
                                     <h1>{{ $chart_medias->options['chart_title'] }}</h1>
                                     {!! $chart_medias->renderHtml() !!}
@@ -339,7 +339,7 @@
                             </div>
                         </div>
 
-                        <!-- Recent Sales -->
+                        <!-- Workflow validation -->
                         <div class="col-12">
                             <div class="card recent-sales overflow-auto">
 
@@ -347,12 +347,12 @@
                                     <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                         <li class="dropdown-header text-start">
-                                            <h6>Filter</h6>
+                                            <h6>{{trans('global.filter')}}</h6>
                                         </li>
 
-                                        <li><a class="dropdown-item" href="#">Today</a></li>
-                                        <li><a class="dropdown-item" href="#">This Month</a></li>
-                                        <li><a class="dropdown-item" href="#">This Year</a></li>
+                                        <li><a class="dropdown-item" href="#">{{trans('global.today')}}</a></li>
+                                        <li><a class="dropdown-item" href="#">{{trans('global.this')}} {{trans('global.month')}}</a></li>
+                                        <li><a class="dropdown-item" href="#">{{trans('global.this')}} {{trans('global.year')}}</a></li>
                                     </ul>
                                 </div>
 
@@ -365,6 +365,8 @@
                                             <th scope="col">#</th>
                                             <th scope="col">{{ trans('global.document') }}</th>
                                             <th scope="col">{{ trans('cruds.workflow_management.fields.users') }}</th>
+                                            <th scope="col">{{ trans('global.created_by') }}</th>
+                                            <th scope="col">{{ trans('global.date_validation') }}</th>
                                             <th scope="col">{{ trans('global.deadline') }}</th>
                                             <th scope="col">{{ trans('global.status') }}</th>
                                         </tr>
@@ -375,7 +377,9 @@
                                                 <th scope="row"><a href="#">#{{ $key }}</a></th>
                                                 <td>{{ substr($stateWorkflow->media_name, 14) ?? ''}}</td>
                                                 <td><a href="#" class="text-primary">{{ $stateWorkflow->users_name ?? ''}}</a></td>
-                                                <td>{{ $stateWorkflow->media_deadline ?? ''}}</td>
+                                                <td>{{ $stateWorkflow->start_workflow_by ?? ''}}</td>
+                                                <td>{{ \Carbon\Carbon::parse($stateWorkflow->date_validation )->diffForHumans()?? ''}}</td>
+                                                <td>{{ \Carbon\Carbon::parse($stateWorkflow->media_deadline)->diffForHumans() ?? ''}}</td>
                                                 @switch($stateWorkflow->final_statut_media)
                                                     @case(0)
                                                     <td><span class="badge bg-warning text-white">{{ trans('global.waiting') }}</span></td>
@@ -394,7 +398,7 @@
                                 </div>
 
                             </div>
-                        </div><!-- End Recent Sales -->
+                        </div><!-- End Workflow validation -->
 
                     </div>
                 </section>

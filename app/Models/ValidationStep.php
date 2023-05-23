@@ -20,7 +20,9 @@ class ValidationStep extends Model
         'user_id',
         'statut',
         'deadline',
-        'order'
+        'order',
+        'date_validation',
+        'start_workflow_by'
     ];
 
     //la validation concerne un et un seul media

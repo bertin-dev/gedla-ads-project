@@ -422,4 +422,9 @@ return [
     'deadline'                       => 'Deadline',
     'approved'                       => 'Approved',
     'rejected'                       => 'Rejected',
+    'created_by'                     => 'created by',
+    'date_validation'                => 'validated on',
+    'loading'                        => 'Loading...',
+    'notes_title'                    => 'Review the tasks assigned to you',
+    'notes_body'                     => 'Different types of tasks can appear in this task list with an approval due date',
 ];

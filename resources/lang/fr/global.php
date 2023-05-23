@@ -422,5 +422,10 @@ return [
     'deadline'                       => 'Date Limite',
     'approved'                       => 'Approuvé',
     'rejected'                       => 'Rejeté',
+    'created_by'                     => 'Crée par',
+    'date_validation'                => 'validé',
+    'loading'                        => 'Chargement Encours....',
+    'notes_title'                    => 'Révisez les tâches qui vous ont été assignées',
+    'notes_body'                     => 'Différents type de tâches peuvent apparaître dans cette liste de tâches avec une écheance d\'approbation',
 
 ];

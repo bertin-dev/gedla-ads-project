@@ -4,7 +4,7 @@
     <div class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-5">
+                <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">{{ trans('global.features') }}</h4>
@@ -23,7 +23,7 @@
                                     <small class="float-right">{{ ($parapheur->medias->where('state', 'unlocked')->sortByDesc('updated_at')->first() != null) ? Carbon\Carbon::parse($parapheur->medias->where('state', 'unlocked')->sortByDesc('updated_at')->first()->updated_at)->diffForHumans() : "" }}</small>
                                 </a>
                                 @can('ocr_access')
-                                    <br>
+                                    <br style="margin-top: 20px">
                                     <a href="{{ route('openOCR') }}" class="list-group-item list-group-item-action flex-column align-items-start">
                                         <div class="d-flex w-100 justify-content-between">
                                             <h5 class="mb-1">{{ trans('global.my') }} {{trans('panel.ocr')}}</h5>
@@ -34,11 +34,11 @@
                                         <small class="float-right">{{ ($parapheur->medias->where('state', 'unlocked')->sortByDesc('updated_at')->first() != null) ? Carbon\Carbon::parse($parapheur->medias->where('state', 'unlocked')->sortByDesc('updated_at')->first()->updated_at)->diffForHumans() : "" }}</small>
                                     </a>
                                 @endcan
-                                @can('workflow_validation_management_access')
-                                <br>
-                                <a href="{{ route("admin.workflow-management.index") }}" class="list-group-item list-group-item-action flex-column align-items-start">
+                                @can('workflow_management_access_create')
+                                    <br style="margin-top: 20px">
+                                <a href="{{ route("workflow-create") }}" class="list-group-item list-group-item-action flex-column align-items-start">
                                     <div class="d-flex w-100 justify-content-between">
-                                        <h5 class="mb-1">{{ trans('cruds.workflow_management.title') }}</h5>
+                                        <h5 class="mb-1">{{ trans('global.start_workflow_validation') }}</h5>
                                         <small>{{ $parapheur->medias->where('state', 'unlocked')->count() }} {{ trans('global.document') }}</small>
                                     </div>
 
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-7 dashboard">
+                <div class="col-md-6 dashboard">
                     <!-- Recent Activity -->
                     <div class="card" style="height: 398px;">
                         <div class="filter">
@@ -113,20 +113,91 @@
 
                             @foreach($getProjects as $key => $getProject)
 
-                            <div class="list-group">
-                                <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h5 class="mb-1">Site {{$key + 1}} : {{$getProject->name}}</h5>
-                                        <small>{{ Carbon\Carbon::parse($getProject->created_at)->diffForHumans() }}</small>
-                                    </div>
-                                </a>
-                            </div>
+                                <div class="list-group">
+                                    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1">Site {{$key + 1}} : {{$getProject->name}}</h5>
+                                            <small>{{ Carbon\Carbon::parse($getProject->created_at)->diffForHumans() }}</small>
+                                        </div>
+                                    </a>
+                                </div>
                             @endforeach
                         </div>
                     </div>
+                    <!-- Workflow validation -->
+                    <div class="card dashboard recent-sales" style="height: 398px;">
+
+                        <div class="filter">
+                            <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                                <li class="dropdown-header text-start">
+                                    <h6>{{trans('global.filter')}}</h6>
+                                </li>
+
+                                <li><a class="dropdown-item" id="filter_approved" href="#">{{trans('global.approved')}}</a></li>
+                                <li><a class="dropdown-item" id="filter_pending" href="#">{{trans('global.waiting')}}</a></li>
+                                <li><a class="dropdown-item" id="filter_rejected" href="#">{{trans('global.rejected')}}</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="card-body overflow-auto">
+                            <h5 class="card-title">{{ trans('global.workflow_validation') }} <span class="workflow_state">| {{ trans('global.all') }}</span></h5>
+
+                            @if(count($workflow_validation) != 0)
+                                @can('workflow_management_access_create')
+                                <table class="table table-borderless datatable">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">{{ trans('global.document') }}</th>
+                                        <th scope="col">{{ trans('cruds.workflow_management.fields.users') }}</th>
+                                        <th scope="col">{{ trans('global.deadline') }}</th>
+                                        <th scope="col">{{ trans('global.status') }}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="workflow-v">
+                                    @foreach($workflow_validation as $key => $stateWorkflow)
+                                        <tr>
+                                            <th scope="row"><a href="#">#{{ $key }}</a></th>
+                                            <td>{{ substr($stateWorkflow->media_name, 14) ?? ''}}</td>
+                                            <td><a href="#" class="text-primary">{{ $stateWorkflow->users_name ?? ''}}</a></td>
+                                            <td>{{ \Carbon\Carbon::parse($stateWorkflow->media_deadline)->diffForHumans() ?? ''}}</td>
+                                            @switch($stateWorkflow->final_statut_media)
+                                                @case(0)
+                                                <td><span class="badge bg-warning text-white">{{ trans('global.waiting') }}</span></td>
+                                                @break
+                                                @case(1)
+                                                <td><span class="badge bg-success text-white">{{ trans('global.approved') }}</span></td>
+                                                @break
+                                                @default
+                                                <td><span class="badge bg-danger text-white">{{ trans('global.rejected') }}</span></td>
+                                            @endswitch
+                                        </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
+                                @endcan
+                            @else
+                                <div class="list-group">
+                                    @can('workflow_management_access_create')
+                                        <h4>{{ trans('global.notes_title') }}</h4>
+                                        <p>{{ trans('global.notes_body') }}</p>
+                                        <a href="{{ route("workflow-create") }}" class="list-group-item list-group-item-action flex-column align-items-start">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h5 class="mb-1">{{ trans('global.start_workflow_validation') }}</h5>
+                                            </div>
+                                        </a>
+                                    @endcan
+                                </div>
+                            @endif
+
+                        </div>
+
+                    </div>
+                    <!-- End Workflow validation -->
                 </div>
                 <div class="col-md-6 dashboard">
-                    <div class="card card-tasks" style="height: 430px;">
+                    <div class="card card-tasks" style="height: 610px;">
                         <div class="card-header ">
                             <h4>{{trans('global.my')}} {{trans('global.document')}}</h4>
                             <p class="card-category">{{ trans('global.my_recent_activity') }}</p>
@@ -150,10 +221,10 @@
                                     @foreach($getFolder->media->sortByDesc('updated_at') as $getMedia)
                                         <div class="card">
                                             <div class="row no-gutters">
-                                                <div class="col-sm-4">
+                                                <div class="col-sm-2">
                                                     <img class="img-thumbnail" width="75" src="{!! url('images\document2.png') !!}">
                                                 </div>
-                                                <div class="col-sm-8">
+                                                <div class="col-sm-10">
                                                     <div class="card-body" style="padding: 5px 5px 0;">
                                                         <h5 class="card-title">{{ strtolower(substr($getMedia->file_name, 14)) }}</h5>
                                                         <span>{{ trans('global.edit') }} {{Carbon\Carbon::parse($getMedia->updated_at)->diffForHumans()}}</span>

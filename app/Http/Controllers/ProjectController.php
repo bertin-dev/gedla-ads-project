@@ -8,6 +8,7 @@ use App\Models\Folder;
 use App\Models\Parapheur;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\ValidationStep;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -23,12 +24,6 @@ class ProjectController extends Controller
 
     public function index()
     {
-        /*$projects = Project::whereHas('users', function($query) {
-            $query->where('id', auth()->id());
-        })->get();*/
-
-        $functionality = Folder::where('functionality', true)->get();
-
         $children_level_n = Folder::with('project')
             ->whereHas('project.users', function($query) {
                 $query->where('id', auth()->id());
@@ -75,9 +70,20 @@ class ProjectController extends Controller
             ->sortByDesc('created_at');
         //dd($getActivity->toArray());
 
+        $workflow_validation = ValidationStep::select('media.file_name AS media_name', \DB::raw('MAX(validation_steps.id) AS max_id'),
+            \DB::raw('GROUP_CONCAT(users.name SEPARATOR ", ") AS users_name'),
+            \DB::raw('GROUP_CONCAT(validation_steps.statut SEPARATOR ", ") AS step_statut'),
+            'media.statut AS final_statut_media', 'media.global_deadline AS media_deadline')
+            ->join('media', 'validation_steps.media_id', '=', 'media.id')
+            ->join('users', 'validation_steps.user_id', '=', 'users.id')
+            ->where('validation_steps.user_id', auth()->id())
+            ->groupBy('media.id', 'media.file_name', 'media.statut', 'media.global_deadline')
+            ->orderBy('media.global_deadline')
+            ->get();
+        //dd($workflow_validation->toArray());
 
         $title = trans('global.welcome') .' '. ucfirst(auth()->user()->name);
-        return view('front.projects.index', compact('children_level_n', 'functionality', 'parapheur', 'getFolders', 'getProjects', 'getActivity', 'title'));
+        return view('front.projects.index', compact('children_level_n','parapheur', 'getFolders', 'getProjects', 'getActivity', 'workflow_validation', 'title'));
     }
 
     public function show($id)
@@ -242,4 +248,53 @@ class ProjectController extends Controller
            'result' => $result
        ]);
    }
+
+
+    public function filterWorkflowByStatus($params){
+        $result = "";
+        switch ($params){
+            case "filter_approved":
+                $workflow_validation = $this->workflowValidationStatus(1);
+                break;
+            case "filter_pending":
+                $workflow_validation = $this->workflowValidationStatus(0);
+                break;
+            case "filter_rejected":
+                $workflow_validation = $this->workflowValidationStatus(-1);
+                break;
+        }
+
+        foreach ($workflow_validation as $key => $stateWorkflow){
+            $result = '<tr>
+                                            <th scope="row"><a href="#">#'. $key .'</a></th>
+                                            <td>'. substr($stateWorkflow->media_name, 14) .'</td>
+                                            <td><a href="#" class="text-primary">'.$stateWorkflow->users_name .'</a></td>
+                                            <td>'. \Carbon\Carbon::parse($stateWorkflow->media_deadline)->diffForHumans() .'</td>';
+            $result .= match ($stateWorkflow->final_statut_media) {
+                0 => '<td><span class="badge bg-warning text-white">' . trans('global.waiting') . '</span></td>',
+                1 => '<td><span class="badge bg-success text-white">' . trans('global.approved') . '</span></td>',
+                default => '<td><span class="badge bg-danger text-white">' . trans('global.rejected') . '</span></td>',
+            };
+            $result .=   '</tr>';
+        }
+        return response()->json([
+            'result' => $result,
+            'status' => $params
+        ]);
+    }
+
+    private function workflowValidationStatus ($status){
+        return ValidationStep::select('media.file_name AS media_name', \DB::raw('MAX(validation_steps.id) AS max_id'),
+            \DB::raw('GROUP_CONCAT(users.name SEPARATOR ", ") AS users_name'),
+            \DB::raw('GROUP_CONCAT(validation_steps.statut SEPARATOR ", ") AS step_statut'),
+            'media.statut AS final_statut_media', 'media.global_deadline AS media_deadline')
+            ->join('media', 'validation_steps.media_id', '=', 'media.id')
+            ->join('users', 'validation_steps.user_id', '=', 'users.id')
+            ->where('validation_steps.user_id', auth()->id())
+            ->where('media.statut', $status)
+            ->groupBy('media.id', 'media.file_name', 'media.statut', 'media.global_deadline')
+            ->orderBy('media.global_deadline')
+            ->get();
+    }
 }
+

@@ -982,6 +982,8 @@
         let dateType = $('.dateType');
         let filterActivity = $('#filter_activity');
         let detailDocumentUpdate = $('.table-full-width');
+        let workflow = $('.workflow-v');
+        let workflow_state = $('.workflow_state');
 
         //filter activity of user connected
         $('#filter_day, #filter_month, #filter_year').on('click', function (e) {
@@ -1044,6 +1046,47 @@
                 success: function (data) {
                     if(data.result !== ""){
                         detailDocumentUpdate.html(data.result);
+                    }
+                },
+                error: function () {
+                    console.log('Error founded where user display document');
+                },
+            });
+        });
+
+
+        //filter activity of documents
+        $('#filter_approved, #filter_pending, #filter_rejected').on('click', function (e) {
+
+            let getParams;
+            if ($(this).attr('id') === 'filter_approved') {
+                getParams = $(this).attr('id');
+            } else if ($(this).attr('id') === 'filter_pending') {
+                getParams = $(this).attr('id');
+            } else if ($(this).attr('id') === 'filter_rejected') {
+                getParams = $(this).attr('id');
+            }
+            e.preventDefault();
+            workflow.empty();
+            workflow_state.empty();
+            $.ajax({
+                url:"{{ route('filter-workflow-by-status', '') }}"+"/"+getParams,
+                method: 'GET',
+                dataType: 'json',
+                beforeSend: function (){
+                    workflow_state.html('| ' + "{{ trans('global.loading') }}");
+                },
+                success: function (data) {
+                    if(data.result !== ""){
+                        workflow.html(data.result);
+                    }
+
+                    if(data.status==="filter_approved"){
+                        workflow_state.html('| ' + "{{ trans('global.approved') }}");
+                    } else if(data.status==="filter_pending"){
+                        workflow_state.html('| ' + "{{ trans('global.waiting') }}");
+                    } else{
+                        workflow_state.html('| ' + "{{ trans('global.rejected') }}");
                     }
                 },
                 error: function () {

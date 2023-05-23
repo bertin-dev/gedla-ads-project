@@ -13,6 +13,7 @@ use App\Http\Controllers\OcrController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\ParapheurController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\WorkflowValidationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\ProjectController;
@@ -49,6 +50,7 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::resource('projects', ProjectController::class)->only(['index', 'show']);
     Route::get('filter/{params}', [ProjectController::class, 'filterActivityByDate'])->name('filter-activity-by-date');
     Route::get('filter-document/{params}', [ProjectController::class, 'filterDocumentByDate'])->name('filter-document-by-date');
+    Route::get('filter-workflow/{params}', [ProjectController::class, 'filterWorkflowByStatus'])->name('filter-workflow-by-status');
 
     Route::get('folders/upload', [FolderController::class, 'upload'])->name('folders.upload');
     Route::post('folders/media', [FolderController::class, 'storeMedia'])->name('folders.storeMedia');
@@ -86,6 +88,13 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     //Search
     Route::get('search/{folder}', [SearchController::class, 'search'])->name('search');
     //Route::get('search/{folder}/{q}', [SearchController::class, 'search'])->name('ajax-search');
+
+    // Workflow validation
+    Route::get('workflow-create', [WorkflowValidationController::class, 'create'])->name('workflow-create');
+    Route::post('workflow-store', [WorkflowValidationController::class, 'store'])->name('workflow-store');
+    Route::get('load_users/{id}', [WorkflowValidationController::class, 'showUsers'])->name('workflow-load-users');
+    Route::post('workflow/media', [WorkflowValidationController::class, 'storeMedia'])->name('workflow-storeMedia');
+
 });
 
 Auth::routes(['register' => false]);
