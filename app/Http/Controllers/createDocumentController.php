@@ -121,19 +121,21 @@ class createDocumentController extends Controller
             $media->save();
         }
 
-
-        $getLog = AuditLog::where('media_id', $media->id)->where('operation_type', 'CREATE_DOCUMENT')->get();
+        $getLog = AuditLog::where('media_id', $media->id)
+            ->where('operation_type', 'CREATE_DOCUMENT')
+            ->where('current_user_id', auth()->id())
+            ->get();
         if(count($getLog) === 0){
             self::trackOperations($media->id,
                 "CREATE_DOCUMENT",
-                auth()->user()->name .' vient de créer le document '. substr($media->file_name, 14),
+                $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a crée le document '. substr($media->file_name, 14)),
                 'success',
-                null,
                 auth()->id(),
-                '');
+                null,
+                auth()->user()->name,
+                ucfirst(auth()->user()->name) .' a crée le document '. substr($media->file_name, 14)
+            );
         }
-
-
         return response()->json([
             'name'          => $fileNameWithExension,
             'original_name' => $request->fileName,
@@ -186,6 +188,17 @@ class createDocumentController extends Controller
             ->get();
 
         return view('front.document.edit', compact('children_level_n', 'folderId', 'parapheurId', 'getMedia', 'text'));
+    }
+
+    private function templateForDocumentHistoric($params = ''){
+        return '<div class="row schedule-item>
+                <div class="col-md-2">
+                <time class="timeago">Le '.date('d-m-Y à H:i:s', time()).'</time>
+                </div>
+                <div class="col-md-12">
+                <p>' .$params . '</p>
+                </div>
+                </div>';
     }
 
 }

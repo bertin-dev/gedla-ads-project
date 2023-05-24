@@ -15,10 +15,11 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class FolderController extends Controller
 {
     use Auditable;
-    public function create()
+
+    public function create(Request $request)
     {
         $children_level_n = Folder::with('project')
-            ->whereHas('project.users', function($query) {
+            ->whereHas('project.users', function ($query) {
                 $query->where('id', auth()->id());
             })
             ->whereNull('parent_id')
@@ -26,15 +27,12 @@ class FolderController extends Controller
             ->get();
 
 
-        //nous recherchons tous les utilisateurs appartenant au même project
-        $getProjectId = DB::table('project_user')->where('user_id', Auth()->id())->first()->project_id;
-
         $users = Project::with('users')
-            ->where('id', $getProjectId)
-            ->first()
+            ->findOrFail($request->project_id)
             ->users
             ->pluck('name', 'id')
             ->prepend(trans('global.pleaseSelect'), '');
+
 
         return view('front.folders.create', compact('children_level_n', 'users'));
     }
@@ -65,38 +63,20 @@ class FolderController extends Controller
 
     public function show(Folder $folder)
     {
-            $folder = $folder->with('project', 'multiUsers', 'userCreatedFolderBy', 'userUpdatedFolderBy')
-                ->whereHas('project.users', function($query) {
-                    $query->where('id', auth()->id());
-                })
-                ->findOrFail($folder->id);
-            //dd($folder->files->where('archived', 0)->where('state', 'unlocked')->where('visibility', 'public')->toArray());
-
-            /*$folder = \DB::table('folder_user')
-                ->join('folders', 'folder_user.folder_id', 'folders.id')
-                ->join('users', 'folder_user.user_id', 'users.id')
-                ->join('projects', 'folders.project_id', 'projects.id')
-                ->where('folder_user.user_id', '=', auth()->id())
-                ->where('folder_user.folder_id', '=', $folder->id)
-                ->get();*/
-
+        //abort_if(Gate::denies('workflow_management_access_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $folder = $folder->with('project', 'multiUsers', 'userCreatedFolderBy', 'userUpdatedFolderBy')
+            ->whereHas('project.users', function ($query) {
+                $query->where('id', auth()->id());
+            })
+            ->findOrFail($folder->id);
 
         $children_level_n = $folder->with('project')
-            ->whereHas('project.users', function($query) {
+            ->whereHas('project.users', function ($query) {
                 $query->where('id', auth()->id());
             })
             ->whereNull('parent_id')
             ->with('subChildren')
             ->get();
-
-        //dd($children_level_n->project);
-
-       /* dd($folder->with('project') ->whereHas('project.users', function($query) {
-            $query->where('id', auth()->id());
-        })  ->whereNull('parent_id')
-            ->with('subChildren')
-            ->get()
-            ->toArray());*/
 
         $users = User::where('id', '!=', \Auth::user()->id)
             ->whereHas('multiFolders')
@@ -105,15 +85,13 @@ class FolderController extends Controller
 
         $getValidationDatas = ValidationStep::where('user_id', auth()->id());
 
-        //dd($folder->children->toArray());
         return view('front.folders.show_files', compact('folder', 'children_level_n', 'users', 'getValidationDatas'));
-        //return view('front.folders.show', compact('folder','projects'));
     }
 
     public function upload()
     {
         $children_level_n = Folder::with('project')
-            ->whereHas('project.users', function($query) {
+            ->whereHas('project.users', function ($query) {
                 $query->where('id', auth()->id());
             })
             ->whereNull('parent_id')
@@ -159,7 +137,7 @@ class FolderController extends Controller
         $file->move($path, $name);
 
         return response()->json([
-            'name'          => $name,
+            'name' => $name,
             'original_name' => $file->getClientOriginalName(),
         ]);
     }
@@ -177,28 +155,29 @@ class FolderController extends Controller
                 ->where('current_user_id', auth()->id())
                 ->where('operation_type', 'IMPORT_DOCUMENT')
                 ->get();
-            if(count($getLog) === 0){
+            if (count($getLog) === 0) {
                 self::trackOperations($media->id,
                     "IMPORT_DOCUMENT",
-                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient d\'importer le document '. strtoupper(substr($media->file_name, 14))),
+                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' vient d\'importer le document ' . strtoupper(substr($media->file_name, 14))),
                     'success',
                     null,
                     auth()->id(),
                     '',
-                    ucfirst(auth()->user()->name) .' vient d\'importer le document '. strtoupper(substr($media->file_name, 14)));
+                    ucfirst(auth()->user()->name) . ' vient d\'importer le document ' . strtoupper(substr($media->file_name, 14)));
             }
         }
 
         return redirect()->route('folders.show', $folder)->withStatus('Files has been uploaded');
     }
 
-    private function templateForDocumentHistoric($params = ''){
+    private function templateForDocumentHistoric($params = '')
+    {
         return '<div class="row schedule-item>
                 <div class="col-md-2">
-                <time class="timeago">Le '.date('d-m-Y à H:i:s', time()).'</time>
+                <time class="timeago">Le ' . date('d-m-Y à H:i:s', time()) . '</time>
                 </div>
                 <div class="col-md-12">
-                <p>' .$params . '</p>
+                <p>' . $params . '</p>
                 </div>
                 </div>';
     }

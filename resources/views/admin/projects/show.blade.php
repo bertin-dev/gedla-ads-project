@@ -20,7 +20,7 @@
                             {{ trans('cruds.project.fields.id') }}
                         </th>
                         <td>
-                            {{ $project->id }}
+                            {{ $project->id ?? '' }}
                         </td>
                     </tr>
                     <tr>
@@ -28,7 +28,7 @@
                             {{ trans('cruds.project.fields.name') }}
                         </th>
                         <td>
-                            {{ $project->name }}
+                            {{ ucfirst($project->name) ?? '' }}
                         </td>
                     </tr>
                     <tr>
@@ -37,7 +37,7 @@
                         </th>
                         <td>
                             @foreach($project->users as $key => $users)
-                                <span class="label label-info">{{ $users->name }}</span>
+                                <span class="label label-info">{{ ucfirst($users->name) ?? '' }},</span>
                             @endforeach
                         </td>
                     </tr>
@@ -46,7 +46,7 @@
                             {{ trans('cruds.project.fields.created_by') }}
                         </th>
                         <td>
-                            {{ $project->userCreatedProjectBy->name }}
+                            {{ $project->userCreatedProjectBy->name ?? '' }}
                         </td>
                     </tr>
                     <tr>
@@ -54,7 +54,7 @@
                             {{ trans('cruds.project.fields.updated_by') }}
                         </th>
                         <td>
-                            {{ $project->userUpdatedProjectBy->name }}
+                            {{ $project->userUpdatedProjectBy->name ?? '' }}
                         </td>
                     </tr>
                 </tbody>

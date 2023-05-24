@@ -89,7 +89,7 @@ class Folder extends Model implements HasMedia
 
     public function subChildren(): HasMany
     {
-        return $this->hasMany(Folder::class, 'parent_id')->with('children');
+        return $this->hasMany(Folder::class, 'parent_id')->with(['children', 'multiUsers']);
     }
 
 

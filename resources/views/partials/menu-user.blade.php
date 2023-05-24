@@ -23,7 +23,11 @@
                 </a>
             <ul class="c-sidebar-nav-dropdown-items">
                 @foreach ($child->subChildren as $childCategory)
-                    @include('partials.child_category', ['child_category' => $childCategory])
+                    @foreach($childCategory->multiUsers as $user)
+                        @if($user->id==auth()->id())
+                        @include('partials.child_category', ['child_category' => $childCategory])
+                        @endif
+                    @endforeach
                 @endforeach
             </ul>
             </li>

@@ -498,14 +498,18 @@
                 dataType: 'json',
                 success: function (data) {
                     //alert(data.title);
-                    /*window.location.href = "{{--{{ route('show-all-prescription')}}--}}";*/
-
                     $('body').notif({
                         title: 'Opération Réussie',
                         content: "Enregistrement effectué avec succès",
                         img: '{{asset('images/success-notif.jpg')}}',
                         cls: 'success1'
                     });
+
+                    setTimeout(function() {
+                        window.history.back();
+                        location.reload();
+                    }, 5000);
+
                 },
                 error: function () {
                     alert("une erreur est survenue");

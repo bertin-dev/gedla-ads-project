@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Http\Resources\AuditLogResource;
 use App\Models\AuditLog;
 use App\Models\Folder;
 use App\Models\Parapheur;
@@ -10,10 +8,6 @@ use App\Models\Project;
 use App\Models\User;
 use App\Models\ValidationStep;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
@@ -77,6 +71,8 @@ class ProjectController extends Controller
             ->join('media', 'validation_steps.media_id', '=', 'media.id')
             ->join('users', 'validation_steps.user_id', '=', 'users.id')
             ->where('validation_steps.user_id', auth()->id())
+            ->where('media.archived', 0)
+            ->where('media.state', 'unlocked')
             ->groupBy('media.id', 'media.file_name', 'media.statut', 'media.global_deadline')
             ->orderBy('media.global_deadline')
             ->get();
@@ -292,6 +288,8 @@ class ProjectController extends Controller
             ->join('users', 'validation_steps.user_id', '=', 'users.id')
             ->where('validation_steps.user_id', auth()->id())
             ->where('media.statut', $status)
+            ->where('media.archived', 0)
+            ->where('media.state', 'unlocked')
             ->groupBy('media.id', 'media.file_name', 'media.statut', 'media.global_deadline')
             ->orderBy('media.global_deadline')
             ->get();
