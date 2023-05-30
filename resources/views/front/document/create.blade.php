@@ -69,7 +69,7 @@
                 </div>
             @endif
 
-            <form method="post" action="{{route('post-upload-file')}}" enctype="multipart/form-data" onsubmit="return false;">
+            <form method="post" action="{{route('upload-document')}}" enctype="multipart/form-data" onsubmit="return false;">
                 @csrf
                 <div class="row">
                     <div class="form-group col">
