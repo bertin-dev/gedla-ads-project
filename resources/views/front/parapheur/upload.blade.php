@@ -16,7 +16,7 @@
                         <form method="POST" action="{{ route('parapheur.postUpload') }}">
                             @csrf
 
-                            <input type="hidden" name="parapheur_id" value="{{ request('parapheur_id') ?? $parapheur->id }}" />
+                            <input type="hidden" name="parapheur_id" value="{{ request('parapheur_id') ?? $parapheurWithMedia->id }}" />
 
                             <div class="form-group">
                                 <label for="files">Files</label>
