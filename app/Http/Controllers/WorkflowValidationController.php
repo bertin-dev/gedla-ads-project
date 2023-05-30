@@ -210,7 +210,7 @@ class WorkflowValidationController extends Controller
             }
         }
 
-        return redirect()->back();
+        return redirect('/')->with('message', 'vous avez démarré le circuit de validation');
     }
 
     public function showUsers($id): UserResource

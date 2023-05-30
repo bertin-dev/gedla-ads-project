@@ -117,6 +117,7 @@ class createDocumentController extends Controller
             $media = $parapheur->addMedia(storage_path('tmp/uploads/' . $fileNameWithExension))->toMediaCollection('files');
             $media->created_by = \Auth::user()->id;
             $media->parapheur_id = $parapheur->id;
+            $media->visibility = 'private';
             $media->model_id = 0;
             $media->save();
         }
