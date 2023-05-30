@@ -13,7 +13,7 @@
                         <div class="card-body">
 
                             <div class="list-group">
-                                <a href="{{ route('parapheur.show') }}?parapheur_id={{$parapheur->id}}" class="list-group-item list-group-item-action flex-column align-items-start">
+                                <a href="{{ route('parapheur.show', $parapheur) }}" class="list-group-item list-group-item-action flex-column align-items-start">
                                     <div class="d-flex w-100 justify-content-between">
                                         <h5 class="mb-1">{{ trans('global.my') }} {{ trans('cruds.parapheur.title') }}</h5>
                                         <small>{{ $parapheur->medias->where('state', 'unlocked')->count() }} {{ trans('global.document') }}</small>

@@ -70,6 +70,7 @@ class ParapheurController extends Controller
             $media = $parapheur->addMedia(storage_path('tmp/uploads/' . $file))->toMediaCollection('files');
             $media->created_by = \Auth::user()->id;
             $media->parapheur_id = $parapheur->id;
+            $media->visibility = 'private';
             $media->model_id = 0;
             $media->save();
 
@@ -80,12 +81,12 @@ class ParapheurController extends Controller
             if(count($getLog) === 0){
                 self::trackOperations($media->id,
                     "IMPORT_DOCUMENT",
-                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient d\'importer le document '. strtoupper(substr($media->file_name, 14))),
+                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a importé le document '. strtoupper(substr($media->file_name, 14))),
                     'success',
                     null,
                     auth()->id(),
                     '',
-                    ucfirst(auth()->user()->name) .' vient d\'importer le document '. strtoupper(substr($media->file_name, 14)));
+                    ucfirst(auth()->user()->name) .' a importé le document '. strtoupper(substr($media->file_name, 14)));
             }
         }
 

@@ -2,7 +2,7 @@
 
 @section('content')
 
-    @if(!$folder->multiUsers->isEmpty())
+    @if(!$folder->multiUsers->isEmpty() && !$folder->multiUsers->where('id', auth()->id())->isEmpty())
 
         <!--**********************************
         Content body start
@@ -28,7 +28,7 @@
                             </a>
                         </div>
                         <div class="col-md-5 mb-3">
-                            <form action="{{ route('search', $folder) }}" method="GET" class="navbar-search" role="search">
+                            <form action="{{ route('search-document', $folder) }}" method="GET" class="navbar-search" role="search">
                                 <div class="form-row">
                                     <div class="col-md-5 mb-3 small">
                                         <select name="type" class="custom-select">

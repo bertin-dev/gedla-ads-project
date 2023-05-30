@@ -69,7 +69,7 @@ Route::group(['middleware' => ['auth', 'user']], function() {
 
     //PARAPHEUR
     Route::get('parapheur/index', [ParapheurController::class, 'index'])->name('parapheur.index');
-    Route::get('parapheur/show', [ParapheurController::class, 'show'])->name('parapheur.show');
+    Route::get('parapheur/show/{parapheur}', [ParapheurController::class, 'show'])->name('parapheur.show');
     Route::get('parapheur/upload', [ParapheurController::class, 'upload'])->name('parapheur.upload');
     Route::post('parapheur/upload', [ParapheurController::class, 'postUpload'])->name('parapheur.postUpload');
     Route::post('parapheur/media', [ParapheurController::class, 'storeMedia'])->name('parapheur.storeMedia');
@@ -86,7 +86,8 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     //Search
-    Route::get('search/{folder}', [SearchController::class, 'search'])->name('search');
+    Route::get('search/{folder}', [SearchController::class, 'searchDocuments'])->name('search-document');
+    Route::get('/autocomplete-search', [SearchController::class, 'autocompleteSearch'])->name('autocomplete-search');
     //Route::get('search/{folder}/{q}', [SearchController::class, 'search'])->name('ajax-search');
 
     // Workflow validation
@@ -165,6 +166,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
 
     //Calendar admin
     Route::get('calendar-admin', [CalendarAdminController::class, 'index'])->name('calendar.admin');
+
+    //Filter Activity of All Users
+    Route::get('filter/{params}', [HomeController::class, 'filterAllActivityByDate'])->name('filter-all-activity-by-date');
 });
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {
 // Change password

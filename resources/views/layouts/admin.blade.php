@@ -399,6 +399,51 @@
         jQuery(document).ready(function() {
             $("time.timeago").timeago();
         });
+
+        $(function () {
+            let dateType = $('.dateType');
+            let filterActivity = $('#filter_activity');
+            //filter activity of user connected
+            $('#filter_day, #filter_month, #filter_year').on('click', function (e) {
+
+                let getParams;
+                // Determine which filter was clicked based on its ID
+                if ($(this).attr('id') === 'filter_day') {
+                    getParams = $(this).attr('id');
+                    // Day filter clicked
+                    // Do something with the day value
+                } else if ($(this).attr('id') === 'filter_month') {
+                    getParams = $(this).attr('id');
+                    // Month filter clicked
+                    // Do something with the month value
+                } else if ($(this).attr('id') === 'filter_year') {
+                    getParams = $(this).attr('id');
+                    // Year filter clicked
+                    // Do something with the year value
+                }
+                e.preventDefault();
+                dateType.empty();
+                filterActivity.empty();
+                $.ajax({
+                    url:"{{ route('admin.filter-all-activity-by-date', '') }}"+"/"+getParams,
+                    method: 'GET',
+                    dataType: 'json',
+                    beforeSend: function (){
+                        dateType.text("Encours...");
+                        //fullLoading.show();
+                    },
+                    success: function (data) {
+                        dateType.text(data.$date_type);
+                        filterActivity.html(data.result);
+                    },
+                    error: function () {
+                        console.log('Error founded where user display document');
+                    },
+                    complete: function (){
+                    },
+                });
+            });
+        });
     </script>
 
     @yield('scripts')

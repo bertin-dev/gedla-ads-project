@@ -85,6 +85,8 @@ class FolderController extends Controller
 
         $getValidationDatas = ValidationStep::where('user_id', auth()->id());
 
+        $checkUsersIfUserIdInArray = $folder->multiUsers->where('id', auth()->id());
+        //dd($checkUsersIfUserIdInArray->toArray());
         return view('front.folders.show_files', compact('folder', 'children_level_n', 'users', 'getValidationDatas'));
     }
 

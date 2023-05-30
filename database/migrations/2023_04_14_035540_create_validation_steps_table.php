@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('user_id')->unsigned()->index();
             $table->integer('statut')->default(0);
             $table->integer('order');
-            $table->integer('start_workflow_by')->unsigned()->index();
+            $table->integer('start_workflow_by')->unsigned()->index()->nullable();
             $table->dateTime('date_validation')->nullable();
             $table->dateTime('deadline')->nullable();
             $table->foreign('media_id')->references('id')->on('media')->onDelete('cascade');

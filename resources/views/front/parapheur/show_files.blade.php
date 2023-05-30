@@ -88,7 +88,7 @@
                     $getMedias = $parapheurWithMedia->medias
                     ->where('archived', 0)
                     ->where('state', 'unlocked')
-                    ->where('visibility', 'public')
+                    ->where('visibility', 'private')
                     ->sortByDesc('created_at');
                 @endphp
 
@@ -194,8 +194,7 @@
                                         <a href="#" class="mediaDownload col-lg-4"> {{trans('global.download')}}</a>
                                     @endcan
                                     @can('archive_file_access')
-                                        <a href="#" class="col-lg-4" data-toggle="modal"
-                                           data-target=".open-file">{{trans('global.archive_document')}} </a>
+                                        <a href="#" class="col-lg-4 mediaArchive">{{trans('global.archive_document')}} </a>
                                     @endcan
                                 </div>
                             </div>
@@ -325,57 +324,5 @@
             </div>
         </div>
     </div>
-
-
-    <div class="modal fade open-file" tabindex="-2" role="dialog" aria-labelledby="myLargeModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title file-title">{{trans('global.file_details')}}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body">
-
-                    <div class="container-fluid">
-                        <div class="row">
-                            {{--<iframe src="{{$file->getUrl()}}"></iframe>--}}
-
-                            <form method="post" action="" enctype="multipart/form-data">
-                                @csrf
-                                <div class="form-group">
-                                    <label>{{trans('global.name')}}</label>
-                                    <input type="text" name="name" class="form-control"/>
-                                </div>
-                                <div class="form-group">
-                                    <label><strong>{{trans('global.description')}} :</strong></label>
-                                    <textarea class="ckeditor form-control" name="description"></textarea>
-                                </div>
-                                <div class="form-group text-center">
-                                    <button type="submit"
-                                            class="btn btn-success btn-sm">{{trans('global.save')}}</button>
-                                </div>
-                            </form>
-
-
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <h5 class="modal-title">{{ trans('global.file_action') }}</h5><br>
-                    <ul>
-                        <li><a href="#">{{trans('global.edit_document')}}</a></li>
-                    </ul>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
 
 @stop

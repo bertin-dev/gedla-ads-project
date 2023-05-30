@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\DocumentAdded;
+use App\Http\Controllers\Traits\Auditable;
 use App\Http\Resources\Admin\UserResource;
 use App\Models\AuditLog;
 use App\Models\Folder;
@@ -21,6 +22,7 @@ use Notification;
 
 class WorkflowValidationController extends Controller
 {
+    use Auditable;
 
     public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
@@ -263,5 +265,16 @@ class WorkflowValidationController extends Controller
             'name'          => $name,
             'original_name' => $file->getClientOriginalName(),
         ]);
+    }
+
+    public function templateForDocumentHistoric($params = ''){
+        return '<div class="row schedule-item>
+                <div class="col-md-2">
+                <time class="timeago">Le '.date('d-m-Y à H:i:s', time()).'</time>
+                </div>
+                <div class="col-md-12">
+                <p>' .$params . '</p>
+                </div>
+                </div>';
     }
 }

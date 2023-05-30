@@ -9,7 +9,6 @@ use App\Http\Requests\MassDestroyFolderRequest;
 use App\Http\Resources\Admin\UserResource;
 use App\Models\AuditLog;
 use App\Models\Folder;
-use App\Models\Operation;
 use App\Models\Parapheur;
 use App\Models\Project;
 use App\Models\User;
@@ -269,7 +268,7 @@ class WorkflowManagementController extends Controller
                 if(count($getLog) === 0){
                     self::trackOperations($media->id,
                         "START_VALIDATION",
-                        $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de démarrer le circuit de validation.'),
+                        $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a démarré le circuit de validation.'),
                         'success',
                         auth()->id(),
                         $firstUserId,
@@ -335,7 +334,7 @@ class WorkflowManagementController extends Controller
                 if(count($getLog) === 0){
                     self::trackOperations($media->id,
                         "START_VALIDATION",
-                        $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de démarrer le circuit de validation.'),
+                        $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a démarré le circuit de validation.'),
                         'success',
                         auth()->id(),
                         $firstUserId,
@@ -461,15 +460,14 @@ class WorkflowManagementController extends Controller
     {
         abort_if(Gate::denies('workflow_management_access_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        Operation::where('id', $id)
-            ->delete();
+        //Operation::where('id', $id)->delete();
 
         return back();
     }
 
     public function massDestroy(MassDestroyFolderRequest $request): \Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory
     {
-        Operation::whereIn('id', request('ids'))->delete();
+        //Operation::whereIn('id', request('ids'))->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }
@@ -510,12 +508,12 @@ class WorkflowManagementController extends Controller
 
                 self::trackOperations($request->id,
                     "PREVIEW_DOCUMENT",
-                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .'</strong> a prévisualisé le document '. strtoupper($request->name)),
+                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a prévisualisé le document '. strtoupper($request->name)),
                     'success',
                     null,
                     auth()->id(),
                     auth()->user()->name,
-                    '<strong>' .ucfirst(auth()->user()->name) .' </strong> a prévisualisé le document '. strtoupper($request->name),
+                    ucfirst(auth()->user()->name) .' a prévisualisé le document '. strtoupper($request->name),
                     '',
                     date('Y-m-d H:i:s', time()),
                 );
@@ -594,12 +592,12 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
 
@@ -626,7 +624,7 @@ class WorkflowManagementController extends Controller
 
                     }
                     else {
-                        $error = "Vous ne pouvez plus valider le document " . strtoupper(substr($getMediaDocument->file_name, 14));
+                        $error = "Vous ne pouvez pas valider le document " . strtoupper(substr($getMediaDocument->file_name, 14));
                     }
                 }
                 else{
@@ -685,12 +683,12 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
                             $success = 'La validation du document ' .strtoupper(substr($getMediaDocument->file_name, 14)). ' a été effectué avec succès et une notification a été envoyé à '. ucfirst($nextUser->name);
@@ -715,7 +713,7 @@ class WorkflowManagementController extends Controller
                         }
 
                     } else {
-                        $error = "Vous ne pouvez plus valider le document " .strtoupper(substr($getMediaDocument->file_name, 14));
+                        $error = "Vous ne pouvez pas valider le document " .strtoupper(substr($getMediaDocument->file_name, 14));
                     }
                 }
                 break;
@@ -767,12 +765,12 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "REJECTED_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de rejeter le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' à rejeté le document '. strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' vient de rejeter le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) .' a rejeté le document '. strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
                         }
@@ -780,7 +778,7 @@ class WorkflowManagementController extends Controller
                         $success = "Le document ".strtoupper(substr($getMediaDocument->file_name, 14))." a été rejeté avec succès";
                     }
                     else {
-                        $error = "Vous ne pouvez plus Rejeter le document " . strtoupper(substr($getMediaDocument->file_name, 14));
+                        $error = "Vous ne pouvez pas Rejeter le document " . strtoupper(substr($getMediaDocument->file_name, 14));
                     }
                 }
                 else{
@@ -834,12 +832,12 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "REJECTED_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de rejeter le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a rejeté le document '. strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' vient de rejeter le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) .' a rejeté le document '. strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
                         }
@@ -847,7 +845,7 @@ class WorkflowManagementController extends Controller
                         $success = "Le document ".strtoupper(substr($getMediaDocument->file_name, 14))." a été rejeté avec succès";
                     }
                     else {
-                        $error = "Vous ne pouvez plus Rejeter le document " . strtoupper(substr($getMediaDocument->file_name, 14));
+                        $error = "Vous ne pouvez pas Rejeter le document " . strtoupper(substr($getMediaDocument->file_name, 14));
                     }
                 }
                 break;
@@ -901,12 +899,12 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
 
@@ -942,7 +940,7 @@ class WorkflowManagementController extends Controller
 
                     }
                     else {
-                        $error = "Vous ne pouvez plus valider le document " . strtoupper(substr($getMediaDocument->file_name, 14));
+                        $error = "Vous ne pouvez pas valider le document " . strtoupper(substr($getMediaDocument->file_name, 14));
                     }
                 }
                 else{
@@ -1001,12 +999,12 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
 
@@ -1041,7 +1039,7 @@ class WorkflowManagementController extends Controller
                         }
 
                     } else {
-                        $error = "Vous ne pouvez plus valider le document " .strtoupper(substr($getMediaDocument->file_name, 14));
+                        $error = "Vous ne pouvez pas valider le document " .strtoupper(substr($getMediaDocument->file_name, 14));
                     }
                 }
                 break;
@@ -1094,12 +1092,12 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
 
@@ -1131,7 +1129,7 @@ class WorkflowManagementController extends Controller
 
                     }
                     else {
-                        $error = "Vous ne pouvez plus valider le document " . strtoupper(substr($getMediaDocument->file_name, 14));
+                        $error = "Vous ne pouvez pas valider le document " . strtoupper(substr($getMediaDocument->file_name, 14));
                     }
                 }
                 else{
@@ -1190,12 +1188,12 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' vient de valider le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
 
@@ -1226,7 +1224,7 @@ class WorkflowManagementController extends Controller
                         }
 
                     } else {
-                        $error = "Vous ne pouvez plus valider le document " .strtoupper(substr($getMediaDocument->file_name, 14));
+                        $error = "Vous ne pouvez pas valider le document " .strtoupper(substr($getMediaDocument->file_name, 14));
                     }
                 }
                 break;
@@ -1249,12 +1247,12 @@ class WorkflowManagementController extends Controller
         if(count($getLog) === 0){
             self::trackOperations($media->id,
                 "DOWNLOAD_DOCUMENT",
-                $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de télécharger le document '. strtoupper(substr($media->file_name, 14))),
+                $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a téléchargé le document '. strtoupper(substr($media->file_name, 14))),
                 'success',
                 null,
                 auth()->id(),
                 '',
-                ucfirst(auth()->user()->name) .' vient de télécharger le document '. strtoupper(substr($media->file_name, 14)));
+                ucfirst(auth()->user()->name) .' a téléchargé le document '. strtoupper(substr($media->file_name, 14)));
         }
 
         return response()->download($media->getPath(), $media->file_name);
@@ -1484,7 +1482,7 @@ class WorkflowManagementController extends Controller
         }
     }
 
-    private function templateForDocumentHistoric($params = ''){
+    public function templateForDocumentHistoric($params = ''){
         return '<div class="row schedule-item>
                 <div class="col-md-2">
                 <time class="timeago">Le '.date('d-m-Y à H:i:s', time()).'</time>

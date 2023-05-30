@@ -13,12 +13,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class SearchController extends Controller
 {
-    public function search(Request $request, Folder $folder)
+
+    public function searchDocuments(Request $request, Folder $folder)
     {
-
-            $searchTerm = $request->input('q');
-            $documentType = $request->input('type');
-
             //$foldersUsers = User::with('multiFolders')->findOrFail(auth()->id());
             //$getMedias = $foldersUsers->multiFolders->where('id', $folder->id)->first();
 
@@ -34,11 +31,60 @@ class SearchController extends Controller
 
             if ($request->filled('q') || $request->filled('type')){
 
-                $folders = Folder::search($searchTerm)->get();
-                dd($folders->load('media'));
+                $searchTerm = $request->input('q');
+                $documentType = $request->input('type');
+
+               $getFilterMedias = Media::where('name', 'LIKE', '%' . $searchTerm . '%')->get();
+
+                $selectedMediaIds = []; // IDs des médias sélectionnés
+                    foreach($getFilterMedias as $i => $mediaItem){
+                        //dd($mediaItem->toArray());
+                        $selectedMediaIds [] = $mediaItem->id;
+                    }
+
+                //$mediass = $folder->media->whereIn('id', $selectedMediaIds);
+                    foreach ($folder->media as $media){
+                        $folder->file = $media->whereIn('id', $selectedMediaIds)->get()->toArray();
+                    }
 
 
-                $medias = $folder->whereHas('media', function($q) use($searchTerm) {
+
+                /*$collectionArray = $folder->media->toArray();
+
+                $filtered = array_filter($collectionArray, function($item) {
+                    return $item['name'] === '646d3e20d33e3_pipo ndemba';
+                });
+
+                $names = array_map(function($item) {
+                    return $item['name'];
+                }, $collectionArray);
+
+
+
+                $filtered1 = array_filter($collectionArray, function($item) use ($searchTerm) {
+                    return strpos($item['name'], $searchTerm) !== false;
+                });
+
+                //dd($names);
+                dd($folder->toArray());
+
+
+
+                $results = Folder::where('id', '=', $folder->id)
+                    ->whereHas('media', function($q) use ($searchTerm) {
+                        $q->where('name', 'LIKE', '%' . $searchTerm . '%')
+                            ->orWhere('mime_type', 'LIKE', '%' . $searchTerm . '%');
+                    })
+                    ->with(['media' => function($q) use ($selectedMediaIds) {
+                        $q->whereIn('id', $selectedMediaIds);
+                    }])
+                    ->get();*/
+
+
+
+
+
+                /*$medias = $folder->whereHas('media', function($q) use($searchTerm) {
                     $q->whereRaw("MATCH(name, file_name, mime_type) AGAINST(? IN BOOLEAN MODE)", array($searchTerm));
                 })
                     ->get();
@@ -49,11 +95,11 @@ class SearchController extends Controller
                     ->where(function ($query) use ($searchTerm, $documentType) {
                         $query->where('name', 'like', '%'.$searchTerm.'%')
                             ->orWhere('mime_type', 'like', '%'.$documentType.'%');
-                    });
+                    });*/
             }else {
                 $medias = $folder->media;
             }
-            dd($medias->toArray());
+            //dd($medias->toArray());
 
             //$collection = collect($getMedias->files);
             //dd($collection->toArray());
@@ -72,8 +118,16 @@ class SearchController extends Controller
             ->pluck('name', 'id')
             ->prepend(trans('global.pleaseSelect'), '');
 
-        $getValidationData = ValidationStep::where('user_id', auth()->id());
+        $getValidationDatas = ValidationStep::where('user_id', auth()->id());
 
-        return view('front.folders.show_files', compact('folder','children_level_n', 'users', 'getValidationData'));
+        return view('front.folders.show_files', compact('folder','children_level_n', 'users', 'getValidationDatas'));
+    }
+
+    public function autocompleteSearch(Request $request)
+    {
+        $query = $request->get('query');
+        $filterResult = Media::where('name', 'LIKE', '%'. $query. '%')->get();
+        //dd(response()->json($filterResult));
+        return response()->json($filterResult);
     }
 }

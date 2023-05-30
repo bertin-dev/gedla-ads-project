@@ -14,9 +14,9 @@ return new class extends Migration
             $table->morphs('model');
             $table->uuid('uuid')->nullable()->unique();
             $table->string('collection_name');
-            $table->string('name');
+            $table->string('name')->index();
             $table->string('file_name');
-            $table->string('mime_type')->nullable();
+            $table->string('mime_type')->nullable()->index();
             $table->string('disk');
             $table->string('conversions_disk')->nullable();
             $table->unsignedBigInteger('size');
