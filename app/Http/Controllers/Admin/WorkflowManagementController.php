@@ -1407,7 +1407,9 @@ class WorkflowManagementController extends Controller
             //$fpdi->Text($left,$top,$text);
 
             if($i==$count){
-                $getSignature = Media::where('signed_by', auth()->id())->where('collection_name', 'signature')->first();
+                $getSignature = Media::where('signed_by', auth()->id())
+                    ->whereIn('collection_name', ['signature', 'paraphe'])
+                    ->first();
                 $fpdi->Image($getSignature->getPath(), 130, 200, 40);
             }
 
@@ -1443,8 +1445,10 @@ class WorkflowManagementController extends Controller
             //$fpdi->Text($left,$top,$text);
 
 
-            if($i<$count){
-                $getSignature = Media::where('signed_by', auth()->id())->where('collection_name', 'paraphe')->first();
+            if($i<$count) {
+                $getSignature = Media::where('signed_by', auth()->id())
+                    ->whereIn('collection_name', ['signature', 'paraphe'])
+                    ->first();
                 $fpdi->Image($getSignature->getPath(), 10, 10, 40);
             }
             //$fpdi->SetXY(90, 50);
