@@ -944,6 +944,10 @@ class WorkflowManagementController extends Controller
                     }
                 }
                 else{
+                    $getSignature = Media::where('signed_by', auth()->id())
+                        ->whereIn('collection_name', ['signature', 'paraphe'])
+                        ->first();
+
                     if ($validationStep) {
 
                         $nextStepValidation = $getMediaDocument
