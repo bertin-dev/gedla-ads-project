@@ -875,7 +875,7 @@ class WorkflowManagementController extends Controller
                             //SEND NOTIFICATION NEXT USER
                             $detailsMedia = [
                                 'user' => $nextUser,
-                                'subject' => 'Attente de validation',
+                                'subject' => 'Document en attente',
                                 'body' => 'Vous avez le document "' . strtoupper(substr($getMediaDocument->file_name, 14)) . '" en attente de validation.',
                                 'media_id' => $getMediaDocument->id,
                                 'media_name' => $getMediaDocument->file_name,
@@ -899,25 +899,34 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
 
-                            //SIGN DOCUMENT
-                            //$path = storage_path($getMediaDocument->file_name);
-                            $filePath = $getMediaDocument->getPath();
-                            //$filePath = asset('uploads/official.pdf');
-                            $outputFilePath = $getMediaDocument->getPath();
-                            //$outputFilePath = asset('uploads/official.pdf');
-                            $this->fillPDFFileSignature($filePath, $outputFilePath);
-                            //return response()->file($outputFilePath);
+                            $signatureWithValidation = $getMediaDocument->validationSteps();
 
-                            $success = 'la validation du document '.strtoupper(substr($getMediaDocument->file_name, 14)).' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+                            $totalSignatureRemaning = $signatureWithValidation
+                                ->where('order', '>', $validationStep->order)
+                                ->where('statut', 0)
+                                ->count();
+
+                            $totalSignatureHasValidate = $signatureWithValidation
+                                ->where('order', '>', $validationStep->order)
+                                ->count();
+
+                            $position = ($totalSignatureHasValidate - $totalSignatureRemaning) + 1;
+                            //SIGN DOCUMENT
+                            $filePath = $getMediaDocument->getPath();
+                            $getSignature = Media::where('signed_by', auth()->id())
+                                ->whereIn('collection_name', ['signature'])
+                                ->first();
+                            $this->addSignatureToPDF($filePath, $getSignature->getPath(), auth()->user()->name, $totalSignatureHasValidate, $position);
+                            $success = 'la validation du document ' . strtoupper(substr($getMediaDocument->file_name, 14)) . ' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
                         }
                         else{
                             $getMediaDocument->statut = 1;
@@ -944,10 +953,6 @@ class WorkflowManagementController extends Controller
                     }
                 }
                 else{
-                    $getSignature = Media::where('signed_by', auth()->id())
-                        ->whereIn('collection_name', ['signature', 'paraphe'])
-                        ->first();
-
                     if ($validationStep) {
 
                         $nextStepValidation = $getMediaDocument
@@ -1003,25 +1008,35 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
 
-                            //SIGN DOCUMENT
-                            //$path = storage_path($getMediaDocument->file_name);
-                            $filePath = $getMediaDocument->getPath();
-                            //$filePath = asset('uploads/official.pdf');
-                            $outputFilePath = $getMediaDocument->getPath();
-                            //$outputFilePath = asset('uploads/official.pdf');
-                            $this->fillPDFFileSignature($filePath, $outputFilePath);
-                            //return response()->file($outputFilePath);
+                            $signatureWithValidation = $getMediaDocument->validationSteps();
 
-                            $success = 'La validation du document ' .strtoupper(substr($getMediaDocument->file_name, 14)). ' a été effectué avec succès et une notification a été envoyé à '. ucfirst($nextUser->name);
+                            $totalSignatureRemaning = $signatureWithValidation
+                                ->where('order', '>', $validationStep->order)
+                                ->where('statut', 0)
+                                ->count();
+
+                            $totalSignatureHasValidate = $signatureWithValidation
+                                ->where('order', '>', $validationStep->order)
+                                ->count();
+
+                            $position = ($totalSignatureHasValidate - $totalSignatureRemaning) + 1;
+                            //SIGN DOCUMENT
+                            $filePath = $getMediaDocument->getPath();
+                            $getSignature = Media::where('signed_by', auth()->id())
+                                ->whereIn('collection_name', ['signature'])
+                                ->first();
+                            $this->addSignatureToPDF($filePath, $getSignature->getPath(), auth()->user()->name, $totalSignatureHasValidate, $position);
+
+                            $success = 'La validation du document ' . strtoupper(substr($getMediaDocument->file_name, 14)) . ' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
                         }
                         else{
                             $getMediaDocument->statut = 1;
@@ -1051,7 +1066,6 @@ class WorkflowManagementController extends Controller
             case "validation_paraphe":
                 if($getMediaDocument->visibility == "public") {
                     if ($validationStep) {
-
                         $nextStepValidation = $getMediaDocument
                             ->validationSteps()
                             ->where('order', '>', $validationStep->order)
@@ -1096,21 +1110,37 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' validé le document ' . strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
 
-                            //SIGN PARAPH
-                            $filePath = $getMediaDocument->getPath();
-                            $outputFilePath = $getMediaDocument->getPath();
-                            $this->fillPDFFileParaphe($filePath, $outputFilePath);
+                            //PARAPH DOCUMENT
+                            $signatureWithValidation = $getMediaDocument->validationSteps();
 
-                            $success = 'la validation du document '.strtoupper(substr($getMediaDocument->file_name, 14)).' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+                            $totalSignatureRemaning = $signatureWithValidation
+                                ->where('order', '>', $validationStep->order)
+                                ->where('statut', 0)
+                                ->count();
+
+                            $totalSignatureHasValidate = $signatureWithValidation
+                                ->where('order', '>', $validationStep->order)
+                                ->count();
+
+                            $position = ($totalSignatureHasValidate - $totalSignatureRemaning) + 1;
+                            $filePath = $getMediaDocument->getPath();
+
+                            $getInitial = Media::where('signed_by', auth()->id())
+                                ->whereIn('collection_name', ['paraphe'])
+                                ->first();
+
+                            $this->addInitialToPDF($filePath, $getInitial->getPath(), auth()->user()->name, $totalSignatureHasValidate, $position);
+
+                            $success = 'la validation du document ' . strtoupper(substr($getMediaDocument->file_name, 14)) . ' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
                         }
                         else{
                             $getMediaDocument->statut = 1;
@@ -1192,21 +1222,35 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
 
-                            //SIGN PARAPH
-                            $filePath = $getMediaDocument->getPath();
-                            $outputFilePath = $getMediaDocument->getPath();
-                            $this->fillPDFFileParaphe($filePath, $outputFilePath);
+                            //PARAPH DOCUMENT
+                            $signatureWithValidation = $getMediaDocument->validationSteps();
 
-                            $success = 'La validation du document ' .strtoupper(substr($getMediaDocument->file_name, 14)). ' a été effectué avec succès et une notification a été envoyé à '. ucfirst($nextUser->name);
+                            $totalSignatureRemaning = $signatureWithValidation
+                                ->where('order', '>', $validationStep->order)
+                                ->where('statut', 0)
+                                ->count();
+
+                            $totalSignatureHasValidate = $signatureWithValidation
+                                ->where('order', '>', $validationStep->order)
+                                ->count();
+
+                            $position = ($totalSignatureHasValidate - $totalSignatureRemaning) + 1;
+                            $filePath = $getMediaDocument->getPath();
+                            $getSignature = Media::where('signed_by', auth()->id())
+                                ->whereIn('collection_name', ['paraphe'])
+                                ->first();
+                            $this->addInitialToPDF($filePath, $getSignature->getPath(), auth()->user()->name, $totalSignatureHasValidate, $position);
+
+                            $success = 'La validation du document ' . strtoupper(substr($getMediaDocument->file_name, 14)) . ' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
                         }
                         else{
                             $getMediaDocument->statut = 1;
@@ -1384,119 +1428,94 @@ class WorkflowManagementController extends Controller
 
     }*/
 
-    /**
-     * Write code on Method
-     *
-     * @return string()
-     */
-    public function fillPDFFileSignature($file, $outputFilePath): string
+    public function addSignatureToPDF($pdfFile, $signatureFile, $name, $numberOfSignatures, $position)
     {
-        $fpdi = new FPDI;
+        $pdf = new FPDI();
 
-        $count = $fpdi->setSourceFile($file);
+        // Importer le modèle PDF
+        $pageCount = $pdf->setSourceFile($pdfFile);
 
-        for ($i=1; $i<=$count; $i++) {
+        // Ajouter la signature à chaque page
+        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
+            $template = $pdf->importPage($pageNumber);
+            $size = $pdf->getTemplateSize($template);
+            $pdf->AddPage($size['orientation'], array($size['width'], $size['height']));
+            $pdf->useTemplate($template);
+            $pdf->SetFont("helvetica", "", 15);
 
-            $template = $fpdi->importPage($i);
-            $size = $fpdi->getTemplateSize($template);
-            $fpdi->AddPage($size['orientation'], array($size['width'], $size['height']));
-            $fpdi->useTemplate($template);
-
-            $fpdi->SetFont("helvetica", "", 15);
-            $fpdi->SetTextColor(153,0,153);
-
-            //$left = 10;
-            //$top = 10;
-            //$text = "NiceSnippets.com";
-            //$fpdi->Text($left,$top,$text);
-
-            if($i==$count){
-                $getSignature = Media::where('signed_by', auth()->id())
-                    ->whereIn('collection_name', ['signature', 'paraphe'])
-                    ->first();
-                $fpdi->Image($getSignature->getPath(), 130, 200, 40);
-            }
-
-            //$fpdi->SetXY(90, 50);
-            //$fpdi->Write(10, "Bertin Mounok");
-
-            //$fpdi->Image("file:///var/www/example-app/public/nice-logo.png", 40, 90);
-        }
-
-        return $fpdi->Output($outputFilePath, 'F');
-    }
-
-
-    public function fillPDFFileParaphe($file, $outputFilePath): string
-    {
-        $fpdi = new FPDI;
-
-        $count = $fpdi->setSourceFile($file);
-
-        for ($i=1; $i<=$count; $i++) {
-
-            $template = $fpdi->importPage($i);
-            $size = $fpdi->getTemplateSize($template);
-            $fpdi->AddPage($size['orientation'], array($size['width'], $size['height']));
-            $fpdi->useTemplate($template);
-
-            $fpdi->SetFont("helvetica", "", 15);
-            $fpdi->SetTextColor(153,0,153);
-
-            //$left = 10;
-            //$top = 10;
-            //$text = "BERTIN MOUNOK";
-            //$fpdi->Text($left,$top,$text);
-
-
-            if($i<$count) {
-                $getSignature = Media::where('signed_by', auth()->id())
-                    ->whereIn('collection_name', ['signature', 'paraphe'])
-                    ->first();
-                $fpdi->Image($getSignature->getPath(), 10, 10, 40);
-            }
-            //$fpdi->SetXY(90, 50);
-            //$fpdi->Write(10, "Bertin Mounok");
-
-            //$fpdi->Image("file:///var/www/example-app/public/nice-logo.png", 40, 90);
-        }
-
-        return $fpdi->Output($outputFilePath, 'F');
-    }
-
-
-    function get_time_ago( $time ): string
-    {
-        $time_difference = time() - $time;
-
-        if( $time_difference < 1 ) { return 'less than 1 second ago'; }
-        $condition = array( 12 * 30 * 24 * 60 * 60 =>  'year',
-            30 * 24 * 60 * 60       =>  'month',
-            24 * 60 * 60            =>  'day',
-            60 * 60                 =>  'hour',
-            60                      =>  'minute',
-            1                       =>  'second'
-        );
-
-        foreach( $condition as $secs => $str )
-        {
-            $d = $time_difference / $secs;
-
-            if( $d >= 1 )
-            {
-                $t = round( $d );
-                return 'about ' . $t . ' ' . $str . ( $t > 1 ? 's' : '' ) . ' ago';
+            // Ajouter la signature à la page courante
+            $this->addSignatureToPage($pdf, $size, $signatureFile, $name, $numberOfSignatures, $position);
+            // Enregistrer la page modifiée dans le fichier de sortie
+            if ($pageNumber == $pageCount) {
+                $pdf->Output($pdfFile, 'F');
             }
         }
     }
 
-    public function templateForDocumentHistoric($params = ''){
+    private function addSignatureToPage($pdf, $size, $signatureFile, $name, $numberOfSignatures, $position)
+    {
+        // Ajouter la signature en fonction du nombre de signatures souhaitées
+        if ($numberOfSignatures == 1) {
+            $x = $size['width'] / 2;
+            $y = $size['height'] - 100;
+            $pdf->Image($signatureFile, $x, $y, 120);
+            $pdf->SetXY($x + 40, $y + 10);
+            $pdf->Write(10, $name);
+        } else {
+            //for ($i = 1; $i <= $numberOfSignatures; $i++) {
+            $x = ($position - 1) * $size['width'] / $numberOfSignatures + $size['width'] / ($numberOfSignatures * 2);
+            $y = $size['height'] - 100;
+            $pdf->Image($signatureFile, $x, $y, 120);
+            $pdf->SetXY($x + 40, $y + 10);
+            $pdf->Write(10, $name);
+            //break;
+            //}
+        }
+    }
+
+
+    public function addInitialToPDF($pdfFile, $signatureFile, $name, $numberOfSignatures, $position)
+    {
+        $pdf = new FPDI();
+
+        // Importer le modèle PDF
+        $pageCount = $pdf->setSourceFile($pdfFile);
+
+        // Ajouter la signature à chaque page
+        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
+            $template = $pdf->importPage($pageNumber);
+            $size = $pdf->getTemplateSize($template);
+            $pdf->AddPage($size['orientation'], array($size['width'], $size['height']));
+            $pdf->useTemplate($template);
+            $pdf->SetFont("helvetica", "", 15);
+
+            // Ajouter le paraphe à la page courante
+            $this->addInitialToPage($pdf, $size, $signatureFile, $name, $numberOfSignatures, $position);
+            // Enregistrer la page modifiée dans le fichier de sortie
+            if ($pageNumber == $pageCount) {
+                $pdf->Output($pdfFile, 'F');
+            }
+        }
+    }
+
+    private function addInitialToPage($pdf, $size, $signatureFile, $name, $numberOfSignatures, $position)
+    {
+        $x = ($position - 1) * $size['width'] / $numberOfSignatures + $size['width'] / ($numberOfSignatures * 4);
+        $y = $size['height'] - 290;
+        $pdf->Image($signatureFile, $x, $y, 20);
+        $pdf->SetXY($x + 10, $y + 10);
+        $pdf->Write(10, $name);
+    }
+
+
+    public function templateForDocumentHistoric($params = '')
+    {
         return '<div class="row schedule-item>
                 <div class="col-md-2">
-                <time class="timeago">Le '.date('d-m-Y à H:i:s', time()).'</time>
+                <time class="timeago">Le ' . date('d-m-Y à H:i:s', time()) . '</time>
                 </div>
                 <div class="col-md-12">
-                <p>' .$params . '</p>
+                <p>' . $params . '</p>
                 </div>
                 </div>';
     }

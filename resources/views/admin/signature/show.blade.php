@@ -23,14 +23,28 @@
                             {{ $media->id ?? ''}}
                         </td>
                     </tr>
-                    <tr>
-                        <th>
-                            {{ trans('cruds.signature.fields.signature_text') }}
-                        </th>
-                        <td>
-                            {{ $media->getUrl() ?? '' }}
-                        </td>
-                    </tr>
+                    @if($media->collection_name=="signature")
+                        <tr>
+                            <th>
+                                {{ trans('cruds.signature.fields.signature_text') }}
+                            </th>
+                            <td>
+                                <img class="img-thumbnail" src="{{ $media->getUrl() }}" alt="{{$media->name}}"
+                                     title="{{$media->name}}">
+                            </td>
+                        </tr>
+                    @endif
+                    @if($media->collection_name=="paraphe")
+                        <tr>
+                            <th>
+                                {{ trans('cruds.parapheur.title') }}
+                            </th>
+                            <td>
+                                <img class="img-thumbnail" src="{{ $media->getUrl() }}" alt="{{$media->name}}"
+                                     title="{{$media->name}}">
+                            </td>
+                        </tr>
+                    @endif
                     <tr>
                         <th>
                             {{ trans('cruds.signature.fields.owner') }}

@@ -37,6 +37,9 @@
                             {{ trans('cruds.signature.fields.signature_text') }}
                         </th>
                         <th>
+                            {{ trans('cruds.parapheur.title') }}
+                        </th>
+                        <th>
                             {{ trans('cruds.signature.fields.owner') }}
                         </th>
                         <th>
@@ -58,7 +61,16 @@
                                 {{ $mediaSigned->id ?? '' }}
                             </td>
                             <td>
-                                <img class="img-thumbnail" src="{{ $mediaSigned->getUrl() }}" alt="{{$mediaSigned->name}}" title="{{$mediaSigned->name}}">
+                                @if($mediaSigned->collection_name=="signature")
+                                    <img class="img-thumbnail" src="{{ $mediaSigned->getUrl() }}"
+                                         alt="{{$mediaSigned->name}}" title="{{$mediaSigned->name}}">
+                                @endif
+                            </td>
+                            <td>
+                                @if($mediaSigned->collection_name=="paraphe")
+                                    <img class="img-thumbnail" src="{{ $mediaSigned->getUrl() }}"
+                                         alt="{{$mediaSigned->name}}" title="{{$mediaSigned->name}}">
+                                @endif
                             </td>
                             <td>
                                 <span class="badge badge-info">{{ $mediaSigned->signedBy->name }}</span>
