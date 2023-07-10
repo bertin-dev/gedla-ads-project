@@ -33,14 +33,14 @@
             </li>
         @endforeach
 
-        {{--@can('storage_access')--}}
+        @can('storage_access')
         <li class="c-sidebar-nav-item">
             <a class="c-sidebar-nav-link" href="{{ route('show-storage-document') }}">
                 <i class="c-sidebar-nav-icon fas fa-fw fa-store"></i>
                 {{ trans('panel.saved_documents') }}
             </a>
         </li>
-        {{--@endcan--}}
+        @endcan
 
         @can('messenger_access')
             <li class="c-sidebar-nav-item">
