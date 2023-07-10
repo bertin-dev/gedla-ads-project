@@ -16,7 +16,7 @@ class SendDocumentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        //abort_if(Gate::denies('send_document'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('send_document'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return true;
     }
