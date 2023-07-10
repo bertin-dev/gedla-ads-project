@@ -6,6 +6,7 @@ use App\Events\DocumentAdded;
 use App\Events\validationStepCompleted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassDestroyFolderRequest;
+use App\Http\Requests\SendDocumentRequest;
 use App\Http\Resources\Admin\UserResource;
 use App\Models\AuditLog;
 use App\Models\Folder;
@@ -34,7 +35,7 @@ class WorkflowManagementController extends Controller
     private $operationTypes = ["SEND_DOCUMENT", "VALIDATE_DOCUMENT", "VALIDATE_DOCUMENT_SIGNATURE",
         "SEND_DOCUMENT_SIGNATURE", "VALIDATE_DOCUMENT_PARAPHEUR", "SEND_DOCUMENT_PARAPHEUR", "OPEN_DOCUMENT", "PREVIEW_DOCUMENT",
         "START_VALIDATION", "REJECTED_DOCUMENT", "EDIT_DOCUMENT", "SAVE_DOCUMENT", "DOWNLOAD_DOCUMENT", "ARCHIVE_DOCUMENT", "IMPORT_DOCUMENT",
-        "RESTORE_ARCHIVE_DOCUMENT", "STORE_DOCUMENT", "RESTORE_DOCUMENT"];
+        "RESTORE_ARCHIVE_DOCUMENT", "STORE_DOCUMENT", "RESTORE_DOCUMENT", "SHARE_DOCUMENT"];
 
     public function __construct(){
     }
@@ -1399,5 +1400,87 @@ class WorkflowManagementController extends Controller
                 <p>' . $params . '</p>
                 </div>
                 </div>';
+    }
+
+
+    public function shareDocument(SendDocumentRequest $request)
+    {
+        //get Media
+        $mediaData = Media::find($request->media_id);
+
+        //if data come from parapheur or folder
+        if (isset($request->parapheur_id) and !empty($request->parapheur_id)) {
+            //Get Parapheur
+            $modelItem = Parapheur::find($mediaData->parapheur_id);
+            //Get if user media assign has parapheur
+            $getParapheurUserAssign = Parapheur::where('user_id', $request->user_assign)->first();
+            if ($getParapheurUserAssign == null) {
+                $getLastInsertId = Parapheur::all()->max('id');
+                $parapheur = Parapheur::create([
+                    'name' => 'parapheur' . $getLastInsertId + 1,
+                    'project_id' => $modelItem->project_id,
+                    'user_id' => $request->user_assign
+                ]);
+                $parapheurId = $parapheur->id;
+            } else {
+                $parapheurId = $getParapheurUserAssign->id;
+            }
+
+            //Update Media table with new datas for receiver user
+            $mediaData->model_type = Parapheur::class;
+            $mediaData->model_id = 0;
+            $mediaData->uuid = Str::uuid();
+            $mediaData->version = $mediaData->version + 1;
+            $mediaData->parapheur_id = $parapheurId;
+        } else {
+            $parapheur = Parapheur::where('user_id', $request->user_assign)->first();
+            $parapheurId = $parapheur->id;
+            //Update Media table with new datas for receiver user
+            $mediaData->model_type = Parapheur::class;
+            $mediaData->model_id = 0;
+            $mediaData->uuid = Str::uuid();
+            $mediaData->version = $mediaData->version + 1;
+            $mediaData->parapheur_id = $parapheurId;
+        }
+
+        //SAVE LOG
+        self::trackOperations($mediaData->id,
+            "SHARE_DOCUMENT",
+            $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' a démarré le circuit de validation.'),
+            'success',
+            auth()->id(),
+            $request->user_assign,
+            auth()->user()->name,
+            $request->message
+        );
+
+        //SEND NOTIFICATION NEXT USER
+        $details = [
+            'user' => User::findOrFail($request->user_assign),
+            'subject' => 'Envoi document',
+            'body' => 'Vous avez réçu le document "' . strtoupper(substr($mediaData->file_name, 14)) . '" de la part de ' . auth()->user()->name,
+            'media_id' => $mediaData->id,
+            'media_name' => $mediaData->file_name,
+            'validation_step_id' => 0,
+        ];
+        event(new DocumentAdded($details));
+
+        //persistence des données
+        $mediaData->save();
+
+        //if checkbox of email checked, then email is send at receiver
+        if ($request->boolean('flexCheckChecked')) {
+            $getUser = User::find($request->user_assign);
+            $details = [
+                'greeting' => 'Bonjour ' . $getUser->name,
+                'body' => 'Vous avez réçu un message de ' . auth()->user()->name . ': ' . $request->message,
+                'actiontext' => 'Subscribe this channel',
+                'actionurl' => '/',
+                'lastline' => 'Nous vous remercions pour votre bonne comprehension.'
+            ];
+            Notification::send($getUser, new sendEmailNotification($details));
+        }
+
+        return redirect()->back()->with('message', 'Votre document a été envoyé avec succès.');
     }
 }

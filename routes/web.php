@@ -64,10 +64,6 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::post('uploadOCR', [OcrController::class, 'postUploadOCR'])->name('postUploadOCR');
     Route::post('storeFile', [OcrController::class, 'postUploadFile'])->name('post-upload-file');
 
-    //OPERATIONS
-    Route::post('operation/store', [OperationController::class, 'store'])->name('operation.store');
-    Route::get('operation/index', [OperationController::class, 'index'])->name('operation.index');
-
     //PARAPHEUR
     Route::get('parapheur/index', [ParapheurController::class, 'index'])->name('parapheur.index');
     Route::get('parapheur/show/{parapheur}', [ParapheurController::class, 'show'])->name('parapheur.show');
@@ -153,6 +149,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('workflow-management/validateDocument', [WorkflowManagementController::class, 'validateDocument'])->name('workflow-management.validateDocument');
     Route::post('workflow-management/download', [WorkflowManagementController::class, 'downloadDocument'])->name('workflow-management.download');
     Route::get('load_users/{id}', [WorkflowManagementController::class, 'showUsers'])->name('workflow-management.load-users');
+    Route::post('workflow/share', [WorkflowManagementController::class, 'shareDocument'])->name('workflow-shareDocument');
 
     //Signature
     Route::resource('signature', SignatureController::class);
