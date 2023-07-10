@@ -456,16 +456,17 @@
                         cls: 'success1'
                     });
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         window.history.back();
                         location.reload();
                     }, 5000);
 
                 },
-                error: function () {
-                    alert("une erreur est survenue");
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
+                    alert(errorMessage);
                 },
-                complete: function (){
+                complete: function () {
                     submitRequest.text("Enregistrer");
                     fullLoading.hide();
                 }
@@ -591,12 +592,12 @@
                         $('.workflow').show();
                     }*/
                 },
-                error: function(){
-                    $('.loading').hide();
-                    alert("Error founded where user display document");
-                    console.log('Error founded where user display document');
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
+                    alert(errorMessage);
+                    console.log(errorMessage);
                 },
-                complete:function (){
+                complete: function () {
                     $('.loading').hide();
                 }
             });
@@ -617,9 +618,10 @@
                 success: function (data) {
                     console.log(data);
                 },
-                error: function(){
-                    console.log('Error founded where user display document');
-                }
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
+                    console.log(errorMessage);
+                },
             });
         });
 
@@ -645,10 +647,11 @@
                         cls: 'success1'
                     });
                 },
-                error: function () {
-                    console.log('Link not found');
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
+                    console.log(errorMessage);
                 },
-                complete: function (){
+                complete: function () {
                     $('body').notif({
                         title: 'Opération Réussie',
                         content: 'Element Téléchargé avec succès.',
@@ -699,22 +702,22 @@
                             cls: 'success1'
                         });
 
-                        setTimeout(function(){
+                        setTimeout(function () {
                             window.location.reload();
                         }, 5000);
                     }
                 },
-                error: function () {
-                    //alert("Error founded where user display document");
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
                     $('body').notif({
                         title: 'Une Erreur est survenue',
-                        content: "Une erreur a été trouvé pendant le processus",
+                        content: errorMessage,
                         img: '{{asset('images/error-notif.png')}}',
                         cls: 'error1'
                     });
-                    console.log('Error founded where user display document');
+                    console.log(errorMessage);
                 },
-                complete: function (){
+                complete: function () {
                     fullLoading.hide();
                 },
             });
@@ -753,15 +756,16 @@
                         location.reload();
                     }
                 },
-                error: function () {
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
                     $('body').notif({
                         title: 'Une Erreur est survenue',
-                        content: "Une erreur a été trouvé pendant le processus",
+                        content: errorMessage,
                         img: '{{asset('images/error-notif.png')}}',
                         cls: 'error1'
                     });
-                    console.log('Error founded where user display document');
-                }
+                    console.log(errorMessage);
+                },
             });
         });
 
@@ -798,15 +802,16 @@
                         location.reload();
                     }
                 },
-                error: function () {
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
                     $('body').notif({
                         title: 'Une Erreur est survenue',
-                        content: "Une erreur a été trouvé pendant le processus",
+                        content: errorMessage,
                         img: '{{asset('images/error-notif.png')}}',
                         cls: 'error1'
                     });
-                    console.log('Error founded where user display document');
-                }
+                    console.log(errorMessage);
+                },
             });
         });
 
@@ -845,15 +850,16 @@
                     }
 
                 },
-                error: function () {
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
                     $('body').notif({
                         title: 'Une Erreur est survenue',
-                        content: "Une erreur a été trouvé pendant le processus",
+                        content: errorMessage,
                         img: '{{asset('images/error-notif.png')}}',
                         cls: 'error1'
                     });
-                    console.log('Error founded where user display document');
-                }
+                    console.log(errorMessage);
+                },
             });
         });
 
@@ -880,21 +886,22 @@
                         cls: 'success1'
                     });
 
-                    setTimeout(function(){
+                    setTimeout(function () {
                         window.location.reload();
                     }, 5000);
                 },
-                error: function () {
+                error: function (xhr, ajaxOptions, thrownError) {
                     fullLoading.hide();
+                    var errorMessage = xhr.responseJSON.message;
                     $('body').notif({
                         title: 'Une Erreur est survenue',
-                        content: "Link not found",
+                        content: errorMessage,
                         img: '{{asset('images/error-notif.png')}}',
                         cls: 'error1'
                     });
-                    console.log('Link not found');
+                    console.log(errorMessage);
                 },
-                complete: function (){
+                complete: function () {
                     fullLoading.hide();
                 }
             });
@@ -919,14 +926,15 @@
         let result;
         $.ajax({
             type: 'GET', //THIS NEEDS TO BE GET
-            url:"{{ route('users.user-find', '') }}"+"/"+id,
+            url:"{{ route('users.user-find', '') }}" + "/" + id,
             dataType: 'json',
-            async:false,
+            async: false,
             success: function (data) {
                 console.log(data);
                 result = data.user.name;
-            },error:function(){
-                alert("une erreur a ete trouvé");
+            }, error: function (xhr, ajaxOptions, thrownError) {
+                var errorMessage = xhr.responseJSON.message;
+                alert(errorMessage);
             },
         });
         return result;
@@ -965,7 +973,7 @@
                 url:"{{ route('filter-activity-by-date', '') }}"+"/"+getParams,
                 method: 'GET',
                 dataType: 'json',
-                beforeSend: function (){
+                beforeSend: function () {
                     dateType.text("Encours...");
                     //fullLoading.show();
                 },
@@ -973,10 +981,11 @@
                     dateType.text(data.$date_type);
                     filterActivity.html(data.result);
                 },
-                error: function () {
-                    console.log('Error founded where user display document');
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
+                    console.log(errorMessage);
                 },
-                complete: function (){
+                complete: function () {
                 },
             });
         });
@@ -995,16 +1004,17 @@
             e.preventDefault();
             detailDocumentUpdate.empty();
             $.ajax({
-                url:"{{ route('filter-document-by-date', '') }}"+"/"+getParams,
+                url:"{{ route('filter-document-by-date', '') }}" + "/" + getParams,
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
-                    if(data.result !== ""){
+                    if (data.result !== "") {
                         detailDocumentUpdate.html(data.result);
                     }
                 },
-                error: function () {
-                    console.log('Error founded where user display document');
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
+                    console.log(errorMessage);
                 },
             });
         });
@@ -1044,8 +1054,9 @@
                         workflow_state.html('| ' + "{{ trans('global.rejected') }}");
                     }
                 },
-                error: function () {
-                    console.log('Error founded where user display document');
+                error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
+                    console.log(errorMessage);
                 },
             });
         });

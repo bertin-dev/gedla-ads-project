@@ -428,7 +428,7 @@
                     url:"{{ route('admin.filter-all-activity-by-date', '') }}"+"/"+getParams,
                     method: 'GET',
                     dataType: 'json',
-                    beforeSend: function (){
+                    beforeSend: function () {
                         dateType.text("Encours...");
                         //fullLoading.show();
                     },
@@ -436,10 +436,11 @@
                         dateType.text(data.$date_type);
                         filterActivity.html(data.result);
                     },
-                    error: function () {
-                        console.log('Error founded where user display document');
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        var errorMessage = xhr.responseJSON.message;
+                        console.log(errorMessage);
                     },
-                    complete: function (){
+                    complete: function () {
                     },
                 });
             });
