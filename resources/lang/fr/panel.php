@@ -15,4 +15,5 @@ return [
     'acquisition_by' => 'Acquisition par',
     'gedla-messenger' => 'Gedla Messenger',
     'gedla-calendar' => 'Gedla Calendar',
+    'saved_documents' => 'Documents sauvegardés',
 ];

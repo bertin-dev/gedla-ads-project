@@ -283,12 +283,32 @@ class PermissionsTableSeeder extends Seeder
                 'title' => 'archive_add_access',
             ],
             [
-                'id'    => 67,
+                'id' => 67,
                 'title' => 'archive_store_access',
             ],
             [
-                'id'    => 68,
+                'id' => 68,
                 'title' => 'unarchive_document_access',
+            ],
+            [
+                'id' => 69,
+                'title' => 'document_create',
+            ],
+            [
+                'id' => 70,
+                'title' => 'document_upload',
+            ],
+            [
+                'id' => 71,
+                'title' => 'storage_access',
+            ],
+            [
+                'id' => 72,
+                'title' => 'store_document',
+            ],
+            [
+                'id' => 73,
+                'title' => 'restore_document',
             ],
         ];
 

@@ -25,7 +25,7 @@
                 @foreach ($child->subChildren as $childCategory)
                     @foreach($childCategory->multiUsers as $user)
                         @if($user->id==auth()->id())
-                        @include('partials.child_category', ['child_category' => $childCategory])
+                            @include('partials.child_category', ['child_category' => $childCategory])
                         @endif
                     @endforeach
                 @endforeach
@@ -33,22 +33,31 @@
             </li>
         @endforeach
 
-        @can('messenger_access')
+        {{--@can('storage_access')--}}
         <li class="c-sidebar-nav-item">
-            <a class="c-sidebar-nav-link" href="{{ route('gedla-messenger') }}">
-                <i class="c-sidebar-nav-icon fas fa-fw fa-send"></i>
-                {{ trans('panel.gedla-messenger') }}
+            <a class="c-sidebar-nav-link" href="{{ route('show-storage-document') }}">
+                <i class="c-sidebar-nav-icon fas fa-fw fa-store"></i>
+                {{ trans('panel.saved_documents') }}
             </a>
         </li>
+        {{--@endcan--}}
+
+        @can('messenger_access')
+            <li class="c-sidebar-nav-item">
+                <a class="c-sidebar-nav-link" href="{{ route('gedla-messenger') }}">
+                    <i class="c-sidebar-nav-icon fas fa-fw fa-send"></i>
+                    {{ trans('panel.gedla-messenger') }}
+                </a>
+            </li>
         @endcan
 
         @can('calendar_access')
-        <li class="c-sidebar-nav-item">
-            <a class="c-sidebar-nav-link" href="{{ route('calendar.home') }}">
-                <i class="c-sidebar-nav-icon fas fa-fw fa-calendar"></i>
-                {{ trans('panel.gedla-calendar') }}
-            </a>
-        </li>
+            <li class="c-sidebar-nav-item">
+                <a class="c-sidebar-nav-link" href="{{ route('calendar.home') }}">
+                    <i class="c-sidebar-nav-icon fas fa-fw fa-calendar"></i>
+                    {{ trans('panel.gedla-calendar') }}
+                </a>
+            </li>
         @endcan
         <li class="c-sidebar-nav-item">
             <a href="#" class="c-sidebar-nav-link" onclick="event.preventDefault(); document.getElementById('logoutform').submit();">
@@ -59,93 +68,4 @@
             </a>
         </li>
     </ul>
-
-    {{--<ul class="c-sidebar-nav">
-        @foreach ($projects as $project)
-            <li class="c-sidebar-nav-dropdown">
-                <a class="c-sidebar-nav-dropdown-toggle" href="#">
-                    <i class="c-sidebar-nav-icon fas fa-fw fa-home"></i>
-                    {{ trans('panel.work_space') }} ({{ $project->name ?? '' }})
-                </a>
-
-                <ul class="c-sidebar-nav-dropdown-items">
-                    <li class="c-sidebar-nav-item">
-                        <a href="{{ route("admin.projects.index") }}" class="c-sidebar-nav-link">
-                            <i class="fa-fw fas fa-upload c-sidebar-nav-icon">
-
-                            </i>
-                            {{ trans('panel.acquisition_document') }}
-                        </a>
-                    </li>
-
-                    <li class="c-sidebar-nav-dropdown">
-                        <a class="c-sidebar-nav-dropdown-toggle" href="#">
-                            <i class="c-sidebar-nav-icon fas fa-fw fa-home"></i>
-                            Folder {{ $folder->name }}
-                        </a>
-                    @foreach ($folder->children as $myFolder)
-
-                        @if($myFolder->children->isEmpty())
-
-                                    <ul class="c-sidebar-nav-dropdown-items">
-                                        <li class="c-sidebar-nav-items">
-
-                                            <ul class="c-sidebar-nav-dropdown-items">
-                                                <li class="c-sidebar-nav-item">
-                                                    <a href="#" class="c-sidebar-nav-link">
-                                                        <i class="fa-fw fas fa-upload c-sidebar-nav-icon"></i>
-                                                        PHP
-                                                    </a>
-                                                </li>
-
-                                                <li class="c-sidebar-nav-item">
-                                                    <a href="#" class="c-sidebar-nav-link">
-                                                        <i class="fa-fw fas fa-upload c-sidebar-nav-icon"></i>
-                                                        HTML / CSS
-                                                    </a>
-
-                                                </li>
-                                            </ul>
-                                        </li>
-
-                                    </ul>
-
-
-                        @endif
-                            <ul class="c-sidebar-nav-dropdown-items">
-                                <li class="c-sidebar-nav-item">
-                                    <a href="{{ route('folders.show', [$myFolder]) }}" class="c-sidebar-nav-link {{ request()->is("admin/projects") || request()->is("admin/projects/*") ? "active" : "" }}">
-                                        <i class="fa-fw fas fa fa-folder-open c-sidebar-nav-icon">
-
-                                        </i>
-                                        {{ $myFolder->name }}
-                                    </a>
-                                </li>
-                            </ul>
-                    @endforeach
-                        </li>
-
-
-                        <li class="c-sidebar-nav-dropdown">
-                        <a class="c-sidebar-nav-dropdown-toggle" href="#">
-                            <i class="c-sidebar-nav-icon fas fa-fw fa-home"></i>
-                            {{ trans('panel.work_space') }}
-                        </a>
-                        <ul class="c-sidebar-nav-dropdown-items">
-                            <li class="c-sidebar-nav-item">
-                                <a href="{{ route("admin.projects.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/projects") || request()->is("admin/projects/*") ? "active" : "" }}">
-                                    <i class="fa-fw fas fa-hospital-o c-sidebar-nav-icon">
-
-                                    </i>
-                                    {{ trans('cruds.project.title') }}
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                </ul>
-            </li>
-        @endforeach
-    </ul>--}}
-
 </div>

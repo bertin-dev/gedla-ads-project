@@ -34,7 +34,7 @@ class WorkflowManagementController extends Controller
     private $operationTypes = ["SEND_DOCUMENT", "VALIDATE_DOCUMENT", "VALIDATE_DOCUMENT_SIGNATURE",
         "SEND_DOCUMENT_SIGNATURE", "VALIDATE_DOCUMENT_PARAPHEUR", "SEND_DOCUMENT_PARAPHEUR", "OPEN_DOCUMENT", "PREVIEW_DOCUMENT",
         "START_VALIDATION", "REJECTED_DOCUMENT", "EDIT_DOCUMENT", "SAVE_DOCUMENT", "DOWNLOAD_DOCUMENT", "ARCHIVE_DOCUMENT", "IMPORT_DOCUMENT",
-        "RESTORE_ARCHIVE_DOCUMENT"];
+        "RESTORE_ARCHIVE_DOCUMENT", "STORE_DOCUMENT", "RESTORE_DOCUMENT"];
 
     public function __construct(){
     }
@@ -249,7 +249,6 @@ class WorkflowManagementController extends Controller
                 $media->version = $media->version + 1;
                 $media->global_deadline = $request->global_deadline;
                 $media->visibility = $request->visibility;
-                $media->save();
 
                 foreach ($usersId as $key => $userId) {
                     $validationStep = new ValidationStep([
@@ -288,6 +287,8 @@ class WorkflowManagementController extends Controller
                 ];
                 event(new DocumentAdded($details));
 
+                //persister les données
+                $media->save();
             }
 
             //if checkbox of email checked, then email is send at receiver
@@ -316,7 +317,6 @@ class WorkflowManagementController extends Controller
                 $media->created_by = \Auth::user()->id;
                 $media->global_deadline = $request->global_deadline;
                 $media->visibility = $request->visibility;
-                $media->save();
 
                 foreach ($usersId as $key => $userId) {
                     $validationStep = new ValidationStep([
@@ -352,6 +352,9 @@ class WorkflowManagementController extends Controller
                     'validation_step_id' => 0,
                 ];
                 event(new DocumentAdded($details));
+
+                //persister les données
+                $media->save();
             }
             //if checkbox of email checked, then email is send at receiver
             if($request->boolean('flexCheckChecked')){
@@ -1305,128 +1308,6 @@ class WorkflowManagementController extends Controller
 
         return response()->download($media->getPath(), $media->file_name);
     }
-
-    /*public function validateDocument(Request $request){
-        $getMediaDocument = Media::with('operations')->find($request->id);
-        $getLog = AuditLog::where('media_id', $getMediaDocument->id);
-        $idNextUser = "";
-        $counterPreviousUser = 0;
-        $oldValue = json_decode($getMediaDocument->step_workflow);
-        for ($i =0; $i<count($oldValue); $i++){
-            //check if all users are pending
-            if($oldValue[$i]->state == "pending"){
-
-                //check if user connected exist in workflow if yes then update state
-                if($oldValue[$i]->user_id == auth()->id()){
-                    $oldValue[$i]->state = "finish";
-                    $counterPreviousUser = $oldValue[$i]->id;
-                }
-                //get id of next user
-                if($counterPreviousUser + 1 == $i){
-                    $idNextUser = $oldValue[$i]->user_id;
-                }
-            }
-        }
-
-        switch ($request->validationType){
-            case "rejected":
-                $getIdPreviousUser = $getMediaDocument->operations->where('user_id_receiver', auth()->id())->first()->user_id_sender;
-                $oldValue = json_decode($getMediaDocument->step_workflow);
-                for ($i =0; $i<count($oldValue); $i++){
-                    //check if all users are pending
-                    if($oldValue[$i]->state == "finish"){
-                        //check if user connected exist in workflow if yes then update state
-                        if($oldValue[$i]->user_id == auth()->id()){
-                            $oldValue[$i]->state = "pending";
-                        }
-                    }
-                }
-
-                    //$getDataNextUser = User::findOrFail($idNextUser);
-                    $getMediaWithOperationDocument = $getMediaDocument->operations->first();
-                    if($getMediaWithOperationDocument != null){
-
-                        if($getMediaWithOperationDocument->status == "public"){
-
-                            $user = User::with('multiFolders')->where('id', $getIdPreviousUser)->first();
-                            $folder = $user->multiFolders->first();
-                            //update media table
-                            $getMediaDocument->version = $getMediaDocument->version + 1;
-                            $getMediaDocument->model_id = $folder->id;
-                            $getMediaDocument->step_workflow = $oldValue;
-                            $getMediaDocument->save();
-
-                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$getIdPreviousUser]);
-
-                        }else{
-
-                            $parapheur = Parapheur::where('user_id', $getIdPreviousUser)->first();
-                            if($parapheur == null){
-                                $getLastInsertId = Parapheur::all()->max('id');
-                                $parapheur = Parapheur::create([
-                                    'name' => 'parapheur'. $getLastInsertId + 1,
-                                    'project_id' => 1,
-                                    'user_id' => $getIdPreviousUser
-                                ]);
-                            }
-
-                            //update media table
-                            $getMediaDocument->version = $getMediaDocument->version + 1;
-                            $getMediaDocument->parapheur_id = $parapheur->id;
-                            $getMediaDocument->step_workflow = $oldValue;
-                            $getMediaDocument->save();
-
-                            $getMediaDocument->usersListSelectedForWorkflowValidations()->sync([$getIdPreviousUser]);
-
-                        }
-
-                        //store datas operation table
-                        Operation::create([
-                            'deadline' => $getMediaWithOperationDocument->deadline,
-                            'priority' => $getMediaWithOperationDocument->priority,
-                            'status' => $getMediaWithOperationDocument->status,
-                            'user_id_sender' => auth()->id(),
-                            'user_id_receiver' => $getIdPreviousUser,
-                            'media_id' => $getMediaDocument->id,
-                            'message' => $getMediaWithOperationDocument->message,
-                            'receive_mail_notification' => $getMediaWithOperationDocument->receive_mail_notification,
-                            'operation_type' => $request->validationType,
-                            'operation_state' => 'rejected',
-                            'num_operation' => (string) Str::orderedUuid(),
-                        ]);
-
-                        $getOperations = Operation::where('media_id', $getMediaDocument->id)
-                            ->where('user_id_receiver', auth()->id())
-                            //->orWhere('user_id_sender', auth()->id())
-                            ->get();
-
-                        foreach ($getOperations as $operationList){
-                            $operationList->update(['operation_state' => 'rejected']);
-                        }
-                    }
-                //dd($getMediaDocument->operations->where('user_id_receiver', auth()->id())->toArray());
-
-                $getLog = $getLog->where('operation_type', 'VALIDATE_DOCUMENT_REJECTED')->get();
-                if(count($getLog) === 0){
-
-                    $getDataNextUser = User::findOrFail($getIdPreviousUser);
-                    self::trackOperations($getMediaDocument->id,
-                        "VALIDATE_DOCUMENT_REJECTED",
-                        $getDataNextUser->name .' a rejeté un document en attente ',
-                        'pending',
-                        auth()->id(),
-                        $getIdPreviousUser,
-                        auth()->user()->name,
-                        $getMediaWithOperationDocument->message);
-
-                }
-            break;
-        }
-        return response()->json([
-            'title' => 'Votre validation a été effectué avec succès'
-        ]);
-
-    }*/
 
     public function addSignatureToPDF($pdfFile, $signatureFile, $name, $numberOfSignatures, $position)
     {

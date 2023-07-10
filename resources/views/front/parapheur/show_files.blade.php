@@ -13,14 +13,18 @@
 
                 <div class="col-lg-12 form-row">
                     <div class="col-md-7 mb-3">
-                        <a class="btn btn-outline-success"
-                           href="{{ route('parapheur.upload') }}?parapheur_id={{ $parapheurWithMedia->id }}">
-                            {{trans('global.upload_file')}}
-                        </a>
-                        <a class="btn btn-outline-primary"
-                           href="{{ route('create-document') }}?parapheur_id={{ $parapheurWithMedia->id }}">
-                            {{ trans('global.create') }} {{trans('global.document')}}
-                        </a>
+                        @can('document_upload')
+                            <a class="btn btn-outline-success"
+                               href="{{ route('parapheur.upload') }}?parapheur_id={{ $parapheurWithMedia->id }}">
+                                {{trans('global.upload_file')}}
+                            </a>
+                        @endcan
+                        @can('document_create')
+                            <a class="btn btn-outline-primary"
+                               href="{{ route('create-document') }}?parapheur_id={{ $parapheurWithMedia->id }}">
+                                {{ trans('global.create') }} {{trans('global.document')}}
+                            </a>
+                        @endcan
                         {{--<a class="btn btn-outline-danger" href="--}}{{--{{ route('folders.create') }}?parent_id={{ $folderItems->id }}--}}{{--">
                              Create a new folder
                         </a>--}}
@@ -87,6 +91,7 @@
                 @php
                     $getMedias = $parapheurWithMedia->medias
                     ->where('archived', 0)
+                    ->where('saved', 0)
                     ->where('state', 'unlocked')
                     ->where('visibility', 'private')
                     ->sortByDesc('created_at');
@@ -112,10 +117,10 @@
                                 </div>
                                 <div class="col-sm-8">
                                     <div class="card-body" style="padding: 5px 5px 0;">
-                                        <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 42)) }}</h5>
+                                        <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 22)) }}</h5>
                                         <div style="margin-top: 13px">
                                                 <span><small style="margin-right: 70px">
-                                                        {{($file->created_at==$file->updated_at) ? "Crée " . Carbon\Carbon::parse($file->created_at)->diffForHumans() . " " . ($file->createdBy != null ? "par ".ucfirst($file->createdBy->name) : "") : "Modifié " . Carbon\Carbon::parse($file->updated_at)->diffForHumans() . " " . ($file->updatedBy != null ? "par ".ucfirst($file->updatedBy->name) : "") }}
+                                                        {{($file->created_at==$file->updated_at) ? trans('global.create')." " . Carbon\Carbon::parse($file->created_at)->diffForHumans() . " " . ($file->createdBy != null ? trans('global.by')." ".ucfirst($file->createdBy->name) : "") : trans('global.edit')." " . Carbon\Carbon::parse($file->updated_at)->diffForHumans() . " " . ($file->updatedBy != null ? trans('global.by')." ".ucfirst($file->updatedBy->name) : "") }}
                                                     </small></span>
                                             <span> <small class="text-right">{{$realSize}} KO</small></span>
                                         </div>
@@ -193,8 +198,9 @@
                                     @can('download_access')
                                         <a href="#" class="mediaDownload col-lg-4"> {{trans('global.download')}}</a>
                                     @endcan
-                                    @can('archive_file_access')
-                                        <a href="#" class="col-lg-4 mediaArchive">{{trans('global.archive_document')}} </a>
+                                    @can('storage_access')
+                                        <a href="#"
+                                           class="col-lg-4 documentStorage">{{trans('global.store_document')}} </a>
                                     @endcan
                                 </div>
                             </div>

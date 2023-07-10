@@ -14,21 +14,28 @@
                 <div class="row">
                     <div class="col-lg-12 form-row">
                         <div class="col-md-7 mb-3">
-                            <a class="btn btn-outline-success"
-                               href="{{ route('folders.upload') }}?folder_id={{ $folder->id }}">
-                                {{trans('global.upload_file')}}
-                            </a>
-                            <a class="btn btn-outline-primary"
-                               href="{{ route('create-document') }}?folder_id={{ $folder->id }}">
-                                {{ trans('global.create') }} {{trans('global.document')}}
-                            </a>
-                            <a class="btn btn-outline-danger"
-                               href="{{ route('folders.create') }}?parent_id={{ $folder->id }}&project_id={{$folder->project_id}}">
-                                {{ trans('global.create') }} {{trans('global.folder')}}
-                            </a>
+                            @can('document_upload')
+                                <a class="btn btn-outline-success"
+                                   href="{{ route('folders.upload') }}?folder_id={{ $folder->id }}">
+                                    {{trans('global.upload_file')}}
+                                </a>
+                            @endcan
+                            @can('document_create')
+                                <a class="btn btn-outline-primary"
+                                   href="{{ route('create-document') }}?folder_id={{ $folder->id }}">
+                                    {{ trans('global.create') }} {{trans('global.document')}}
+                                </a>
+                            @endcan
+                            @can('folder_create')
+                                <a class="btn btn-outline-danger"
+                                   href="{{ route('folders.create') }}?parent_id={{ $folder->id }}&project_id={{$folder->project_id}}">
+                                    {{ trans('global.create') }} {{trans('global.folder')}}
+                                </a>
+                            @endcan
                         </div>
                         <div class="col-md-5 mb-3">
-                            <form action="{{ route('search-document', $folder) }}" method="GET" class="navbar-search" role="search">
+                            <form action="{{ route('search-document', $folder) }}" method="GET" class="navbar-search"
+                                  role="search">
                                 <div class="form-row">
                                     <div class="col-md-5 mb-3 small">
                                         <select name="type" class="custom-select">
@@ -83,6 +90,7 @@
                         @php
                             $getMedias = $folder->files
                             ->where('archived', 0)
+                            ->where('saved', 0)
                             ->where('state', 'unlocked')
                             ->where('visibility', 'public')
                             ->sortByDesc('created_at');
@@ -108,10 +116,10 @@
                                         </div>
                                         <div class="col-sm-8">
                                             <div class="card-body" style="padding: 5px 5px 0;">
-                                                <h5 class="card-title">{{ strtolower(Str::substr($file->file_name, 14, 42)) }}</h5>
+                                                <h5 class="card-title">{{ strtolower(Str::substr($file->name, 14, 22)) }}</h5>
                                                 <div style="margin-top: 13px">
                                                         <span><small style="margin-right: 70px">
-                                                                {{($file->created_at==$file->updated_at) ? "Crée " . Carbon\Carbon::parse($file->created_at)->diffForHumans() . " " . ($file->createdBy != null ? "par ".ucfirst($file->createdBy->name) : "") : "Modifié " . Carbon\Carbon::parse($file->updated_at)->diffForHumans() . " " . ($file->updatedBy != null ? "par ".ucfirst($file->updatedBy->name) : "") }}
+                                                                {{($file->created_at==$file->updated_at) ? trans('global.create') ." " . Carbon\Carbon::parse($file->created_at)->diffForHumans() . " " . ($file->createdBy != null ? trans('global.by')." ".ucfirst($file->createdBy->name) : "") : trans('global.edit')." " . Carbon\Carbon::parse($file->updated_at)->diffForHumans() . " " . ($file->updatedBy != null ? trans('global.edit')." ".ucfirst($file->updatedBy->name) : "") }}
                                                             </small></span>
                                                     <span> <small class="text-right">{{$realSize}} KO</small></span>
                                                 </div>
@@ -226,10 +234,10 @@
                                     @can('download_access')
                                         <a href="#" class="mediaDownload col-lg-4"> {{trans('global.download')}}</a>
                                     @endcan
-                                    @can('archive_file_access')
-                                        <a href="#"
-                                           class="col-lg-4 mediaArchive">{{trans('global.archive_document')}} </a>
-                                    @endcan
+                                    {{--@can('storage_access')--}}
+                                    <a href="#"
+                                       class="col-lg-4 documentStorage">{{trans('global.store_document')}} </a>
+                                    {{--@endcan--}}
                                 </div>
                             </div>
 
@@ -256,18 +264,7 @@
                                             <!-- Schdule Day 1 -->
                                             <div role="tabpanel" class="col-lg-9 tab-pane fade show active myActivity"
                                                  id="day-1">
-
-                                                <div class="row schedule-item">
-                                                    <div class="col-md-2">
-                                                        <time>09:30 AM</time>
-                                                    </div>
-                                                    <div class="col-md-10">
-                                                        <h4>Registration</h4>
-                                                        <p>Fugit voluptas iusto maiores temporibus autem numquam
-                                                            magnam.</p>
-                                                    </div>
-                                                </div>
-
+                                                <div class="row schedule-item"></div>
                                             </div>
                                             <!-- End Schdule Day 1 -->
 
@@ -378,8 +375,6 @@
                         @endcan
                     </ul>
                 </div>
-
-                {{--<iframe src="{{$file->getUrl()}}"></iframe>--}}
 
             </div>
         </div>

@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::table('media', function (Blueprint $table) {
             $table->timestamp('archived_at')->nullable();
+            $table->boolean('saved')->default(false)->comment('false=unsaved, true=saved')->index();
+            $table->timestamp('saved_at')->nullable();
         });
     }
 

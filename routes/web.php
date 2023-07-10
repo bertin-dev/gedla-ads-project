@@ -13,6 +13,7 @@ use App\Http\Controllers\OcrController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\ParapheurController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\StorageDocumentController;
 use App\Http\Controllers\WorkflowValidationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -96,6 +97,10 @@ Route::group(['middleware' => ['auth', 'user']], function() {
     Route::get('load_users/{id}', [WorkflowValidationController::class, 'showUsers'])->name('workflow-load-users');
     Route::post('workflow/media', [WorkflowValidationController::class, 'storeMedia'])->name('workflow-storeMedia');
 
+    //Storage
+    Route::get('show-storage-document', [StorageDocumentController::class, 'index'])->name('show-storage-document');
+    Route::post('store-document', [StorageDocumentController::class, 'store'])->name('store-document');
+    Route::get('restore-document/{id}', [StorageDocumentController::class, 'restore'])->name('restore-document');
 });
 
 Auth::routes(['register' => false]);
