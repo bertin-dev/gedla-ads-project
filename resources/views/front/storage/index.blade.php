@@ -21,7 +21,8 @@
                                  data-name="{{ucfirst(strtolower(Str::substr($file->file_name, 14)))}}"
                                  data-size="{{$realSize}}"
                                  data-item_type="{{$result}}" data-url="{{$file->getUrl()}}"
-                                 data-version="{{$file->version}}" data-mime_type="{{$file->mime_type}}">
+                                 data-version="{{$file->version}}" data-mime_type="{{$file->mime_type}}"
+                                 data-created="{{$file->created_at}}" data-created_by="{{$file->created_by}}">
                                 <div class="row no-gutters">
                                     <div class="col-sm-4">
                                         <img class="img-thumbnail"
@@ -69,10 +70,10 @@
                                                 @else
                                                     <small class="alert-info">{{trans('global.import')}}</small>
                                                 @endif
-                                                {{--@can('restore_document')--}}
+                                                @can('restore_document')
                                                     <small class="alert-link"> <a
                                                             href="{{ route('restore-document', $file->id) }}">{{ trans('global.Restore_document') }}</a></small>
-                                                {{--@endcan--}}
+                                                @endcan
                                             </span>
                                         </div>
                                     </div>
@@ -85,6 +86,59 @@
 
             </div>
 
+        </div>
+    </div>
+
+
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" aria-labelledby="indexationModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="indexationModalLabel">Informations d'indexation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{ route('admin.archive.store') }}">
+                        @csrf
+                        <input type="hidden" id="media_archived_id" name="media_archived_id">
+                        <div class="mb-3">
+                            <label for="inputNameStorage" class="form-label">Nom du document</label>
+                            <input type="text" class="form-control" id="inputNameStorage" name="inputNameStorage"
+                                   required readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputSizeStorage" class="form-label">Taille du document</label>
+                            <input type="text" class="form-control" id="inputSizeStorage" name="inputSizeStorage"
+                                   required readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputVersionStorage" class="form-label">Version du document</label>
+                            <input type="text" class="form-control" id="inputVersionStorage" name="inputVersionStorage"
+                                   required readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="typeDocument" class="form-label">Type de document</label>
+                            <input type="text" class="form-control" id="typeDocument" name="typeDocument" required
+                                   readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputDate" class="form-label">Date de création</label>
+                            <input type="text" class="form-control" id="inputDate" name="inputDate" required readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputAuthor" class="form-label">Auteur</label>
+                            <input type="text" class="form-control" id="inputAuthor" name="inputAuthor" required
+                                   readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputPassword" class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="inputPassword" name="inputPassword" required
+                                   maxlength="5">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Archiver</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 

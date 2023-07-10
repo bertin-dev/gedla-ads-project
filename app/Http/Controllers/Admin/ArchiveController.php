@@ -60,7 +60,7 @@ class ArchiveController extends Controller
     public function store(Request $request)
     {
         abort_if(Gate::denies('archive_store_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $media = Media::findOrFail($request->id);
+        $media = Media::findOrFail($request->media_archived_id);
         $media_name = strtoupper(substr($media->file_name, 14));
 
         // Mettez à jour la colonne 'archived_at' dans la base de données
@@ -68,7 +68,8 @@ class ArchiveController extends Controller
             'disk' => 'archives',
             'conversions_disk' => 'archives',
             'archived' => true,
-            'archived_at' => now()
+            'archived_at' => now(),
+            'password' => bcrypt($request->inputPassword)
         ]);
 
         $getLog = AuditLog::where('media_id', $media->id)

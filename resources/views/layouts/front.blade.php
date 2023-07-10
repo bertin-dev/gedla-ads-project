@@ -499,34 +499,36 @@
             let version = $(e.relatedTarget).data('version');
             let itemType = $(e.relatedTarget).data('item_type');
             let mimeType = $(e.relatedTarget).data('mime_type');
+            let createdAt = $(e.relatedTarget).data('created');
+            let created_by = $(e.relatedTarget).data('created_by');
             let loadFile = $('.iframeFile');
             let mediaId = $('.mediaId');
             //let objects = $('#objectLink').data('name');
 
-            switch (mimeType){
+            switch (mimeType) {
                 case "application/pdf":
-                    loadFile.html("<embed src='"+url+"' id='100' width='100%' height='600px'/>");
+                    loadFile.html("<embed src='" + url + "' id='100' width='100%' height='600px'/>");
                     break;
                 case "image/jpeg":
-                    loadFile.html("<img class='img-thumbnail' src='"+itemType+"' alt='"+name+"' title='"+name+"' >");
+                    loadFile.html("<img class='img-thumbnail' src='" + itemType + "' alt='" + name + "' title='" + name + "' >");
                     break;
                 case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": //Word docx
                     //loadFile.html("<iframe src='https://view.officeapps.live.com/op/view.aspx?src=http%3A%2F%2Fieee802%2Eorg%3A80%2Fsecmail%2FdocIZSEwEqHFr%2Edoc' frameborder='0' style='width:100%;min-height:640px;'></iframe>");
                     //loadFile.html("<iframe src='https://view.officeapps.live.com/op/embed.aspx?src="+encodeURIComponent(url)+"' width='100%' height='623px' frameborder='0'></iframe>");
-                    loadFile.html("<iframe data-url='"+url+"' src='https://view.officeapps.live.com/op/embed.aspx?src=http%3A%2F%2Fieee802%2Eorg%3A80%2Fsecmail%2FdocIZSEwEqHFr%2Edoc' width='100%' height='600px' frameborder='0'></iframe>");
+                    loadFile.html("<iframe data-url='" + url + "' src='https://view.officeapps.live.com/op/embed.aspx?src=http%3A%2F%2Fieee802%2Eorg%3A80%2Fsecmail%2FdocIZSEwEqHFr%2Edoc' width='100%' height='600px' frameborder='0'></iframe>");
                     break;
                 case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": //Excel .xlsx
-                    loadFile.html("<iframe data-url='"+url+"' src='https://view.officeapps.live.com/op/embed.aspx?src="+encodeURIComponent(url)+"' width='100%' height='623px' frameborder='0'></iframe>");
+                    loadFile.html("<iframe data-url='" + url + "' src='https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(url) + "' width='100%' height='623px' frameborder='0'></iframe>");
                     break;
                 default:
-                    loadFile.html("<img class='img-thumbnail' src='"+itemType+"' alt='"+name+"' title='"+name+"' >");
+                    loadFile.html("<img class='img-thumbnail' src='" + itemType + "' alt='" + name + "' title='" + name + "' >");
             }
 
-           /* $('.iframeFile').attr({
-                src: url
-            });*/
+            /* $('.iframeFile').attr({
+                 src: url
+             });*/
             $('.file-title').text('{{trans('global.file_details')}} : ' + name);
-            $('.folder_id').text('{{ trans('global.folder') }} : ' + id + '');
+            $('.folder_id').text('{{ trans('global.document') }} : ' + id + '');
             $('.folder_size').text('{{ trans('global.size') }} : ' + size + ' KO');
             $('.version').text('{{ trans('global.version') }} : ' + version);
             $('.myUrl').attr("href", url);
@@ -536,6 +538,15 @@
             mediaId.attr("href", mediaId.attr("href") + "&mediaId=" + id);
             $('.documentStorage').attr("href", id);
             console.log(id);
+
+            //Récuperation des infos du document
+            $('#inputNameStorage').val(name);
+            $('#media_archived_id').val(id);
+            $('#inputSizeStorage').val(size + " KO");
+            $('#inputVersionStorage').val(version);
+            $('#typeDocument').val(mimeType);
+            $('#inputDate').val(formatDate(createdAt));
+            $('#inputAuthor').val(getUser(created_by));
             updateMediaTable(id, name);
         });
 

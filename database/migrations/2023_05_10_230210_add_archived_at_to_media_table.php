@@ -17,6 +17,7 @@ return new class extends Migration
             $table->timestamp('archived_at')->nullable();
             $table->boolean('saved')->default(false)->comment('false=unsaved, true=saved')->index();
             $table->timestamp('saved_at')->nullable();
+            $table->string('password')->nullable();
         });
     }
 
