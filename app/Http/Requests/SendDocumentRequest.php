@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\HttpFoundation\Response;
 
-class StoreOperationRequest extends FormRequest
+class SendDocumentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,7 +16,7 @@ class StoreOperationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        abort_if(Gate::denies('operation_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('send_document'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return true;
     }
@@ -26,26 +26,14 @@ class StoreOperationRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    #[ArrayShape(['deadline' => "string[]", 'priority' => "string[]", 'visibility' => "string[]", 'user_assign' => "string[]", 'media_id' => "string[]", 'message' => "string[]"])] public function rules(): array
+    #[ArrayShape(['deadline' => "string[]", 'user_assign' => "string[]", 'media_id' => "string[]", 'message' => "string[]"])] public function rules(): array
     {
         return [
-            'deadline'     => [
-                'date',
-                'nullable',
-            ],
-            'priority'    => [
-                'string',
-                'required',
-            ],
-            'visibility' => [
-                'string',
-                'required',
-            ],
-            'user_assign'    => [
+            'user_assign' => [
                 'integer',
                 'required',
             ],
-            'media_id'    => [
+            'media_id' => [
                 'integer',
                 'required',
             ],

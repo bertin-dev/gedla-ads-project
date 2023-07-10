@@ -221,7 +221,7 @@
                                 </div>
 
                                 <div class="card workflow_form" style="display: none">
-                                    <div class="card-header">{{trans('global.workflow_validation')}}</div>
+                                    <div class="card-header">{{trans('global.shared_document')}}</div>
 
                                     <div class="card-body">
                                         @if (session('status') || session()->has('message'))
@@ -230,42 +230,23 @@
                                             </div>
                                         @endif
 
-                                        <form method="POST" action="{{ route('operation.store') }}">
+                                        <form method="POST" action="{{ route('admin.workflow-shareDocument') }}">
                                             @csrf
                                             <input type="hidden" name="send_validation_workflow"
                                                    value="send_validation_workflow">
                                             <input id="media_id" type="hidden" name="media_id"/>
                                             <input type="hidden" name="parapheur_id"
                                                    value="{{$parapheurWithMedia->id}}"/>
-                                            <div class="form-group">
-                                                <label for="deadline">{{trans('global.term')}}</label>
-                                                <input type="date" id="deadline" name="deadline" class="form-control">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="priority">{{trans('global.priority')}}</label>
-                                                <select name="priority" id="priority" class="form-control">
-                                                    <option value="low">{{trans('global.low')}}</option>
-                                                    <option value="medium">{{trans('global.means')}}</option>
-                                                    <option value="high">{{trans('global.important')}}</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="visibility">{{trans('global.visibility')}}</label>
-                                                <select name="visibility" id="visibility" class="form-control">
-                                                    <option value="public">{{trans('global.public')}}</option>
-                                                    <option value="private">{{trans('global.private')}}</option>
-                                                </select>
-                                            </div>
 
                                             <div class="form-group">
                                                 <label for="user_assign">{{trans('global.assigned_to')}}</label>
                                                 <select name="user_assign" id="user_assign" class="form-control">
-                                                    @foreach(\App\Models\User::all() as $user)
-                                                        @if($user->id != Auth::user()->id)
-                                                            <option value="{{$user->id}}">{{$user->name}}</option>
-                                                        @endif
+                                                    @foreach(\App\Models\User::get() as $user)
+                                                        @foreach($user->roles as $role)
+                                                            @if(strtolower($role->title)=="user" && $user->id != Auth::user()->id)
+                                                                <option value="{{$user->id}}">{{$user->name}}</option>
+                                                            @endif
+                                                        @endforeach
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -311,22 +292,20 @@
                             <li><a href="#" class="document_id validation validate_file_access"
                                    title="validation">{{trans('global.validate')}}</a></li>
                             <li><a href="#" class="document_id validation_signature validate_file_access"
-                                   title="validation_signature">validation avec signature</a></li>
-                            <li><a href="#" class="validation_paraphe validate_file_access" title="validation_paraphe">validation
-                                    avec paraphe</a></li>
-                            <li><a href="#" class="document_id rejected validate_file_access" title="rejected">Rejeter/refuser</a>
+                                   title="validation_signature">{{ trans('global.validation_signature') }}</a></li>
+                            <li><a href="#" class="validation_paraphe validate_file_access"
+                                   title="validation_paraphe">{{ trans('global.validation_initialed') }}</a></li>
+                            <li><a href="#" class="document_id rejected validate_file_access"
+                                   title="rejected">{{ trans('global.Rejected_Refused') }}</a>
                             </li>
                         @endcan
-                        @can('operation_access')
+                        @can('send_document')
                             <li><a href="#"
-                                   class="workflow_validate workflow">{{trans('global.start_workflow_validation')}}</a>
+                                   class="workflow_validate workflow">{{trans('global.send_document_to')}}</a>
                             </li>
                         @endcan
                     </ul>
                 </div>
-
-                {{--<iframe src="{{$file->getUrl()}}"></iframe>--}}
-
             </div>
         </div>
     </div>

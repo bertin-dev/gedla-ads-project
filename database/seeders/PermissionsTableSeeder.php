@@ -179,8 +179,8 @@ class PermissionsTableSeeder extends Seeder
                 'title' => 'user_alert_access',
             ],
             [
-                'id'    => 41,
-                'title' => 'operation_access',
+                'id' => 41,
+                'title' => 'send_document',
             ],
             [
                 'id'    => 42,
