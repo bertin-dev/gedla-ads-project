@@ -933,21 +933,23 @@
         return [day, month, year].join('-');
     }
 
-    function getUser(id = ''){
-        let result;
-        $.ajax({
-            type: 'GET', //THIS NEEDS TO BE GET
-            url:"{{ route('users.user-find', '') }}" + "/" + id,
-            dataType: 'json',
-            async: false,
-            success: function (data) {
-                console.log(data);
-                result = data.user.name;
-            }, error: function (xhr, ajaxOptions, thrownError) {
-                var errorMessage = xhr.responseJSON.message;
-                alert(errorMessage);
-            },
-        });
+    function getUser(id = '') {
+        let result = "";
+        if (id !== '') {
+            $.ajax({
+                type: 'GET', //THIS NEEDS TO BE GET
+                url: "{{ route('users.user-find', '') }}" + "/" + id,
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                    console.log(data);
+                    result = data.user.name;
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    var errorMessage = xhr.responseJSON.message;
+                    alert(errorMessage);
+                },
+            });
+        }
         return result;
     }
 

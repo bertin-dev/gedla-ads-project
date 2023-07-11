@@ -72,24 +72,18 @@ class ArchiveController extends Controller
             'password' => bcrypt($request->inputPassword)
         ]);
 
-        $getLog = AuditLog::where('media_id', $media->id)
-            ->where('current_user_id', auth()->id())
-            ->where('operation_type', 'ARCHIVE_DOCUMENT')
-            ->get();
-        if(count($getLog) === 0){
-            self::trackOperations($media->id,
-                "ARCHIVE_DOCUMENT",
-                $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient d\'archiver le document '. $media_name),
-                'success',
-                null,
-                auth()->id(),
-                '',
-                ucfirst(auth()->user()->name) .' vient d\'archiver le document '. $media_name);
-        }
+        self::trackOperations($media->id,
+            "ARCHIVE_DOCUMENT",
+            $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' vient d\'archiver le document ' . $media_name),
+            'success',
+            null,
+            auth()->id(),
+            '',
+            ucfirst(auth()->user()->name) . ' vient d\'archiver le document ' . $media_name);
 
         //Déplacez le document vers le dossier d'archivage
-        $publicPath = 'public/'.$media->id;
-        $ArchivesPath = 'public/archives/'.$media->id;
+        $publicPath = 'public/' . $media->id;
+        $ArchivesPath = 'public/archives/' . $media->id;
         Storage::move($publicPath, $ArchivesPath);
 
         // Vérifiez que le dossier source existe
@@ -101,12 +95,13 @@ class ArchiveController extends Controller
             //echo "Le dossier a été déplacé avec succès.";
         }
 
-        if($request->user=="admin"){
+        /*if($request->user=="admin"){
             return Redirect::back()->with('success', 'Le document '.$media_name.' a été archivé avec succès.');
         }
         return \response()->json([
             'result' => 'Le document '.$media_name.' a été archivé avec succès.'
-        ], Response::HTTP_ACCEPTED);
+        ], Response::HTTP_ACCEPTED);*/
+        return redirect()->back()->with('status', 'Le document ' . $media_name . ' a été archivé avec succès.');
     }
 
     public function restore(Request $request){
@@ -126,29 +121,23 @@ class ArchiveController extends Controller
             'archived_at' => null
         ]);
 
-        $getLog = AuditLog::where('media_id', $media->id)
-            ->where('current_user_id', auth()->id())
-            ->where('operation_type', 'RESTORE_ARCHIVE_DOCUMENT')
-            ->get();
-        if(count($getLog) === 0){
-            self::trackOperations($media->id,
-                "RESTORE_ARCHIVE_DOCUMENT",
-                $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' vient de restorer le document '. $media_name .' qui avait été archivé'),
-                'success',
-                null,
-                auth()->id(),
-                '',
-                ucfirst(auth()->user()->name) .' vient de restorer le document '. $media_name .' qui avait été archivé');
-        }
+        self::trackOperations($media->id,
+            "RESTORE_ARCHIVE_DOCUMENT",
+            $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' vient de restorer le document ' . $media_name . ' qui avait été archivé'),
+            'success',
+            null,
+            auth()->id(),
+            '',
+            ucfirst(auth()->user()->name) . ' vient de restorer le document ' . $media_name . ' qui avait été archivé');
 
         //Déplacez le document vers le dossier d'archivage
-        $ArchivesPath = 'public/archives/'.$request->file_name;
-        $publicPath = 'public/'.$media->id;
+        $ArchivesPath = 'public/archives/' . $request->file_name;
+        $publicPath = 'public/' . $media->id;
         Storage::move($ArchivesPath, $publicPath);
 
         // Vérifiez que le dossier source existe
-        if (File::isDirectory('public/archives/'.$media->id)) {
-            File::deleteDirectories('public/archives/'.$media->id);
+        if (File::isDirectory('public/archives/' . $media->id)) {
+            File::deleteDirectories('public/archives/' . $media->id);
         }
 
 

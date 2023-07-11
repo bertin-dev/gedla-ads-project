@@ -22,7 +22,7 @@ class StorageDocumentController extends Controller
      */
     public function index()
     {
-        //abort_if(Gate::denies('storage_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('storage_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $getMedias = Media::where('archived', 0)
             ->where('saved', 1)

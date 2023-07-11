@@ -8,6 +8,12 @@
 
             <div class="row">
 
+                @include('partials.filter_search', ['parapheurWithMedia' => null ,'folder' => null])
+
+                @if($getMedias->isEmpty())
+                    @include('partials.not_found', ['page' => true])
+                @endif
+
                 <div id="folder_media_bloc" class="col-lg-12 form-row">
 
                     @foreach ($getMedias as $file)
