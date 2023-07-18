@@ -559,7 +559,6 @@ class WorkflowManagementController extends Controller
                             ->first();
 
                         $validationStep->statut = 1;
-                        $validationStep->save();
 
                         if ($nextStepValidation) {
                             $nextUser = $nextStepValidation->user;
@@ -586,7 +585,6 @@ class WorkflowManagementController extends Controller
                             //update media table
                             $getMediaDocument->version = $getMediaDocument->version + 1;
                             $getMediaDocument->model_id = $folder->id;
-                            $getMediaDocument->save();
 
                             //SAVE OPERATION IN LOG
                             $getLog = AuditLog::where('media_id', $getMediaDocument->id)
@@ -596,20 +594,22 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
+                            $success = 'la validation du document ' . strtoupper(substr($getMediaDocument->file_name, 14)) . ' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
 
-                            $success = 'la validation du document '.strtoupper(substr($getMediaDocument->file_name, 14)).' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+                            //persistence des données
+                            $validationStep->save();
+                            $getMediaDocument->save();
                         }
                         else{
                             $getMediaDocument->statut = 1;
-                            $getMediaDocument->save();
 
                             $creator_user = $getMediaDocument->createdBy;
 
@@ -624,6 +624,8 @@ class WorkflowManagementController extends Controller
                             ];
                             event(new validationStepCompleted($detailsMedia));
                             $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+                            //persistence des données
+                            $getMediaDocument->save();
                         }
 
                     }
@@ -641,7 +643,6 @@ class WorkflowManagementController extends Controller
                             ->first();
 
                         $validationStep->statut = 1;
-                        $validationStep->save();
 
                         //dd($nextStepValidation->toArray());
                         if ($nextStepValidation) {
@@ -676,7 +677,6 @@ class WorkflowManagementController extends Controller
                             //update media table
                             $getMediaDocument->version = $getMediaDocument->version + 1;
                             $getMediaDocument->parapheur_id = $parapheur->id;
-                            $getMediaDocument->save();
 
 
                             //SAVE OPERATION IN LOG
@@ -687,19 +687,22 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "VALIDATE_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' a validé le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) . ' a validé le document ' . strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
-                            $success = 'La validation du document ' .strtoupper(substr($getMediaDocument->file_name, 14)). ' a été effectué avec succès et une notification a été envoyé à '. ucfirst($nextUser->name);
+                            $success = 'La validation du document ' . strtoupper(substr($getMediaDocument->file_name, 14)) . ' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+
+                            //persistence des données
+                            $validationStep->save();
+                            $getMediaDocument->save();
                         }
                         else{
                             $getMediaDocument->statut = 1;
-                            $getMediaDocument->save();
 
                             $creator_user = $getMediaDocument->createdBy;
 
@@ -714,6 +717,8 @@ class WorkflowManagementController extends Controller
                             ];
                             event(new validationStepCompleted($detailsMedia));
                             $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+                            //persistence des données
+                            $getMediaDocument->save();
                         }
 
                     } else {
@@ -727,10 +732,8 @@ class WorkflowManagementController extends Controller
                 if($getMediaDocument->visibility == "public"){
                     if ($validationStep) {
                         $validationStep->statut = -1;
-                        $validationStep->save();
 
                         $getMediaDocument->statut = -1;
-                        $getMediaDocument->save();
 
                         $previousStepValidation = $getMediaDocument
                             ->validationSteps()
@@ -759,7 +762,6 @@ class WorkflowManagementController extends Controller
                             //update media table
                             $getMediaDocument->version = $getMediaDocument->version + 1;
                             $getMediaDocument->model_id = $folder->id;
-                            $getMediaDocument->save();
 
                             //SAVE OPERATION IN LOG
                             $getLog = AuditLog::where('media_id', $getMediaDocument->id)
@@ -769,17 +771,22 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "REJECTED_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' à rejeté le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' à rejeté le document ' . strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' a rejeté le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) . ' a rejeté le document ' . strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
+                            //persistence des données
+                            $getMediaDocument->save();
                         }
 
-                        $success = "Le document ".strtoupper(substr($getMediaDocument->file_name, 14))." a été rejeté avec succès";
+                        $success = "Le document " . strtoupper(substr($getMediaDocument->file_name, 14)) . " a été rejeté avec succès";
+                        //persistence des données
+                        $validationStep->save();
+                        $getMediaDocument->save();
                     }
                     else {
                         $error = "Vous ne pouvez pas Rejeter le document " . strtoupper(substr($getMediaDocument->file_name, 14));
@@ -788,10 +795,8 @@ class WorkflowManagementController extends Controller
                 else{
                     if ($validationStep) {
                         $validationStep->statut = -1;
-                        $validationStep->save();
 
                         $getMediaDocument->statut = -1;
-                        $getMediaDocument->save();
 
                         $previousStepValidation = $getMediaDocument
                             ->validationSteps()
@@ -826,7 +831,6 @@ class WorkflowManagementController extends Controller
                             //update media table
                             $getMediaDocument->version = $getMediaDocument->version + 1;
                             $getMediaDocument->parapheur_id = $parapheur->id;
-                            $getMediaDocument->save();
 
                             //SAVE OPERATION IN LOG
                             $getLog = AuditLog::where('media_id', $getMediaDocument->id)
@@ -836,17 +840,22 @@ class WorkflowManagementController extends Controller
                             if(count($getLog) === 0){
                                 self::trackOperations($request->id,
                                     "REJECTED_DOCUMENT",
-                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) .' a rejeté le document '. strtoupper(substr($getMediaDocument->name, 14))),
+                                    $this->templateForDocumentHistoric(ucfirst(auth()->user()->name) . ' a rejeté le document ' . strtoupper(substr($getMediaDocument->name, 14))),
                                     'success',
                                     null,
                                     auth()->id(),
                                     auth()->user()->name,
-                                    ucfirst(auth()->user()->name) .' a rejeté le document '. strtoupper(substr($getMediaDocument->name, 14)),
+                                    ucfirst(auth()->user()->name) . ' a rejeté le document ' . strtoupper(substr($getMediaDocument->name, 14)),
                                 );
                             }
+                            //persistence des données
+                            $getMediaDocument->save();
                         }
+                        $success = "Le document " . strtoupper(substr($getMediaDocument->file_name, 14)) . " a été rejeté avec succès";
 
-                        $success = "Le document ".strtoupper(substr($getMediaDocument->file_name, 14))." a été rejeté avec succès";
+                        //persistence des données
+                        $validationStep->save();
+                        $getMediaDocument->save();
                     }
                     else {
                         $error = "Vous ne pouvez pas Rejeter le document " . strtoupper(substr($getMediaDocument->file_name, 14));
@@ -866,7 +875,6 @@ class WorkflowManagementController extends Controller
                             ->first();
 
                         $validationStep->statut = 1;
-                        $validationStep->save();
 
                         if ($nextStepValidation) {
                             $nextUser = $nextStepValidation->user;
@@ -893,7 +901,7 @@ class WorkflowManagementController extends Controller
                             //update media table
                             $getMediaDocument->version = $getMediaDocument->version + 1;
                             $getMediaDocument->model_id = $folder->id;
-                            $getMediaDocument->save();
+
 
                             //SAVE OPERATION IN LOG
                             $getLog = AuditLog::where('media_id', $getMediaDocument->id)
@@ -931,10 +939,12 @@ class WorkflowManagementController extends Controller
                                 ->first();
                             $this->addSignatureToPDF($filePath, $getSignature->getPath(), auth()->user()->name, $totalSignatureHasValidate, $position);
                             $success = 'la validation du document ' . strtoupper(substr($getMediaDocument->file_name, 14)) . ' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+                            //persistence des données
+                            $validationStep->save();
+                            $getMediaDocument->save();
                         }
                         else{
                             $getMediaDocument->statut = 1;
-                            $getMediaDocument->save();
 
                             $creator_user = $getMediaDocument->createdBy;
 
@@ -949,6 +959,9 @@ class WorkflowManagementController extends Controller
                             ];
                             event(new validationStepCompleted($detailsMedia));
                             $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+
+                            //persistence des données
+                            $getMediaDocument->save();
                         }
 
                     }
@@ -966,7 +979,6 @@ class WorkflowManagementController extends Controller
                             ->first();
 
                         $validationStep->statut = 1;
-                        $validationStep->save();
 
                         //dd($nextStepValidation->toArray());
                         if ($nextStepValidation) {
@@ -1001,8 +1013,6 @@ class WorkflowManagementController extends Controller
                             //update media table
                             $getMediaDocument->version = $getMediaDocument->version + 1;
                             $getMediaDocument->parapheur_id = $parapheur->id;
-                            $getMediaDocument->save();
-
 
                             //SAVE OPERATION IN LOG
                             $getLog = AuditLog::where('media_id', $getMediaDocument->id)
@@ -1041,10 +1051,13 @@ class WorkflowManagementController extends Controller
                             $this->addSignatureToPDF($filePath, $getSignature->getPath(), auth()->user()->name, $totalSignatureHasValidate, $position);
 
                             $success = 'La validation du document ' . strtoupper(substr($getMediaDocument->file_name, 14)) . ' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+
+                            //persitence des données
+                            $validationStep->save();
+                            $getMediaDocument->save();
                         }
                         else{
                             $getMediaDocument->statut = 1;
-                            $getMediaDocument->save();
 
                             $creator_user = $getMediaDocument->createdBy;
 
@@ -1059,6 +1072,9 @@ class WorkflowManagementController extends Controller
                             ];
                             event(new validationStepCompleted($detailsMedia));
                             $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+
+                            //persitence des données
+                            $getMediaDocument->save();
                         }
 
                     } else {
@@ -1077,7 +1093,6 @@ class WorkflowManagementController extends Controller
                             ->first();
 
                         $validationStep->statut = 1;
-                        $validationStep->save();
 
                         if ($nextStepValidation) {
                             $nextUser = $nextStepValidation->user;
@@ -1104,7 +1119,6 @@ class WorkflowManagementController extends Controller
                             //update media table
                             $getMediaDocument->version = $getMediaDocument->version + 1;
                             $getMediaDocument->model_id = $folder->id;
-                            $getMediaDocument->save();
 
                             //SAVE OPERATION IN LOG
                             $getLog = AuditLog::where('media_id', $getMediaDocument->id)
@@ -1145,10 +1159,13 @@ class WorkflowManagementController extends Controller
                             $this->addInitialToPDF($filePath, $getInitial->getPath(), auth()->user()->name, $totalSignatureHasValidate, $position);
 
                             $success = 'la validation du document ' . strtoupper(substr($getMediaDocument->file_name, 14)) . ' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+
+                            //persistence des données
+                            $validationStep->save();
+                            $getMediaDocument->save();
                         }
                         else{
                             $getMediaDocument->statut = 1;
-                            $getMediaDocument->save();
 
                             $creator_user = $getMediaDocument->createdBy;
 
@@ -1163,6 +1180,9 @@ class WorkflowManagementController extends Controller
                             ];
                             event(new validationStepCompleted($detailsMedia));
                             $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+
+                            //persistence des données
+                            $getMediaDocument->save();
                         }
 
                     }
@@ -1180,7 +1200,6 @@ class WorkflowManagementController extends Controller
                             ->first();
 
                         $validationStep->statut = 1;
-                        $validationStep->save();
 
                         //dd($nextStepValidation->toArray());
                         if ($nextStepValidation) {
@@ -1215,8 +1234,6 @@ class WorkflowManagementController extends Controller
                             //update media table
                             $getMediaDocument->version = $getMediaDocument->version + 1;
                             $getMediaDocument->parapheur_id = $parapheur->id;
-                            $getMediaDocument->save();
-
 
                             //SAVE OPERATION IN LOG
                             $getLog = AuditLog::where('media_id', $getMediaDocument->id)
@@ -1253,12 +1270,14 @@ class WorkflowManagementController extends Controller
                                 ->whereIn('collection_name', ['paraphe'])
                                 ->first();
                             $this->addInitialToPDF($filePath, $getSignature->getPath(), auth()->user()->name, $totalSignatureHasValidate, $position);
-
                             $success = 'La validation du document ' . strtoupper(substr($getMediaDocument->file_name, 14)) . ' a été effectué avec succès et une notification a été envoyé à ' . ucfirst($nextUser->name);
+
+                            //persistence des données
+                            $validationStep->save();
+                            $getMediaDocument->save();
                         }
                         else{
                             $getMediaDocument->statut = 1;
-                            $getMediaDocument->save();
 
                             $creator_user = $getMediaDocument->createdBy;
 
@@ -1273,6 +1292,8 @@ class WorkflowManagementController extends Controller
                             ];
                             event(new validationStepCompleted($detailsMedia));
                             $error = 'Toutes les étapes du circuit de validation ont déjà été effectuées';
+                            //persistence des données
+                            $getMediaDocument->save();
                         }
 
                     } else {
